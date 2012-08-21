@@ -1,8 +1,11 @@
-from requests import post, get
-from urllib import urlencode
 import logging
+import requests
+import json
+
+from urllib import urlencode
 
 from moxie.core.search import AbstractSearch
+
 
 logger = logging.getLogger(name=__name__)
 
@@ -11,23 +14,30 @@ class SolrSearch(AbstractSearch):
 
     DEFAULT_TIMEOUT = 1     # default timeout in seconds
 
-    def __init__(self, core, return_type='json'):
-        self.server_url = 'http://localhost:8983/solr/'
+    def __init__(self, core, return_type='json',
+            server_url='http://localhost:8983/solr/'):
         self.core = core
         self.return_type = return_type
+        self.server_url = server_url
         # Default methods and paths to on Solr
         self.methods = {'update': 'update/', 'select': 'select/'}
         self.content_types = {'json': 'application/json'}
         super(SolrSearch, self).__init__(core)
 
     def search(self, query):
-        results = self.connection(self.methods['search'], data=query)
+        data = urlencode(query)
+        results = self.connection(self.methods['search'], data=data)
         return results
 
     def index(self, document):
         params = {'commit': 'true'}
-        results = self.connection(self.methods['update'], params=params,
-                data=document)
+        params = dict()
+        data = json.dumps(document)
+        response = self.connection(self.methods['update'], params=params,
+                data=data)
+        if response.status_code != 200:
+            print response
+            raise Exception
 
     def commit(self):
         raise NotImplemented()
@@ -42,17 +52,18 @@ class SolrSearch(AbstractSearch):
         @param params GET parameters
         @param data POST form
         """
-        if not params:
-            params = dict()
-        if data:
-            data = urlencode(data)
+        headers = headers or dict()
+        params = params or dict()
+        headers['Content-Type'] = self.content_types[self.return_type]
         params['wt'] = self.return_type
         url = '{0}{1}/{2}'.format(self.server_url, self.core, method)
         logger.debug(url)
         if data:
-            return post(url, data, params=params, timeout=self.DEFAULT_TIMEOUT)
+            return requests.post(url, data, headers=headers,
+                    params=params, timeout=self.DEFAULT_TIMEOUT)
         else:
-            return get(url, params=params, timeout=self.DEFAULT_TIMEOUT)
+            return requests.get(url, headers=headers,
+                    params=params, timeout=self.DEFAULT_TIMEOUT)
 
     @staticmethod
     def solr_escape(string):
