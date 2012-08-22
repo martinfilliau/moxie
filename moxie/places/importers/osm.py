@@ -2,14 +2,23 @@ import logging
 import uuid
 
 from xml.sax import handler, make_parser
+from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
 
 
 class OSMHandler(handler.ContentHandler):
 
-    def __init__(self, indexer):
+    def __init__(self, indexer, precedence, identifier_key='identifiers',
+            uid_key='id', uid_func=None):
         self.indexer = indexer
+        self.precedence = precedence
+        self.identifier_key = identifier_key
+        self.uid_key = uid_key
+        if not uid_func:
+            def uid_func():
+                return str(uuid.uuid1())
+        self.uid_func = uid_func
 
     def startDocument(self):
         self.tags = {}
@@ -51,16 +60,21 @@ class OSMHandler(handler.ContentHandler):
             result = dict([('raw_osm_%s' % k, v) for k, v in self.tags.items()])
             result['raw_osm_type'] = element_type
             result['raw_osm_version'] = self.attrs['version']
-            result['identifiers'] = ['osm:%s' % self.id]
+            result[self.identifier_key] = ['osm:%s' % self.id]
             atco = self.tags.get('naptan:AtcoCode', None)
             if atco:
-                result['identifiers'].append('atco:%s' % atco)
+                result[self.identifier_key].append('atco:%s' % atco)
             # Some ameneties do not have names, this is correct behaviour.
             # For example, post boxes and car parks.
             result['name'] = self.tags.get('name', self.tags.get('operator', None))
             if result['name']:
+                # TODO: Search Solr for identifiers and merge docs
+                # TODO: Only create a new uid if we don't already have a doc
                 result['location'] = "%s,%s" % location
-                result['id'] = str(uuid.uuid1())
+                search_results = self.indexer.search_for_ids(
+                        self.identifier_key, result[self.identifier_key])
+                result = prepare_document(result, search_results.json,
+                        self.uid_func, self.uid_key, self.precedence)
                 result = [result]
                 self.indexer.index(result)
 
@@ -74,7 +88,7 @@ def main():
     ns = parser.parse_args()
     from moxie.core.search.solr import SolrSearch
     solr = SolrSearch('collection1')
-    handler = OSMHandler(solr)
+    handler = OSMHandler(solr, 5)
 
     parser = make_parser(['xml.sax.xmlreader.IncrementalParser'])
     parser.setContentHandler(handler)
