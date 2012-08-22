@@ -21,29 +21,40 @@ class SolrSearch(AbstractSearch):
         self.server_url = server_url
         # Default methods and paths to on Solr
         self.methods = {'update': 'update/', 'select': 'select/'}
-        self.content_types = {'json': 'application/json'}
+        self.content_types = {
+                'json': 'application/json',
+                'form': 'application/x-www-form-urlencoded',
+                }
         super(SolrSearch, self).__init__(core)
 
     def search(self, query):
-        data = urlencode(query)
-        results = self.connection(self.methods['search'], data=data)
+        l = []
+        for k,v in query.items():
+            l.append(k+'='+v)
+        data = "&".join(l)
+        headers = {'Content-Type': self.content_types['form']}
+        results = self.connection(self.methods['select'],
+                data=data, headers=headers)
         return results
 
-    def index(self, document):
-        params = {'commit': 'true'}
-        params = dict()
+    def index(self, document, params=None):
         data = json.dumps(document)
+        headers = {'Content-Type': self.content_types[self.return_type]}
         response = self.connection(self.methods['update'], params=params,
-                data=data)
+                data=data, headers=headers)
         if response.status_code != 200:
             raise Exception
 
     def commit(self):
         raise NotImplemented()
 
-    def search_for_id(self, id):
-        query = {'q': 'identifiers:{0}'.format(self.solr_escape(id))}
-        return self.search(query)
+    def search_for_ids(self, id_key, identifiers):
+        query = []
+        for id in identifiers:
+            query.append('%s:%s' % (id_key, self.solr_escape(id)))
+        query_string = {'q': " OR ".join(query)}
+        results = self.search(query_string)
+        return results
 
     def connection(self, method, params=None, data=None, headers=None):
         """
@@ -53,7 +64,6 @@ class SolrSearch(AbstractSearch):
         """
         headers = headers or dict()
         params = params or dict()
-        headers['Content-Type'] = self.content_types[self.return_type]
         params['wt'] = self.return_type
         url = '{0}{1}/{2}'.format(self.server_url, self.core, method)
         logger.debug(url)
