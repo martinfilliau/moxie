@@ -1,6 +1,22 @@
 #TODO managed keys should come from the configuration files
 managed_keys = ['name', 'location']
-identifiers_key = 'identifier'
+identifiers_key = 'identifiers'
+precedence_key = 'meta_precedence'
+
+
+class ACIDException(Exception):
+    pass
+
+
+def prepare_document(doc, results, uid_func, uid_key, precedence):
+    if len(results['response']['docs']) == 0:
+        doc[uid_key] = uid_func()
+        doc[precedence_key] = precedence
+        return doc
+    elif len(results['response']['docs']) == 1:
+        return merge_docs(doc, results['response']['docs'][0], precedence)
+    else:
+        raise ACIDException()
 
 
 def merge_docs(current_doc, new_doc, new_precedence):
