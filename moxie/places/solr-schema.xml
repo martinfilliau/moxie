@@ -8,8 +8,8 @@
         <!-- e.g. ID: osm:1938450 TODO: be able to search by part of ID? like naptan code-->
         <field name="identifiers" type="string" indexed="true" stored="true" required="true" multiValued="true" />
 
-        <!-- Unique ID - designated by importers (generally a UUID) -->
-        <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+        <!-- Unique ID - Generated UUID by Solr, if not provided then generated as using "NEW" -->
+        <field name="id" type="uuid" indexed="true" stored="true"/>
 
         <!-- Precedence - int proportional to the reliability of the importer which set the value -->
         <field name="meta_precedence" type="int" indexed="false" stored="true" required="true" multiValued="false" />
@@ -35,6 +35,8 @@
     <uniqueKey>id</uniqueKey>
 
     <types>
+
+        <fieldType name="uuid" class="solr.UUIDField" indexed="true" />
 
         <!-- Simple type that doesn't do any analyze, perfect for IDs... -->
         <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
