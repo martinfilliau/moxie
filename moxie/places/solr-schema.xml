@@ -8,8 +8,11 @@
         <!-- e.g. ID: osm:1938450 TODO: be able to search by part of ID? like naptan code-->
         <field name="identifiers" type="string" indexed="true" stored="true" required="true" multiValued="true" />
 
-        <!-- first ID of the document, quick fix, should be replaced by something else -->
+        <!-- Unique ID - designated by importers (generally a UUID) -->
         <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+
+        <!-- Precedence - int proportional to the reliability of the importer which set the value -->
+        <field name="meta_precedence" type="int" indexed="false" stored="true" required="true" multiValued="false" />
 
         <!-- e.g. "Oxford University Computing Services" -->
         <field name="name" type="text_en_splitting" indexed="true" stored="true" required="true" />
@@ -35,6 +38,8 @@
 
         <!-- Simple type that doesn't do any analyze, perfect for IDs... -->
         <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+
+        <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
 
         <fieldType name="location" class="solr.LatLonType" subFieldSuffix="_coordinate" />
         <!-- used by dnyamic field "_coordinate" -->
