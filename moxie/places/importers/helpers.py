@@ -8,9 +8,8 @@ class ACIDException(Exception):
     pass
 
 
-def prepare_document(doc, results, uid_func, uid_key, precedence):
+def prepare_document(doc, results, precedence):
     if len(results['response']['docs']) == 0:
-        doc[uid_key] = uid_func()
         doc[precedence_key] = precedence
         return doc
     elif len(results['response']['docs']) == 1:

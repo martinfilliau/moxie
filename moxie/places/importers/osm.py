@@ -9,16 +9,10 @@ logger = logging.getLogger(__name__)
 
 class OSMHandler(handler.ContentHandler):
 
-    def __init__(self, indexer, precedence, identifier_key='identifiers',
-            uid_key='id', uid_func=None):
+    def __init__(self, indexer, precedence, identifier_key='identifiers'):
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
-        self.uid_key = uid_key
-        if not uid_func:
-            def uid_func():
-                return str(uuid.uuid1())
-        self.uid_func = uid_func
 
     def startDocument(self):
         self.tags = {}
@@ -68,13 +62,10 @@ class OSMHandler(handler.ContentHandler):
             # For example, post boxes and car parks.
             result['name'] = self.tags.get('name', self.tags.get('operator', None))
             if result['name']:
-                # TODO: Search Solr for identifiers and merge docs
-                # TODO: Only create a new uid if we don't already have a doc
                 result['location'] = "%s,%s" % location
                 search_results = self.indexer.search_for_ids(
                         self.identifier_key, result[self.identifier_key])
-                result = prepare_document(result, search_results.json,
-                        self.uid_func, self.uid_key, self.precedence)
+                result = prepare_document(result, search_results.json, self.precedence)
                 result = [result]
                 self.indexer.index(result)
 
