@@ -36,7 +36,6 @@ class SolrSearch(AbstractSearch):
         response = self.connection(self.methods['update'], params=params,
                 data=data)
         if response.status_code != 200:
-            print response
             raise Exception
 
     def commit(self):
@@ -49,7 +48,7 @@ class SolrSearch(AbstractSearch):
     def connection(self, method, params=None, data=None, headers=None):
         """
         Does a GET request if there is no data otherwise a POST
-        @param params GET parameters
+        @param params URL parameters
         @param data POST form
         """
         headers = headers or dict()
