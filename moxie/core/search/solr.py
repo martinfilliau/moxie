@@ -27,10 +27,24 @@ class SolrSearch(AbstractSearch):
                 }
         super(SolrSearch, self).__init__(core)
 
+    def search_nearby(self, query, location, location_field='location'):
+        lat, lon = location
+        q = {'defType': 'edismax',
+                'qf': 'name',
+                'pf': query,
+                'q': query,
+                'sfield': location_field,
+                'pt': '%s,%s' % (lon, lat),
+                'sort': 'geodist() asc',
+                'fl': '*,_dist_:geodist()',
+                }
+        results = self.search(q)
+        return results
+
     def search(self, query):
         l = []
-        for k,v in query.items():
-            l.append(k+'='+v)
+        for k, v in query.items():
+            l.append(k + '=' + v)
         data = "&".join(l)
         headers = {'Content-Type': self.content_types['form']}
         results = self.connection(self.methods['select'],
