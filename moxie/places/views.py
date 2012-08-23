@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from moxie.core.views import ServiceView, register_mimetype
 from moxie.core.search.solr import SolrSearch
 
@@ -7,6 +7,7 @@ places = Blueprint('places', __name__, template_folder='templates')
 
 
 class Search(ServiceView):
+    methods = ['GET', 'POST']
 
     def __init__(self, searcher, *args, **kwargs):
         self.searcher = searcher
@@ -21,6 +22,10 @@ class Search(ServiceView):
         location = request.args.get('lat', None), request.args.get('lon', None)
         results = self.get_results(query, location)
         return jsonify(results.json)
+
+    @register_mimetype('text/html')
+    def html_form(self):
+        return render_template('search.html')
 
 
 solr = SolrSearch('collection1')
