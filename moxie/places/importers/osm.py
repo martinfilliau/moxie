@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 from xml.sax import handler, make_parser
 from moxie.places.importers.helpers import prepare_document
