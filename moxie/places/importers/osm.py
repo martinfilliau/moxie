@@ -12,6 +12,7 @@ class OSMHandler(handler.ContentHandler):
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
+        self.indexed_tags = ['amenity', 'cuisine', 'shop']
 
     def startDocument(self):
         self.tags = {}
@@ -57,6 +58,11 @@ class OSMHandler(handler.ContentHandler):
             atco = self.tags.get('naptan:AtcoCode', None)
             if atco:
                 result[self.identifier_key].append('atco:%s' % atco)
+            result['tags'] = []
+            for it in self.indexed_tags:
+                doc_tags = [t.replace('_', ' ').strip() for t in self.tags.get(it, '').split(';')]
+                if doc_tags and doc_tags != ['']:
+                    result['tags'].extend(doc_tags)
             # Some ameneties do not have names, this is correct behaviour.
             # For example, post boxes and car parks.
             result['name'] = self.tags.get('name', self.tags.get('operator', None))
