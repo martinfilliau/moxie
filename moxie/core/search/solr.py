@@ -20,7 +20,11 @@ class SolrSearch(AbstractSearch):
         self.return_type = return_type
         self.server_url = server_url
         # Default methods and paths to on Solr
-        self.methods = {'update': 'update/', 'select': 'select/'}
+        self.methods = {
+            'update': 'update/',
+            'select': 'select/',
+            'get': 'get'
+        }
         self.content_types = {
                 'json': 'application/json',
                 'form': 'application/x-www-form-urlencoded',
@@ -51,6 +55,20 @@ class SolrSearch(AbstractSearch):
                 data=data, headers=headers)
         return results
 
+    def get_by_ids(self, document_ids):
+        """
+        Get documents by their ID (using the real-time GET feature of Solr 4).
+        Query string to build is as "?ids=5a9b4f27-310f-4207-8a97-1dce48fdf31d,a791b6e9-e532-461f-8ae1-12218f0db81e"
+        (i.e. param is ids, and IDs are comma-separated.
+        @param document_ids list of document ids
+        @return list of documents
+        """
+        ids = ",".join(document_ids)
+        params = { 'ids': ids }
+        results = self.connection(self.methods['get'],
+            params=params)
+        return results
+
     def index(self, document, params=None):
         data = json.dumps(document)
         headers = {'Content-Type': self.content_types[self.return_type]}
@@ -63,6 +81,9 @@ class SolrSearch(AbstractSearch):
         raise NotImplemented()
 
     def search_for_ids(self, id_key, identifiers):
+        """
+        Search for documents by their identifiers (NB: this is not the unique ID used by Solr).
+        """
         query = []
         for id in identifiers:
             query.append('%s:%s' % (id_key, self.solr_escape(id)))
@@ -73,7 +94,7 @@ class SolrSearch(AbstractSearch):
     def connection(self, method, params=None, data=None, headers=None):
         """
         Does a GET request if there is no data otherwise a POST
-        @param params URL parameters
+        @param params URL parameters as a dict
         @param data POST form
         """
         headers = headers or dict()
