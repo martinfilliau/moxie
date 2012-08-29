@@ -45,7 +45,13 @@ class NaptanXMLHandler(handler.ContentHandler):
         for result in self.results:
             data = dict([('raw_naptan_%s' % k, v) for k, v in result.items()])
             data[self.identifier_key] = ["atco:%s" % result['AtcoCode']]
-            data['location'] = "%s,%s" % (result.pop('Longitude'), result.pop('Latitude'))
+            lon, lat = result.pop('Longitude'), result.pop('Latitude')
+            valid_location = True
+            for i in [float(lon), float(lat)]:
+                if i > 180 or i < -180:
+                    valid_location = False
+            if not valid_location: continue
+            data['location'] = "%s,%s" % (lon, lat)
             data['name'] = result['CommonName']
             search_results = self.indexer.search_for_ids(
                 self.identifier_key, data[self.identifier_key])
