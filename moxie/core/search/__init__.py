@@ -11,3 +11,9 @@ class AbstractSearch(object):
 
     def search(self, query):
         pass
+
+    def get_by_ids(self, document_ids):
+        """
+        Get documents by their unique ID
+        """
+        pass
