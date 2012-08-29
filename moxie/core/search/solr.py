@@ -81,6 +81,9 @@ class SolrSearch(AbstractSearch):
         raise NotImplemented()
 
     def search_for_ids(self, id_key, identifiers):
+        """
+        Search for documents by their identifiers (NB: this is not the unique ID used by Solr).
+        """
         query = []
         for id in identifiers:
             query.append('%s:%s' % (id_key, self.solr_escape(id)))
