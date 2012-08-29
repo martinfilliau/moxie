@@ -20,6 +20,12 @@
         <!-- e.g. "Oxford University Computing Services" -->
         <field name="name" type="text_en_splitting" indexed="true" stored="true" required="true" />
 
+        <!-- Unique ID of parent(s) of the present document -->
+        <field name="child_of" type="uuid" indexed="true" stored="true" multiValued="true" />
+
+        <!-- Unique ID of children of the present document -->
+        <field name="parent_of" type="uuid" indexed="true" stored="true" multiValued="true" />
+
         <!-- location - can't be multiValued atm, see fieldType -->
         <field name="location" type="location" indexed="true" stored="true" required="true" multiValued="false" />
         <dynamicField name="*_coordinate" type="tdouble" indexed="true" stored="false" />
