@@ -35,7 +35,6 @@ class SolrSearch(AbstractSearch):
     def search_nearby(self, query, location, location_field='location'):
         lat, lon = location
         q = {'defType': 'edismax',
-                'qf': 'name',
                 'spellcheck.collate': 'true',
                 'pf': query,
                 'q': query,
