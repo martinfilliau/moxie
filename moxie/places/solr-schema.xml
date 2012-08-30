@@ -26,6 +26,9 @@
         <!-- Unique ID of children of the present document -->
         <field name="parent_of" type="uuid" indexed="true" stored="true" multiValued="true" />
 
+        <!-- Full Text Search for tags and name of document -->
+        <field name="fts" type="text_en" indexed="true" stored="false" multiValued="true"/>
+
         <!-- location - can't be multiValued atm, see fieldType -->
         <field name="location" type="location" indexed="true" stored="true" required="true" multiValued="false" />
         <dynamicField name="*_coordinate" type="tdouble" indexed="true" stored="false" />
@@ -42,6 +45,10 @@
     -->
     <!-- Actually, we need it for updating documents, below is a temporary solution... -->
     <uniqueKey>id</uniqueKey>
+
+    <!-- Copying name and tags for full text search -->
+    <copyField source="name" dest="fts"/>
+    <copyField source="tags" dest="fts"/>
 
     <types>
 
