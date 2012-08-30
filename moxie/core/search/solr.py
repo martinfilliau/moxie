@@ -36,6 +36,7 @@ class SolrSearch(AbstractSearch):
         lat, lon = location
         q = {'defType': 'edismax',
                 'qf': 'name',
+                'spellcheck.collate': 'true',
                 'pf': query,
                 'q': query,
                 'sfield': location_field,
