@@ -660,6 +660,7 @@
        <str name="df">fts</str>
        <str name="wt">json</str>
        <str name="indent">true</str>
+       <str name="q.op">AND|OR</str>
        <str name="spellcheck">true</str>
        <str name="spellcheck.dictionary">default</str>
        <str name="spellcheck.dictionary">wordbreak</str>
