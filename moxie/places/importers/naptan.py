@@ -20,19 +20,17 @@ def tag_handler(tag):
 
 class NaptanXMLHandler(object):
 
-    def __init__(self, areas, indexer, precedence, identifier_key='identifiers'):
+    def __init__(self, areas, identifier_key):
         self.areas = areas
-        self.indexer = indexer
-        self.precedence = precedence
         self.identifier_key = identifier_key
-        self.prev_tag = None
+        self.tag_stack = []
         self.element_data = None
         self.capture_data = False
+        self.flexible_zone = False
         self.stop_points = dict()
         self.stop_areas = dict()
         self.tag_handlers = dict()
         self.namespaced = None
-        self.debug_print = False
         for attr in dir(self):
             attr = getattr(self, attr)
             tags = getattr(attr, 'tags', [])
@@ -57,10 +55,10 @@ class NaptanXMLHandler(object):
         if attrib.get('Status', 'active') != 'active':
             self.skip_element = True
             return
-        self.prev_tag = tag
+        self.tag_stack.append(tag)
         if tag in ['StopArea', 'StopPoint']:
-            self.tag_counts = defaultdict(int)
             self.element_data = defaultdict(str)
+            self.tag_stack = []
             self.capture_data = True
 
     def end(self, tag):
@@ -71,44 +69,48 @@ class NaptanXMLHandler(object):
                 th(self.element_data)
                 self.element_data = None
                 self.capture_data = False
-                self.debug_print = False
+                self.flexible_zone = False
+            else:
+                self.tag_stack.pop()
 
     def data(self, data):
         if self.capture_data and not self.skip_element:
-            if self.prev_tag in ['Latitude', 'Longitude']:
-                self.tag_counts[self.prev_tag] += 1
-                self.element_data[self.prev_tag] += data
-                try:
-                    float(self.element_data[self.prev_tag])
-                except Exception as e:
-                    print self.tag_counts
-                    self.debug_print = True
-            else:
-                self.element_data[self.prev_tag] += data
-            self.element_data[self.prev_tag] = self.element_data[self.prev_tag].strip()
+            tag = '_'.join(self.tag_stack)
+            self.element_data[tag] += data
+            self.element_data[tag] = self.element_data[tag].strip()
 
     @tag_handler('StopArea')
     def add_stop_area(self, sa):
+        sa.default_factory = None
         area_code = sa['StopAreaCode'][:3]
         if area_code in self.areas:
             data = dict([('raw_naptan_%s' % k, v) for k, v in sa.items()])
-            data[self.identifier_key] = ["atco:%s" % sa['StopAreaCode']]
-            lon, lat = sa.pop('Longitude'), sa.pop('Latitude')
+            data[self.identifier_key] = ["stoparea:%s" % sa['StopAreaCode']]
+            lon, lat = (sa.pop('Location_Translation_Longitude'),
+                    sa.pop('Location_Translation_Latitude'))
             data['location'] = "%s,%s" % (lon, lat)
-            data['name'] = sa['CommonName']
+            data['name'] = sa['Name']
+            data['tags'] = ['bus stop area']
             data['id'] = str(uuid.uuid1())
             self.stop_areas[sa['StopAreaCode']] = data
 
     @tag_handler('StopPoint')
     def add_stop(self, sp):
-        """If within our set of areas then store to be indexed"""
+        """Set the location to our agreed format of lon,lat and pick a
+        friendly name. We also apply a busstop tag """
+        sp.default_factory = None
         area_code = sp['AtcoCode'][:3]
         if area_code in self.areas:
             data = dict([('raw_naptan_%s' % k, v) for k, v in sp.items()])
             data[self.identifier_key] = ["atco:%s" % sp['AtcoCode']]
-            lon, lat = sp.pop('Longitude'), sp.pop('Latitude')
+            lon, lat = (sp.pop('Place_Location_Translation_Longitude'),
+                    sp.pop('Place_Location_Translation_Latitude'))
             data['location'] = "%s,%s" % (lon, lat)
-            data['name'] = sp['CommonName']
+            if 'Descriptor_Indicator' in sp:
+                data['name'] = "%s - %s" % (sp['Descriptor_CommonName'], sp['Descriptor_Indicator'])
+            else:
+                data['name'] = sp['Descriptor_CommonName']
+            data['tags'] = ['bus stop']
             data['id'] = str(uuid.uuid1())
             self.stop_points[sp['AtcoCode']] = data
 
@@ -131,9 +133,9 @@ class NaptanXMLHandler(object):
 
     def annotate_stop_point_ancestry(self, stop_points, stop_areas):
         for atco_code, sp in stop_points.items():
-            if 'raw_naptan_StopAreaRef' in sp:
+            if 'raw_naptan_StopAreas_StopAreaRef' in sp:
                 try:
-                    parent_area = stop_areas[sp['raw_naptan_StopAreaRef']]
+                    parent_area = stop_areas[sp['raw_naptan_StopAreas_StopAreaRef']]
                 except KeyError:
                     continue
                 if 'child_of' in sp:
@@ -152,6 +154,39 @@ class NaptanXMLHandler(object):
         return stop_points, stop_areas
 
 
+class NaPTANImporter(object):
+    def __init__(self, indexer, precedence, naptan_file, areas,
+            identifier_key='identifiers', buffer_size=8192,
+            xml_parser=NaptanXMLHandler):
+        self.indexer = indexer
+        self.precedence = precedence
+        self.naptan_file = naptan_file
+        self.areas = areas
+        self.identifier_key = identifier_key
+        self.buffer_size = buffer_size
+        self.xml_parser = xml_parser(self.areas, self.identifier_key)
+
+    def run(self):
+        parser = etree.XMLParser(target=self.xml_parser)
+        buffered_data = self.naptan_file.read(self.buffer_size)
+        while buffered_data:
+            parser.feed(buffered_data)
+            buffered_data = self.naptan_file.read(self.buffer_size)
+        stop_points, stop_areas = parser.close()
+        for stop_area_code, data in stop_areas.items():
+            search_results = self.indexer.search_for_ids(
+                'identifiers', data['identifiers'])
+            doc = prepare_document(data, search_results.json, 10)
+            doc = [doc]
+            self.indexer.index(doc)
+        for atco_code, sp in stop_points.items():
+            search_results = self.indexer.search_for_ids(
+                'identifiers', sp['identifiers'])
+            doc = prepare_document(sp, search_results.json, 10)
+            doc = [doc]
+            self.indexer.index(doc)
+
+
 def main():
     import argparse
     args = argparse.ArgumentParser()
@@ -159,27 +194,9 @@ def main():
     ns = args.parse_args()
     from moxie.core.search.solr import SolrSearch
     solr = SolrSearch('collection1')
+    naptan_importer = NaPTANImporter(solr, 10, ns.naptanfile, ['340'], 'identifiers')
+    naptan_importer.run()
 
-    buffer_size = 8192
-    naptan = ns.naptanfile
-    parser = etree.XMLParser(target=NaptanXMLHandler(['340'], solr, 10))
-    buffered_data = naptan.read(buffer_size)
-    while buffered_data:
-        parser.feed(buffered_data)
-        buffered_data = naptan.read(buffer_size)
-    stop_points, stop_areas = parser.close()
-    for stop_area_code, data in stop_areas.items():
-        search_results = solr.search_for_ids(
-            'identifiers', data['identifiers'])
-        doc = prepare_document(data, search_results.json, 10)
-        doc = [doc]
-        solr.index(doc)
-    for atco_code, sp in stop_points.items():
-        search_results = solr.search_for_ids(
-            'identifiers', sp['identifiers'])
-        doc = prepare_document(sp, search_results.json, 10)
-        doc = [doc]
-        solr.index(doc)
 
 if __name__ == '__main__':
     main()
