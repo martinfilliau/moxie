@@ -14,6 +14,9 @@
         <!-- Unique ID - Generated UUID by Solr, if not provided then generated as using "NEW" -->
         <field name="id" type="uuid" indexed="true" stored="true"/>
 
+        <!-- Basic field to store opening hours -->
+        <field name="opening_hours" type="string" indexed="false" stored="true" required="false" />
+
         <!-- Precedence - int proportional to the reliability of the importer which set the value -->
         <field name="meta_precedence" type="int" indexed="false" stored="true" required="true" multiValued="false" />
 
