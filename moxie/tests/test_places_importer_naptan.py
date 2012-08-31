@@ -4,7 +4,7 @@ from mock import Mock
 from lxml import etree
 
 from moxie.core.search.solr import SolrSearch
-from moxie.places.importers.naptan import NaptanXMLHandler
+from moxie.places.importers.naptan import NaptanXMLHandler, NaPTANImporter
 
 
 test_stop_areas = """
@@ -71,7 +71,7 @@ class NaptanTestCase(unittest.TestCase):
         self.mock_solr.search_for_ids.return_value.json = {'response': {'docs': []}}
 
     def test_finds_all_stops(self):
-        xml_handler = NaptanXMLHandler(['639'], self.mock_solr, 10)
+        xml_handler = NaptanXMLHandler(['639'], 'identifiers')
         parser = etree.XMLParser(target=xml_handler)
         with open(self.naptan_file) as test_data:
             parser.feed(test_data.read())
@@ -79,7 +79,7 @@ class NaptanTestCase(unittest.TestCase):
         self.assertEqual(len(xml_handler.stop_points), 5)
 
     def test_finds_all_stop_areas(self):
-        xml_handler = NaptanXMLHandler(['639'], self.mock_solr, 10)
+        xml_handler = NaptanXMLHandler(['639'], 'identifiers')
         parser = etree.XMLParser(target=xml_handler)
         with open(self.naptan_file) as test_data:
             parser.feed(test_data.read())
@@ -87,7 +87,7 @@ class NaptanTestCase(unittest.TestCase):
         self.assertEqual(len(xml_handler.stop_areas), 6)
 
     def test_finds_no_stops_in_different_location(self):
-        xml_handler = NaptanXMLHandler(['123'], self.mock_solr, 10)
+        xml_handler = NaptanXMLHandler(['123'], 'identifiers')
         parser = etree.XMLParser(target=xml_handler)
         with open(self.naptan_file) as test_data:
             parser.feed(test_data.read())
@@ -96,16 +96,13 @@ class NaptanTestCase(unittest.TestCase):
         self.assertEqual(len(xml_handler.stop_areas), 0)
 
     def test_search_called_each_result(self):
-        xml_handler = NaptanXMLHandler(['639'], self.mock_solr, 10)
-        parser = etree.XMLParser(target=xml_handler)
-        with open(self.naptan_file) as test_data:
-            parser.feed(test_data.read())
-        parser.close()
+        naptan_importer = NaPTANImporter(self.mock_solr, 10, file(self.naptan_file), ['639'], 'identifiers')
+        naptan_importer.run()
         self.assertEqual(self.mock_solr.search_for_ids.call_count,
-                len(xml_handler.stop_points)+len(xml_handler.stop_areas))
+                len(naptan_importer.xml_parser.stop_points)+len(naptan_importer.xml_parser.stop_areas))
 
     def test_parent_child_stop_areas(self):
-        xml_handler = NaptanXMLHandler(['639'], self.mock_solr, 10)
+        xml_handler = NaptanXMLHandler(['639'], 'identifiers')
         parser = etree.XMLParser(target=xml_handler)
         parser.feed(test_stop_areas)
         areas = xml_handler.annotate_stop_area_ancestry(xml_handler.stop_areas)
@@ -113,7 +110,7 @@ class NaptanTestCase(unittest.TestCase):
         self.assertEqual(areas['639GSHI20121']['parent_of'][0], areas['639GSHI21581']['id'])
 
     def test_parent_child_stop_areas_inactive(self):
-        xml_handler = NaptanXMLHandler(['639'], self.mock_solr, 10)
+        xml_handler = NaptanXMLHandler(['639'], 'identifiers')
         parser = etree.XMLParser(target=xml_handler)
         parser.feed(test_stop_areas)
         areas = xml_handler.annotate_stop_area_ancestry(xml_handler.stop_areas)
@@ -121,7 +118,7 @@ class NaptanTestCase(unittest.TestCase):
             self.assertEqual(areas['639GSHI21580']['child_of'][0], areas['639GSHI20121']['id'])
 
     def test_parent_child_stop_point(self):
-        xml_handler = NaptanXMLHandler(['639'], self.mock_solr, 10)
+        xml_handler = NaptanXMLHandler(['639'], 'identifiers')
         parser = etree.XMLParser(target=xml_handler)
         parser.feed(test_stop_areas)
         areas = xml_handler.annotate_stop_area_ancestry(xml_handler.stop_areas)
