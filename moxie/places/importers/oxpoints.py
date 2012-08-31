@@ -5,6 +5,16 @@ from moxie.places.importers.helpers import prepare_document
 
 
 class OxpointsImporter(object):
+
+    IDENTIFIERS = {
+        'oxp_hasOUCSCode': 'oucs',
+        'oxp_hasOLISCode': 'olis',
+        'oxp_hasOLISAlephCode': 'olis-aleph',
+        'oxp_hasOSMIdentifier': 'osm',
+        'oxp_hasFinanceCode': 'finance',
+        'oxp_hasOBNCode': 'obn',
+    }
+
     def __init__(self, indexer, precedence, oxpoints_file, identifier_key='identifiers'):
         self.indexer = indexer
         self.precedence = precedence
@@ -22,20 +32,26 @@ class OxpointsImporter(object):
                 continue
             doc = dict()
             doc['name'] = name
+
+            oxpoints_type = datum.get('type', '').rsplit('#')[-1]
+            doc['tags'] = oxpoints_type
+
             ids = list()
             ids.append('oxpoints:{0}'.format(oxpoints_id))
 
-            if 'oxp_hasOUCSCode' in datum:
-                ids.append('oucs:{0}'.format(datum.pop('oxp_hasOUCSCode')))
-            if 'oxp_hasOLISCode' in datum:
-                olis_codes = datum.pop('oxp_hasOLISCode')
-                for code in olis_codes:
-                    ids.append('olis:{0}'.format(code.replace(' ', '-').replace('/', '-')))
-            if 'oxp_hasOLISAlephCode' in datum:
-                ids.append('olis-aleph:{0}'.format(re.escape(datum.pop('oxp_hasOLISAlephCode').replace('/', '-'))))
-            if 'oxp_hasOSMIdentifier' in datum:
-                ids.append('osm:{0}'.format(datum.pop('oxp_hasOSMIdentifier').split('/')[1]))
+            for oxp_property, identifier in self.IDENTIFIERS.items():
+                if oxp_property in datum:
+                    value = datum.pop(oxp_property)
+                    if identifier == "osm":
+                        value = value.split('/')[1]
+                    if type(value) is list:
+                        for val in value:
+                            ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
+                    else:
+                        ids.append('{0}:{1}'.format(identifier, value.replace(' ', '-').replace('/', '-')))
+
             doc['identifiers'] = ids
+
             if 'geo_lat' in datum and 'geo_long' in datum:
                 doc['location'] = "%s,%s" % (datum.pop('geo_long'), datum.pop('geo_lat'))
             else:

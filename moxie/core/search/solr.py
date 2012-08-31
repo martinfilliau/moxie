@@ -23,7 +23,8 @@ class SolrSearch(AbstractSearch):
         self.methods = {
             'update': 'update/',
             'select': 'select/',
-            'get': 'get'
+            'get': 'get',
+            'suggest': 'suggest',
         }
         self.content_types = {
                 'json': 'application/json',
@@ -34,7 +35,7 @@ class SolrSearch(AbstractSearch):
     def search_nearby(self, query, location, location_field='location'):
         lat, lon = location
         q = {'defType': 'edismax',
-                'qf': 'name',
+                'spellcheck.collate': 'true',
                 'pf': query,
                 'q': query,
                 'sfield': location_field,
@@ -53,6 +54,12 @@ class SolrSearch(AbstractSearch):
         headers = {'Content-Type': self.content_types['form']}
         results = self.connection(self.methods['select'],
                 data=data, headers=headers)
+        return results
+
+    def suggest(self, query):
+        params = {'q': query}
+        results = self.connection(self.methods['suggest'],
+            params=params)
         return results
 
     def get_by_ids(self, document_ids):
