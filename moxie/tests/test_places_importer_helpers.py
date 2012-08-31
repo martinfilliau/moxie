@@ -1,6 +1,6 @@
 import unittest
 
-from moxie.places.importers.helpers import merge_docs, merge_identifiers
+from moxie.places.importers.helpers import merge_docs, merge_keys, merge_values
 
 
 class HelpersTestCase(unittest.TestCase):
@@ -41,8 +41,24 @@ class HelpersTestCase(unittest.TestCase):
         self.assertEqual(new_doc['bar_url'], merged_doc['bar_url'])
         self.assertEqual(set(['foo:123', 'bar:xyz']), set(merged_doc['identifiers']))
 
-    def test_merge_identifiers(self):
-        new_identifiers = ['osm:123', 'naptan:xyz']
-        current_identifiers = ['foo:678']
-        merged_idents = merge_identifiers(current_identifiers, new_identifiers)
-        self.assertEqual(set(['osm:123', 'naptan:xyz', 'foo:678']), set(merged_idents))
+    def test_merge_keys(self):
+        new_doc = {'identifiers': ['osm:123', 'naptan:xyz']}
+        current_doc = {'identifiers': ['foo:678']}
+        merged_doc = merge_keys(current_doc, new_doc, ['identifiers'])
+        self.assertEqual(set(['osm:123', 'naptan:xyz', 'foo:678']),
+                set(merged_doc['identifiers']))
+
+    def test_merge_multiple_keys(self):
+        new_doc = {'identifiers': ['osm:123', 'naptan:xyz'], 'tags': ['bus stop']}
+        current_doc = {'identifiers': ['foo:678'], 'tags': ['public urinal']}
+        merged_doc = merge_keys(current_doc, new_doc, ['identifiers', 'tags'])
+        self.assertEqual(set(['osm:123', 'naptan:xyz', 'foo:678']),
+                set(merged_doc['identifiers']))
+        self.assertEqual(set(['bus stop', 'public urinal']),
+                set(merged_doc['tags']))
+
+    def test_merge_values(self):
+        a = ['a', 1, 2, 3]
+        b = ['a', 'b', 'c', 3]
+        merged = merge_values(a, b)
+        self.assertEqual(set([1, 2, 3, 'a', 'b', 'c']), set(merged))

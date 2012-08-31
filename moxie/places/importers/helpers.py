@@ -1,6 +1,6 @@
 #TODO managed keys should come from the configuration files
 managed_keys = ['name', 'location']
-identifiers_key = 'identifiers'
+mergable_keys = ['identifiers', 'tags']
 precedence_key = 'meta_precedence'
 
 
@@ -25,10 +25,7 @@ def merge_docs(current_doc, new_doc, new_precedence):
 
     @param new_precedence Integer proportional to the reliability of new data
     """
-    current_identifiers = current_doc.get(identifiers_key, [])
-    new_identifiers = new_doc.get(identifiers_key, [])
-    merged_idents = merge_identifiers(current_identifiers, new_identifiers)
-
+    new_doc = merge_keys(current_doc, new_doc, mergable_keys)
     current_precedence = current_doc.get('meta_precedence', -1)
     if new_precedence > current_precedence:
         current_doc['meta_precedence'] = new_precedence
@@ -36,12 +33,17 @@ def merge_docs(current_doc, new_doc, new_precedence):
             if key in new_doc:
                 current_doc[key] = new_doc[key]
     current_doc.update(new_doc)
-
-    current_doc[identifiers_key] = merged_idents
     return current_doc
 
 
-def merge_identifiers(current_identifiers, new_identifiers):
-    current_identifiers.extend(new_identifiers)
-    merged_idents = list(set(current_identifiers))
-    return merged_idents
+def merge_keys(current_doc, new_doc, keys):
+    for key in keys:
+        new_doc[key] = merge_values(
+                current_doc.get(key, []), new_doc.get(key, []))
+    return new_doc
+
+
+def merge_values(current_vals, new_vals):
+    current_vals.extend(new_vals)
+    merged = list(set(current_vals))
+    return merged
