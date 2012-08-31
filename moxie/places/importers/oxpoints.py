@@ -34,7 +34,7 @@ class OxpointsImporter(object):
             doc['name'] = name
 
             oxpoints_type = datum.get('type', '').rsplit('#')[-1]
-            doc['tags'] = oxpoints_type
+            doc['tags'] = [oxpoints_type]
 
             ids = list()
             ids.append('oxpoints:{0}'.format(oxpoints_id))
