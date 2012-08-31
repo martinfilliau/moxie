@@ -66,6 +66,8 @@ class OSMHandler(handler.ContentHandler):
             # Some ameneties do not have names, this is correct behaviour.
             # For example, post boxes and car parks.
             result['name'] = self.tags.get('name', self.tags.get('operator', None))
+            if 'opening_hours' in self.tags:
+                result['opening_hours'] = self.tags['opening_hours']
             if result['name']:
                 result['location'] = "%s,%s" % location
                 search_results = self.indexer.search_for_ids(
