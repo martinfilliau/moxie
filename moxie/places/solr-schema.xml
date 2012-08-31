@@ -27,7 +27,7 @@
         <field name="parent_of" type="uuid" indexed="true" stored="true" multiValued="true" />
 
         <!-- Full Text Search for tags and name of document -->
-        <field name="fts" type="text_en" indexed="true" stored="false" multiValued="true"/>
+        <field name="fts" type="text_en_splitting" indexed="true" stored="false" multiValued="true"/>
 
         <!-- location - can't be multiValued atm, see fieldType -->
         <field name="location" type="location" indexed="true" stored="true" required="true" multiValued="false" />
