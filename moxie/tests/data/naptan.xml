@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NaPTAN xmlns="http://www.naptan.org.uk/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" CreationDateTime="2012-06-26T11:22:11" ModificationDateTime="2012-06-26T11:22:11" Modification="new" RevisionNumber="0" FileName="NaPTAN.xml" SchemaVersion="2.1" xsi:schemaLocation="http://www.naptan.org.uk/ http://www.naptan.org.uk/schema/2.1/NaPTAN.xsd">
+    <StopPoints>
+        <StopPoint CreationDateTime="2003-07-15T00:00:00" ModificationDateTime="2011-10-05T14:27:00" Modification="revise" RevisionNumber="2" Status="active">
+            <AtcoCode>639000011</AtcoCode>
+            <NaptanCode>23234375</NaptanCode>
+            <Descriptor>
+                <CommonName>Union Grove East</CommonName>
+                <Landmark>Albyn Grove</Landmark>
+                <Street>Union Grove</Street>
+                <Indicator>o/s 103</Indicator>
+            </Descriptor>
+            <Place>
+                <NptgLocalityRef>ES001772</NptgLocalityRef>
+                <Suburb>City Centre</Suburb>
+                <Town>Aberdeen</Town>
+                <LocalityCentre>1</LocalityCentre>
+                <Location>
+                    <Translation>
+                        <GridType>UKOS</GridType>
+                        <Easting>392987</Easting>
+                        <Northing>805587</Northing>
+                        <Longitude>-2.1175191146</Longitude>
+                        <Latitude>57.1411176399</Latitude>
+                    </Translation>
+                </Location>
+            </Place>
+            <StopClassification>
+                <StopType>BCT</StopType>
+                <OnStreet>
+                    <Bus>
+                        <BusStopType>MKD</BusStopType>
+                        <TimingStatus>OTH</TimingStatus>
+                        <MarkedPoint>
+                            <Bearing>
+                                <CompassPoint>E</CompassPoint>
+                            </Bearing>
+                        </MarkedPoint>
+                    </Bus>
+                </OnStreet>
+            </StopClassification>
+            <AdministrativeAreaRef>111</AdministrativeAreaRef>
+            <PlusbusZones>
+                <PlusbusZoneRef CreationDateTime="2010-10-07T14:27:15" ModificationDateTime="2010-10-07T14:27:15" Modification="new" RevisionNumber="0" Status="active">ABRDEEN</PlusbusZoneRef>
+            </PlusbusZones>
+            <Notes>-</Notes>
+        </StopPoint>
+        <StopPoint CreationDateTime="2003-07-15T00:00:00" ModificationDateTime="2011-10-05T14:27:00" Modification="revise" RevisionNumber="1" Status="active">
+            <AtcoCode>639000012</AtcoCode>
+            <NaptanCode>23234378</NaptanCode>
+            <Descriptor>
+                <CommonName>Union Grove East</CommonName>
+                <Landmark>Holburn Street</Landmark>
+                <Street>Union Grove</Street>
+                <Indicator>o/s 82</Indicator>
+            </Descriptor>
+            <Place>
+                <NptgLocalityRef>ES001772</NptgLocalityRef>
+                <Suburb>Mannofield</Suburb>
+                <Town>Aberdeen</Town>
+                <LocalityCentre>1</LocalityCentre>
+                <Location>
+                    <Translation>
+                        <GridType>UKOS</GridType>
+                        <Easting>393030</Easting>
+                        <Northing>805607</Northing>
+                        <Longitude>-2.1168091476</Longitude>
+                        <Latitude>57.1412979686</Latitude>
+                    </Translation>
+                </Location>
+            </Place>
+            <StopClassification>
+                <StopType>BCT</StopType>
+                <OnStreet>
+                    <Bus>
+                        <BusStopType>MKD</BusStopType>
+                        <TimingStatus>OTH</TimingStatus>
+                        <MarkedPoint>
+                            <Bearing>
+                                <CompassPoint>W</CompassPoint>
+                            </Bearing>
+                        </MarkedPoint>
+                    </Bus>
+                </OnStreet>
+            </StopClassification>
+            <AdministrativeAreaRef>111</AdministrativeAreaRef>
+            <PlusbusZones>
+                <PlusbusZoneRef CreationDateTime="2010-10-07T14:27:15" ModificationDateTime="2010-10-07T14:27:15" Modification="new" RevisionNumber="0" Status="active">ABRDEEN</PlusbusZoneRef>
+            </PlusbusZones>
+            <Notes>-</Notes>
+        </StopPoint>
+        <StopPoint CreationDateTime="2003-07-15T00:00:00" ModificationDateTime="2011-10-12T14:09:00" Modification="revise" RevisionNumber="2" Status="active">
+            <AtcoCode>639000021</AtcoCode>
+            <NaptanCode>23234365</NaptanCode>
+            <Descriptor>
+                <CommonName>Albyn Grove</CommonName>
+                <Landmark>Graton Place</Landmark>
+                <Street>Union Grove</Street>
+                <Indicator>o/s 177</Indicator>
+            </Descriptor>
+            <Place>
+                <NptgLocalityRef>ES001772</NptgLocalityRef>
+                <Suburb>City Centre</Suburb>
+                <Town>Aberdeen</Town>
+                <LocalityCentre>1</LocalityCentre>
+                <Location>
+                    <Translation>
+                        <GridType>UKOS</GridType>
+                        <Easting>392814</Easting>
+                        <Northing>805527</Northing>
+                        <Longitude>-2.1203760201</Longitude>
+                        <Latitude>57.1405759344</Latitude>
+                    </Translation>
+                </Location>
+            </Place>
+            <StopClassification>
+                <StopType>BCT</StopType>
+                <OnStreet>
+                    <Bus>
+                        <BusStopType>MKD</BusStopType>
+                        <TimingStatus>OTH</TimingStatus>
+                        <MarkedPoint>
+                            <Bearing>
+                                <CompassPoint>SW</CompassPoint>
+                            </Bearing>
+                        </MarkedPoint>
+                    </Bus>
+                </OnStreet>
+            </StopClassification>
+            <AdministrativeAreaRef>111</AdministrativeAreaRef>
+            <PlusbusZones>
+                <PlusbusZoneRef CreationDateTime="2010-10-07T14:27:15" ModificationDateTime="2010-10-07T14:27:15" Modification="new" RevisionNumber="0" Status="active">ABRDEEN</PlusbusZoneRef>
+            </PlusbusZones>
+            <Notes>-</Notes>
+        </StopPoint>
+        <StopPoint CreationDateTime="2003-07-15T00:00:00" ModificationDateTime="2011-10-12T14:10:00" Modification="revise" RevisionNumber="2" Status="active">
+            <AtcoCode>639000022</AtcoCode>
+            <NaptanCode>23234369</NaptanCode>
+            <Descriptor>
+                <CommonName>Albyn Grove</CommonName>
+                <Landmark>Albyn Grove</Landmark>
+                <Street>Union Grove</Street>
+                <Indicator>o/s 20</Indicator>
+            </Descriptor>
+            <Place>
+                <NptgLocalityRef>ES001772</NptgLocalityRef>
+                <Suburb>Mannofield</Suburb>
+                <Town>Aberdeen</Town>
+                <LocalityCentre>0</LocalityCentre>
+                <Location>
+                    <Translation>
+                        <GridType>UKOS</GridType>
+                        <Easting>392898</Easting>
+                        <Northing>805572</Northing>
+                        <Longitude>-2.1189893199</Longitude>
+                        <Latitude>57.1409815049</Latitude>
+                    </Translation>
+                </Location>
+            </Place>
+            <StopClassification>
+                <StopType>BCT</StopType>
+                <OnStreet>
+                    <Bus>
+                        <BusStopType>MKD</BusStopType>
+                        <TimingStatus>OTH</TimingStatus>
+                        <MarkedPoint>
+                            <Bearing>
+                                <CompassPoint>NE</CompassPoint>
+                            </Bearing>
+                        </MarkedPoint>
+                    </Bus>
+                </OnStreet>
+            </StopClassification>
+            <StopAreas>
+                <StopAreaRef CreationDateTime="2009-10-29T00:00:00" ModificationDateTime="2009-10-29T00:00:00" Modification="revise" RevisionNumber="0" Status="active">639GSHI22301</StopAreaRef>
+            </StopAreas>
+            <AdministrativeAreaRef>111</AdministrativeAreaRef>
+            <PlusbusZones>
+                <PlusbusZoneRef CreationDateTime="2010-10-07T14:27:15" ModificationDateTime="2010-10-07T14:27:15" Modification="new" RevisionNumber="0" Status="active">ABRDEEN</PlusbusZoneRef>
+            </PlusbusZones>
+            <Notes>-</Notes>
+        </StopPoint>
+        <StopPoint CreationDateTime="2003-07-15T00:00:00" ModificationDateTime="2011-10-05T14:29:00" Modification="revise" RevisionNumber="3" Status="active">
+            <AtcoCode>639000031</AtcoCode>
+            <NaptanCode>23234354</NaptanCode>
+            <Descriptor>
+                <CommonName>Claremount Pl</CommonName>
+                <Landmark>Claremount Pl</Landmark>
+                <Street>Union Grove</Street>
+                <Indicator>o/s 233</Indicator>
+            </Descriptor>
+            <Place>
+                <NptgLocalityRef>ES001772</NptgLocalityRef>
+                <Suburb>Union Grove</Suburb>
+                <Town>Aberdeen</Town>
+                <LocalityCentre>0</LocalityCentre>
+                <Location>
+                    <Translation>
+                        <GridType>UKOS</GridType>
+                        <Easting>392615</Easting>
+                        <Northing>805430</Northing>
+                        <Longitude>-2.1236613456</Longitude>
+                        <Latitude>57.1397013606</Latitude>
+                    </Translation>
+                </Location>
+            </Place>
+            <StopClassification>
+                <StopType>BCT</StopType>
+                <OnStreet>
+                    <Bus>
+                        <BusStopType>MKD</BusStopType>
+                        <TimingStatus>OTH</TimingStatus>
+                        <MarkedPoint>
+                            <Bearing>
+                                <CompassPoint>SW</CompassPoint>
+                            </Bearing>
+                        </MarkedPoint>
+                    </Bus>
+                </OnStreet>
+            </StopClassification>
+            <StopAreas>
+                <StopAreaRef CreationDateTime="2009-10-29T00:00:00" ModificationDateTime="2009-10-29T00:00:00" Modification="revise" RevisionNumber="0" Status="active">639GSHI20121</StopAreaRef>
+            </StopAreas>
+            <AdministrativeAreaRef>111</AdministrativeAreaRef>
+            <PlusbusZones>
+                <PlusbusZoneRef CreationDateTime="2010-10-07T14:27:15" ModificationDateTime="2010-10-07T14:27:15" Modification="new" RevisionNumber="0" Status="active">ABRDEEN</PlusbusZoneRef>
+            </PlusbusZones>
+            <Notes>-</Notes>
+        </StopPoint>
+        <StopPoint CreationDateTime="2010-09-27T12:32:00" ModificationDateTime="2010-09-29T16:24:00" Modification="revise" RevisionNumber="1" Status="active">
+            <AtcoCode>630060241</AtcoCode>
+            <NaptanCode>23629825</NaptanCode>
+            <Descriptor>
+                <CommonName>Sclattiebrae Drive</CommonName>
+                <Landmark>Reservoir</Landmark>
+                <Street>Sclattiebrae Drive</Street>
+                <Indicator>NW bound</Indicator>
+            </Descriptor>
+            <Place>
+                <NptgLocalityRef>ES003834</NptgLocalityRef>
+                <Town>Westhill</Town>
+                <LocalityCentre>0</LocalityCentre>
+                <Location>
+                    <Translation>
+                        <GridType>UKOS</GridType>
+                        <Easting>382860</Easting>
+                        <Northing>808378</Northing>
+                        <Longitude>-2.2850493669</Longitude>
+                        <Latitude>57.1659212652</Latitude>
+                    </Translation>
+                </Location>
+            </Place>
+            <StopClassification>
+                <StopType>BCT</StopType>
+                <OnStreet>
+                    <Bus>
+                        <BusStopType>FLX</BusStopType>
+                        <TimingStatus>OTH</TimingStatus>
+                        <FlexibleZone CreationDateTime="2010-09-27T12:32:00" ModificationDateTime="2010-09-29T16:24:00" Modification="revise" RevisionNumber="1" Status="active">
+                            <Location>
+                                <Translation>
+                                    <GridType>UKOS</GridType>
+                                    <Easting>384231</Easting>
+                                    <Northing>806287</Northing>
+                                    <Longitude>-2.2622470089</Longitude>
+                                    <Latitude>57.1471869178</Latitude>
+                                </Translation>
+                            </Location>
+                            <Location>
+                                <Translation>
+                                    <GridType>UKOS</GridType>
+                                    <Easting>376747</Easting>
+                                    <Northing>805661</Northing>
+                                    <Longitude>-2.3858557271</Longitude>
+                                    <Latitude>57.1412441059</Latitude>
+                                </Translation>
+                            </Location>
+                            <Location>
+                                <Translation>
+                                    <GridType>UKOS</GridType>
+                                    <Easting>379001</Easting>
+                                    <Northing>807925</Northing>
+                                    <Longitude>-2.348802421</Longitude>
+                                    <Latitude>57.1616908453</Latitude>
+                                </Translation>
+                            </Location>
+                            <Location>
+                                <Translation>
+                                    <GridType>UKOS</GridType>
+                                    <Easting>382335</Easting>
+                                    <Northing>803893</Northing>
+                                    <Longitude>-2.2934111624</Longitude>
+                                    <Latitude>57.1256118216</Latitude>
+                                </Translation>
+                            </Location>
+                        </FlexibleZone>
+                    </Bus>
+                </OnStreet>
+            </StopClassification>
+            <AdministrativeAreaRef>112</AdministrativeAreaRef>
+        </StopPoint>
+    </StopPoints>
+    <StopAreas>
+        <StopArea CreationDateTime="2003-01-10T00:00:00" ModificationDateTime="2003-01-10T00:00:00" Modification="new" RevisionNumber="0" Status="active">
+            <StopAreaCode>639GSHI20121</StopAreaCode>
+            <Name>Bullers of Buchan</Name>
+            <AdministrativeAreaRef>112</AdministrativeAreaRef>
+            <StopAreaType>GCLS</StopAreaType>
+            <Location>
+                <Translation>
+                    <GridType>UKOS</GridType>
+                    <Easting>410662</Easting>
+                    <Northing>838068</Northing>
+                    <Longitude>-1.8240700289</Longitude>
+                    <Latitude>57.4328198507</Latitude>
+                </Translation>
+            </Location>
+        </StopArea>
+        <StopArea CreationDateTime="2003-01-10T00:00:00" ModificationDateTime="2003-01-10T00:00:00" Modification="new" RevisionNumber="0" Status="active">
+            <StopAreaCode>639GSHI21581</StopAreaCode>
+            <Name>Market Street</Name>
+            <AdministrativeAreaRef>112</AdministrativeAreaRef>
+            <StopAreaType>GCLS</StopAreaType>
+            <Location>
+                <Translation>
+                    <GridType>UKOS</GridType>
+                    <Easting>370676</Easting>
+                    <Northing>864659</Northing>
+                    <Longitude>-2.4932405666</Longitude>
+                    <Latitude>57.6708309449</Latitude>
+                </Translation>
+            </Location>
+        </StopArea>
+        <StopArea CreationDateTime="2003-01-10T00:00:00" ModificationDateTime="2003-01-10T00:00:00" Modification="new" RevisionNumber="0" Status="active">
+            <StopAreaCode>639GSHI21781</StopAreaCode>
+            <Name>Station Road</Name>
+            <AdministrativeAreaRef>112</AdministrativeAreaRef>
+            <StopAreaType>GCLS</StopAreaType>
+            <Location>
+                <Translation>
+                    <GridType>UKOS</GridType>
+                    <Easting>403660</Easting>
+                    <Northing>847480</Northing>
+                    <Longitude>-1.9405531871</Longitude>
+                    <Latitude>57.5174746839</Latitude>
+                </Translation>
+            </Location>
+        </StopArea>
+        <StopArea CreationDateTime="2003-01-10T00:00:00" ModificationDateTime="2003-01-10T00:00:00" Modification="new" RevisionNumber="0" Status="active">
+            <StopAreaCode>639GSHI21801</StopAreaCode>
+            <Name>Inn Brae</Name>
+            <AdministrativeAreaRef>112</AdministrativeAreaRef>
+            <StopAreaType>GCLS</StopAreaType>
+            <Location>
+                <Translation>
+                    <GridType>UKOS</GridType>
+                    <Easting>403742</Easting>
+                    <Northing>847450</Northing>
+                    <Longitude>-1.9391847404</Longitude>
+                    <Latitude>57.5172045499</Latitude>
+                </Translation>
+            </Location>
+        </StopArea>
+        <StopArea CreationDateTime="2003-01-10T00:00:00" ModificationDateTime="2003-01-10T00:00:00" Modification="new" RevisionNumber="0" Status="active">
+            <StopAreaCode>639GSHI21921</StopAreaCode>
+            <Name>Seggat Road End</Name>
+            <AdministrativeAreaRef>112</AdministrativeAreaRef>
+            <StopAreaType>GCLS</StopAreaType>
+            <Location>
+                <Translation>
+                    <GridType>UKOS</GridType>
+                    <Easting>374948</Easting>
+                    <Northing>842335</Northing>
+                    <Longitude>-2.4193140309</Longitude>
+                    <Latitude>57.4705753562</Latitude>
+                </Translation>
+            </Location>
+        </StopArea>
+        <StopArea CreationDateTime="2003-01-10T00:00:00" ModificationDateTime="2003-01-10T00:00:00" Modification="new" RevisionNumber="0" Status="active">
+            <StopAreaCode>639GSHI22301</StopAreaCode>
+            <Name>Strichen Junction</Name>
+            <ParentStopAreaRef Modification="new" Status="active">639GSHI21921</ParentStopAreaRef>
+            <AdministrativeAreaRef>112</AdministrativeAreaRef>
+            <StopAreaType>GCLS</StopAreaType>
+            <Location>
+                <Translation>
+                    <GridType>UKOS</GridType>
+                    <Easting>411993</Easting>
+                    <Northing>845066</Northing>
+                    <Longitude>-1.8015616451</Longitude>
+                    <Latitude>57.4956482909</Latitude>
+                </Translation>
+            </Location>
+        </StopArea>
+    </StopAreas>
+</NaPTAN>
