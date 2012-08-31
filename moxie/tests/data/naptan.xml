@@ -227,6 +227,78 @@
             </PlusbusZones>
             <Notes>-</Notes>
         </StopPoint>
+        <StopPoint CreationDateTime="2010-09-27T12:32:00" ModificationDateTime="2010-09-29T16:24:00" Modification="revise" RevisionNumber="1" Status="active">
+            <AtcoCode>630060241</AtcoCode>
+            <NaptanCode>23629825</NaptanCode>
+            <Descriptor>
+                <CommonName>Sclattiebrae Drive</CommonName>
+                <Landmark>Reservoir</Landmark>
+                <Street>Sclattiebrae Drive</Street>
+                <Indicator>NW bound</Indicator>
+            </Descriptor>
+            <Place>
+                <NptgLocalityRef>ES003834</NptgLocalityRef>
+                <Town>Westhill</Town>
+                <LocalityCentre>0</LocalityCentre>
+                <Location>
+                    <Translation>
+                        <GridType>UKOS</GridType>
+                        <Easting>382860</Easting>
+                        <Northing>808378</Northing>
+                        <Longitude>-2.2850493669</Longitude>
+                        <Latitude>57.1659212652</Latitude>
+                    </Translation>
+                </Location>
+            </Place>
+            <StopClassification>
+                <StopType>BCT</StopType>
+                <OnStreet>
+                    <Bus>
+                        <BusStopType>FLX</BusStopType>
+                        <TimingStatus>OTH</TimingStatus>
+                        <FlexibleZone CreationDateTime="2010-09-27T12:32:00" ModificationDateTime="2010-09-29T16:24:00" Modification="revise" RevisionNumber="1" Status="active">
+                            <Location>
+                                <Translation>
+                                    <GridType>UKOS</GridType>
+                                    <Easting>384231</Easting>
+                                    <Northing>806287</Northing>
+                                    <Longitude>-2.2622470089</Longitude>
+                                    <Latitude>57.1471869178</Latitude>
+                                </Translation>
+                            </Location>
+                            <Location>
+                                <Translation>
+                                    <GridType>UKOS</GridType>
+                                    <Easting>376747</Easting>
+                                    <Northing>805661</Northing>
+                                    <Longitude>-2.3858557271</Longitude>
+                                    <Latitude>57.1412441059</Latitude>
+                                </Translation>
+                            </Location>
+                            <Location>
+                                <Translation>
+                                    <GridType>UKOS</GridType>
+                                    <Easting>379001</Easting>
+                                    <Northing>807925</Northing>
+                                    <Longitude>-2.348802421</Longitude>
+                                    <Latitude>57.1616908453</Latitude>
+                                </Translation>
+                            </Location>
+                            <Location>
+                                <Translation>
+                                    <GridType>UKOS</GridType>
+                                    <Easting>382335</Easting>
+                                    <Northing>803893</Northing>
+                                    <Longitude>-2.2934111624</Longitude>
+                                    <Latitude>57.1256118216</Latitude>
+                                </Translation>
+                            </Location>
+                        </FlexibleZone>
+                    </Bus>
+                </OnStreet>
+            </StopClassification>
+            <AdministrativeAreaRef>112</AdministrativeAreaRef>
+        </StopPoint>
     </StopPoints>
     <StopAreas>
         <StopArea CreationDateTime="2003-01-10T00:00:00" ModificationDateTime="2003-01-10T00:00:00" Modification="new" RevisionNumber="0" Status="active">
