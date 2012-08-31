@@ -28,3 +28,7 @@ pip-log.txt
 
 # IDEA (PyCharm)
 .idea/
+
+NaPTAN.xml
+oxfordshire.osm
+oxpoints.json
