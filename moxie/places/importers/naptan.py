@@ -1,7 +1,7 @@
 import logging
 import uuid
 
-from lxml import etree
+from xml.sax import ContentHandler, make_parser
 from collections import defaultdict
 
 from moxie.places.importers.helpers import prepare_document
@@ -18,7 +18,7 @@ def tag_handler(tag):
     return wrapper
 
 
-class NaptanXMLHandler(object):
+class NaptanXMLHandler(ContentHandler):
 
     def __init__(self, areas, identifier_key):
         self.areas = areas
@@ -37,20 +37,7 @@ class NaptanXMLHandler(object):
             for tag in tags:
                 self.tag_handlers[tag] = attr
 
-    def split_namespace(self, tag):
-        if self.namespaced is None:
-            if '}' in tag:
-                self.namespaced = True
-            else:
-                self.namespaced = False
-        if self.namespaced:
-            namespace, tag = tag.split('}')
-            return namespace[1:], tag
-        else:
-            return None, tag
-
-    def start(self, tag, attrib):
-        ns, tag = self.split_namespace(tag)
+    def startElement(self, tag, attrib):
         self.skip_element = False
         if attrib.get('Status', 'active') != 'active':
             self.skip_element = True
@@ -61,8 +48,7 @@ class NaptanXMLHandler(object):
             self.tag_stack = []
             self.capture_data = True
 
-    def end(self, tag):
-        ns, tag = self.split_namespace(tag)
+    def endElement(self, tag):
         if self.capture_data and not self.skip_element:
             if tag in self.tag_handlers:
                 th = self.tag_handlers[tag]
@@ -73,7 +59,7 @@ class NaptanXMLHandler(object):
             else:
                 self.tag_stack.pop()
 
-    def data(self, data):
+    def characters(self, data):
         if self.capture_data and not self.skip_element:
             tag = '_'.join(self.tag_stack)
             self.element_data[tag] += data
@@ -148,38 +134,38 @@ class NaptanXMLHandler(object):
                     parent_area['parent_of'] = [sp['id']]
         return stop_points, stop_areas
 
-    def close(self):
+    def endDocument(self):
         areas = self.annotate_stop_area_ancestry(self.stop_areas)
-        stop_points, stop_areas = self.annotate_stop_point_ancestry(self.stop_points, areas)
-        return stop_points, stop_areas
+        self.stop_points, self.stop_areas = self.annotate_stop_point_ancestry(self.stop_points, areas)
 
 
 class NaPTANImporter(object):
     def __init__(self, indexer, precedence, naptan_file, areas,
             identifier_key='identifiers', buffer_size=8192,
-            xml_parser=NaptanXMLHandler):
+            handler=NaptanXMLHandler):
         self.indexer = indexer
         self.precedence = precedence
         self.naptan_file = naptan_file
         self.areas = areas
         self.identifier_key = identifier_key
         self.buffer_size = buffer_size
-        self.xml_parser = xml_parser(self.areas, self.identifier_key)
+        self.handler = handler(self.areas, self.identifier_key)
 
     def run(self):
-        parser = etree.XMLParser(target=self.xml_parser)
+        parser = make_parser(['xml.sax.IncrementalParser'])
+        parser.setContentHandler(self.handler)
         buffered_data = self.naptan_file.read(self.buffer_size)
         while buffered_data:
             parser.feed(buffered_data)
             buffered_data = self.naptan_file.read(self.buffer_size)
-        stop_points, stop_areas = parser.close()
-        for stop_area_code, data in stop_areas.items():
+        parser.close()
+        for stop_area_code, data in self.handler.stop_areas.items():
             search_results = self.indexer.search_for_ids(
                 'identifiers', data['identifiers'])
             doc = prepare_document(data, search_results.json, 10)
             doc = [doc]
             self.indexer.index(doc)
-        for atco_code, sp in stop_points.items():
+        for atco_code, sp in self.handler.stop_points.items():
             search_results = self.indexer.search_for_ids(
                 'identifiers', sp['identifiers'])
             doc = prepare_document(sp, search_results.json, 10)
