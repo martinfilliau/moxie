@@ -14,8 +14,7 @@ class SolrSearch(AbstractSearch):
 
     DEFAULT_TIMEOUT = 1     # default timeout in seconds
 
-    def __init__(self, core, return_type='json',
-            server_url='http://localhost:8983/solr/'):
+    def __init__(self, core, server_url, return_type='json'):
         self.core = core
         self.return_type = return_type
         self.server_url = server_url
