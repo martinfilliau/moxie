@@ -9,6 +9,10 @@ SEARCH_SCHEMES = {
 
 
 def get_searcher():
+    """Sets the searcher instance on the application context.
+    This is done for each application, so they can be configured with
+    different search indexes. Eg. Places on one collection, events in another.
+    """
     ctx = _app_ctx_stack.top
     searcher = getattr(ctx, 'moxie_searcher', None)
     if searcher is None:
@@ -19,6 +23,7 @@ def get_searcher():
 
 
 def _find_searcher(searcher_url):
+    """Parse the URL and imports the appropriate AbstractSearch implementation"""
     parsed = urlparse.urlparse(searcher_url)
     search_scheme, http_scheme = parsed.scheme.split('+')
     http_path, _, index_name = parsed.path.rpartition('/')
