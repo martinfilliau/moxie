@@ -9,7 +9,7 @@ SEARCH_SCHEMES = {
         }
 
 
-def get_searcher(default_url='solr+http://localhost:8983/solr/collection1'):
+def get_searcher():
     """Sets the searcher instance on the application context.
     This is done for each application, so they can be configured with
     different search indexes. Eg. Places on one collection, events in another.
@@ -19,7 +19,7 @@ def get_searcher(default_url='solr+http://localhost:8983/solr/collection1'):
     ctx = _app_ctx_stack.top
     searcher = getattr(ctx, 'moxie_searcher', None)
     if searcher is None:
-        searcher_url = ctx.app.config.get('SEARCHER_URL', default_url)
+        searcher_url = ctx.app.config['SEARCHER_URL']
         searcher = _find_searcher(searcher_url)
         ctx.moxie_searcher = searcher
     return searcher
