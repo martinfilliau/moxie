@@ -2,24 +2,28 @@ import urlparse
 import importlib
 
 from flask import _app_ctx_stack
+from werkzeug.local import LocalProxy
 
 SEARCH_SCHEMES = {
         'solr': ('moxie.core.search.solr', 'SolrSearch'),
         }
 
 
-def get_searcher():
+def get_searcher(default_url='solr+http://localhost:8983/solr/collection1'):
     """Sets the searcher instance on the application context.
     This is done for each application, so they can be configured with
     different search indexes. Eg. Places on one collection, events in another.
+
+    The searcher is configured by setting a SEARCHER_URL in your config file.
     """
     ctx = _app_ctx_stack.top
     searcher = getattr(ctx, 'moxie_searcher', None)
     if searcher is None:
-        searcher_url = ctx.app.config.get('SEARCHER_URL',
-            'solr+http://localhost:8983/solr/collection1')  # Defaults to Solr
-        ctx.moxie_searcher = _find_searcher(searcher_url)
+        searcher_url = ctx.app.config.get('SEARCHER_URL', default_url)
+        searcher = _find_searcher(searcher_url)
+        ctx.moxie_searcher = searcher
     return searcher
+searcher = LocalProxy(get_searcher)
 
 
 def _find_searcher(searcher_url):
