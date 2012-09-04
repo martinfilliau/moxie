@@ -1,20 +1,16 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import request, jsonify, render_template
 from moxie.core.views import ServiceView, register_mimetype
-from moxie.core.search.solr import SolrSearch
-
-
-places = Blueprint('places', __name__, template_folder='templates')
+from moxie.core.search import searcher
 
 
 class Search(ServiceView):
     methods = ['GET', 'POST']
 
-    def __init__(self, searcher, *args, **kwargs):
-        self.searcher = searcher
+    def __init__(self, *args, **kwargs):
         super(Search, self).__init__(*args, **kwargs)
 
     def get_results(self, query, location):
-        return self.searcher.search_nearby(query, location)
+        return searcher.search_nearby(query, location)
 
     @register_mimetype('application/json')
     def json_results(self):
@@ -30,7 +26,3 @@ class Search(ServiceView):
     @register_mimetype('text/html')
     def html_form(self):
         return render_template('search.html')
-
-
-solr = SolrSearch('collection1')
-places.add_url_rule('/search', view_func=Search.as_view('search', solr))
