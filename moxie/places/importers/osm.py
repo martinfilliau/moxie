@@ -1,6 +1,6 @@
 import logging
 
-from xml.sax import handler, make_parser
+from xml.sax import handler
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -79,8 +79,10 @@ class OSMHandler(handler.ContentHandler):
     def endDocument(self):
         pass
 
+
 def main():
     import argparse
+    from xml.sax import make_parser
     parser = argparse.ArgumentParser()
     parser.add_argument('osmfile', type=argparse.FileType('r'))
     ns = parser.parse_args()
