@@ -1,0 +1,10 @@
+language: python
+python:
+  - "2.7"
+install:
+  - pip install -q -r requirements.txt --use-mirrors
+script:
+  - python runtests.py
+notifications:
+  irc:
+    - "irc.ox.ac.uk.org#mox"
