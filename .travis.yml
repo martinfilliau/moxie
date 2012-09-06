@@ -7,4 +7,5 @@ script:
   - python runtests.py
 notifications:
   irc:
-    - "irc.ox.ac.uk.org#mox"
+    channels: "irc.ox.ac.uk#mox"
+    on_success: change
