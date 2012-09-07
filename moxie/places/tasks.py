@@ -2,6 +2,7 @@ import requests
 import logging
 import urlparse
 import bz2
+import zipfile
 
 from tempfile import NamedTemporaryFile
 from xml.sax import make_parser
@@ -11,17 +12,13 @@ from moxie.core.kv import kv_store
 from moxie.core.search import searcher
 from moxie.worker import celery
 from moxie.places.importers.osm import OSMHandler
+from moxie.places.importers.oxpoints import OxpointsImporter
+from moxie.places.importers.naptan import NaPTANImporter
 
 app = create_app()
 logger = logging.getLogger(__name__)
-
-
-def resource_unchanged(url, etag):
-    h = requests.head(url)
-    if etag and 'etag' in h.headers:
-        if etag == h.headers['etag']:
-            return True
-    return False
+ETAG_KEY_FORMAT = "%s_etag_%s"
+LOCATION_KEY_FORMAT = "%s_location_%s"
 
 
 def write_resource(response):
@@ -34,36 +31,76 @@ def write_resource(response):
     return location
 
 
-def get_resource(url, force_update=False):
-    resource_etag_key = "%s_etag_%s" % (__name__, url)
-    resource_location_key = "%s_location_%s" % (__name__, url)
+def get_cached_etag_location(url):
+    resource_etag_key = ETAG_KEY_FORMAT % (__name__, url)
+    resource_location_key = LOCATION_KEY_FORMAT % (__name__, url)
     with app.app_context():
         etag = kv_store.get(resource_etag_key)
         location = kv_store.get(resource_location_key)
-    if resource_unchanged(url, etag) and not force_update:
-        try:
-            f = open(location)
-            f.close()
-            logger.info("ETag's match. No change resource - %s" % url)
-            return location  # No change
-        except IOError:
-            pass
-    response = requests.get(url)
-    etag = response.headers.get('etag')
+        if location:
+            # Check to see if the cached file still exists
+            try:
+                f = open(location)
+                f.close()
+            except IOError:
+                etag, location = None, None
+    return etag, location
+
+
+def cache_etag_location(url, etag, location):
+    resource_etag_key = ETAG_KEY_FORMAT % (__name__, url)
+    resource_location_key = LOCATION_KEY_FORMAT % (__name__, url)
+    success = False
+    with app.app_context():
+        if etag and location:
+            kv_store.set(resource_etag_key, etag)
+            kv_store.set(resource_location_key, location)
+            success = True
+    return success
+
+
+def get_resource(url, force_update=False):
+    etag, location = get_cached_etag_location(url)
+    headers = {}
+    if etag and not force_update:
+        headers['if-none-match'] = etag
+    response = requests.get(url, headers=headers)
+    etag = response.headers.get('etag', None)
+    if response.status_code == 304:
+        # Unchanged
+        logger.info("ETag's match. No change resource - %s" % url)
+        return location
     if response.ok:
         logger.info("Downloaded - %s - Content-length: %s" % (
-            url, len(response.content)))
+            response.url, len(response.content)))
         location = write_resource(response)
-        with app.app_context():
-            if etag:
-                kv_store.set(resource_etag_key, etag)
-            if location:
-                kv_store.set(resource_location_key, location)
+        if cache_etag_location(url, etag, location):
+            logger.info("Successfully cached etag: %s for url: %s" % (etag, url))
         return location
     else:
         logger.warning("Failed to download: %s Response: %s-%s" % (
             url, response.status_code, response.reason))
-        return None
+        return False
+
+
+@celery.task
+def clear_index():
+    with app.app_context():
+        r = searcher.clear_index()
+        logger.info(r)
+
+
+@celery.task
+def import_all(force_update_all=False):
+    with app.app_context():
+        if force_update_all:
+            clear_index()
+        import_osm.delay(app.config['OSM_IMPORT_URL'],
+                force_update=force_update_all)
+        import_oxpoints.delay(app.config['OXPOINTS_IMPORT_URL'],
+                force_update=force_update_all)
+        import_naptan.delay(app.config['NAPTAN_IMPORT_URL'],
+                force_update=force_update_all)
 
 
 @celery.task
@@ -82,3 +119,23 @@ def import_osm(url, force_update=False):
             parser.feed(bunzip.decompress(buffer))
             buffer = osm.read(8192)
         parser.close()
+
+
+@celery.task
+def import_oxpoints(url, force_update=False):
+    oxpoints = get_resource(url, force_update)
+    logger.info("OxPoints Downloaded - Stored here: %s" % oxpoints)
+    oxpoints = open(oxpoints)
+    with app.app_context():
+        importer = OxpointsImporter(searcher, 10, oxpoints)
+        importer.import_data()
+
+
+@celery.task
+def import_naptan(url, force_update=False):
+    naptan = get_resource(url, force_update)
+    archive = zipfile.ZipFile(open(naptan))
+    f = archive.open('NaPTAN.xml')
+    with app.app_context():
+        naptan_importer = NaPTANImporter(searcher, 10, f, ['340'], 'identifiers')
+        naptan_importer.run()
