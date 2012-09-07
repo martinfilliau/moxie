@@ -50,13 +50,16 @@ class AbstractSearch(object):
         pass
 
     def index(self, document):
-        pass
+        raise NotImplementedError
 
     def search(self, query):
-        pass
+        raise NotImplementedError
+
+    def clear_index(self):
+        raise NotImplementedError
 
     def get_by_ids(self, document_ids):
         """
         Get documents by their unique ID
         """
-        pass
+        raise NotImplementedError

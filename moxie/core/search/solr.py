@@ -84,7 +84,18 @@ class SolrSearch(AbstractSearch):
             raise Exception
 
     def commit(self):
-        raise NotImplemented()
+        return self.connection(self.methods['update'],
+                params={'commit': 'true'})
+
+    def clear_index(self):
+        """WARNING: This action will delete *all* documents in your index.
+        TODO: This doesn't seem to work? Despite being the documented way
+        """
+        logger.warning("Clearing index!")
+        data = json.dumps({'delete': {'query': '*:*'}})
+        headers = {'Content-Type': self.content_types[self.return_type]}
+        return self.connection(self.methods['update'], data=data,
+                params={'commit': 'true'}, headers=headers)
 
     def search_for_ids(self, id_key, identifiers):
         """
