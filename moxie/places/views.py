@@ -4,26 +4,36 @@ from moxie.core.search import searcher
 
 
 class Search(ServiceView):
-    methods = ['GET', 'POST']
+    methods = ['GET']
 
     def __init__(self, *args, **kwargs):
         super(Search, self).__init__(*args, **kwargs)
 
+    def format_results(self, results):
+        out = []
+        for doc in results['docs']:
+            out.append({
+                'name': doc['name'],
+                'location': doc['location'], # TODO: Should this be lat/lon
+                'distance': doc['__dist__'],
+                })
+        return out
+
     def get_results(self, query, location):
-        return searcher.search_nearby(query, location)
+        results = searcher.search_nearby(query, location)
+        # TODO(?) new query should be shown to the user
+        if results.json['response']['numFound'] == 0:
+            new_query = str(results.json['spellcheck']['suggestions'][-1])
+            results = self.get_results(new_query, location)
+        return self.format_results(results.json)
 
     def handle_request(self):
+        if not request.args:
+            # No search q and no location
+            return dict()
         query = request.args.get('q', '*')
         location = request.args.get('lat', None), request.args.get('lon', None)
-        if location == (None, None):
-            return dict()
-        else:
-            results = self.get_results(query, location)
-            # TODO should be extracted from this method, and new query should be shown to the user
-            if results.json['response']['numFound'] == 0:
-                new_query = str(results.json['spellcheck']['suggestions'][-1])
-                results = self.get_results(new_query, location)
-            return results.json
+        return self.get_results(query, location)
 
     @accepts('text/html')
     def as_html(self, response):
