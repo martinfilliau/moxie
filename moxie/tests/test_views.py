@@ -1,35 +1,33 @@
 import unittest
 import flask
 
-from moxie.core.views import register_mimetype, ServiceView
+from moxie.core.views import accepts, ServiceView
 
 
-class RegisterMimeTypeTestCase(unittest.TestCase):
+class AcceptsMimeTypeTestCase(unittest.TestCase):
 
-    def test_register_mimetype(self):
-        @register_mimetype('foo/bar')
+    def test_accepts(self):
+        @accepts('foo/bar')
         def test_func():
             return 'Hello World!'
         self.assertEqual(test_func.mimetypes, ['foo/bar'])
 
     def test_registering_multiple_mimetypes(self):
-        @register_mimetype('foo/bar')
-        @register_mimetype('text/html')
-        @register_mimetype('bar/baz')
+        @accepts('foo/bar', 'text/html', 'bar/baz')
         def test_func():
             return 'Hello World!'
-        self.assertEqual(test_func.mimetypes,
-                ['bar/baz', 'text/html', 'foo/bar'])
+        self.assertEqual(set(test_func.mimetypes),
+                set(['bar/baz', 'text/html', 'foo/bar']))
 
 
 class TestServiceView(ServiceView):
-    @register_mimetype('foo/bar')
-    def basic_response(self):
-        return 'Hello World!', 200
 
-    @register_mimetype('foo/json')
-    def json_response(self):
-        return flask.jsonify({'Hello': 'World'})
+    def handle_request(self):
+        return {'name': 'Dave'}
+
+    @accepts('foo/bar')
+    def basic_response(self, response):
+        return 'Hello %s!' % response['name'], 200
 
 
 class ServiceViewTestCase(unittest.TestCase):
@@ -54,6 +52,6 @@ class ServiceViewTestCase(unittest.TestCase):
 
     def test_working_response_json(self):
         with self.app.test_client() as c:
-            rv = c.get('/foo', headers=[('Accept', 'foo/json')])
+            rv = c.get('/foo', headers=[('Accept', 'application/json')])
             self.assertEqual(rv.status_code, 200)
             self.assertEqual(rv.content_type, 'application/json')
