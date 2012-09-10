@@ -1,43 +1,20 @@
 {% extends "base.html" %}
-{% block title %}moxie search{% endblock %}
-{% block body %}
-<div class="row">
-    <div class="span4 offset4">
-        <form action="" method="POST">
-            <input type="text" placeholder="Search places…">
-            <button type="submit" class="btn">Submit</button>
-        </form>
-    </div>
-</div>
-<div class="row">
-  <div id="results" class="span4 offset4"></div>
-</div>
-{% endblock %}
-{% block js %}
-{% raw %}
-<script id="results-template" type="text/x-handlebars-template">
-    <table class="table table-striped">
-        {{#each docs}}
-        <tr>
-            <td>{{name}}</td>
-            <td>{{_dist_}}</td>
-        </tr>
-        {{/each}}
-    </table>
-</script>
-<script type="text/javascript">
-    function success(position) {
-        var latlng = {'lat': position.coords.latitude, 'lon': position.coords.longitude};
-        $.getJSON(window.location, latlng, function(data) {
-                console.log(data);
-                var source = $("#results-template").html();
-                var template = Handlebars.compile(source);
-                var html = template(data.response);
-                console.log(html);
-                $("#results").html(html);
-        });
-    }
-    navigator.geolocation.getCurrentPosition(success);
-</script>
-{% endraw %}
+{% block title %}Places - Search{% endblock %}
+{% block content %}
+        <div id="map"></div>
+        <div id="list-bar">
+            <form id="places-search">
+                <input type="text" placeholder="Places search">
+                <span class="deleteicon ss-icon">delete</span>
+            </form>
+            <h2>Results near <span >here</span></h2>
+            <ul class="results-list">
+                {% for result in results %}
+                <li>
+                <h3>{{ result.name }}</h3>
+                <p class="metadata">{{ result.distance }}m away.</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
 {% endblock %}
