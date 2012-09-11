@@ -1,4 +1,4 @@
-from flask import request, jsonify, render_template
+from flask import request, render_template
 from moxie.core.views import ServiceView, accepts
 from moxie.core.search import searcher
 
@@ -11,13 +11,13 @@ class Search(ServiceView):
 
     def format_results(self, results):
         out = []
-        for doc in results['docs']:
+        for doc in results['response']['docs']:
             out.append({
                 'name': doc['name'],
-                'location': doc['location'], # TODO: Should this be lat/lon
-                'distance': doc['__dist__'],
+                'location': doc['location'],  # TODO: Should this be lat/lon
+                'distance': doc['_dist_'],
                 })
-        return out
+        return {'results': out}
 
     def get_results(self, query, location):
         results = searcher.search_nearby(query, location)
