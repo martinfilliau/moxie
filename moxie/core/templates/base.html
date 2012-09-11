@@ -21,17 +21,17 @@
     <!-- Symbolset -->
     <link href="{{ url_for('static', filename='webfonts/ss-standard.css') }}" rel="stylesheet">
 
-    <script src="{{ url_for('static', filename='js/modernizr.min.js') }}"></script>
-
-    <!-- IE Fix for HTML5 Tags -->
-    <!--[if lt IE 9]>
-    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
     <!-- Leaflet -->
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.css">
     <!--[if lte IE 8]>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.ie.css" />
+    <![endif]-->
+
+    <!-- Modernizr -->
+    <script src="{{ url_for('static', filename='js/modernizr.min.js') }}"></script>
+    <!-- IE Fix for HTML5 Tags -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
 </head>
