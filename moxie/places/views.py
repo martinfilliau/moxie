@@ -9,15 +9,17 @@ class Search(ServiceView):
     def __init__(self, *args, **kwargs):
         super(Search, self).__init__(*args, **kwargs)
 
-    def format_results(self, results):
+    def format_results(self, query, results):
         out = []
         for doc in results['response']['docs']:
+            lon, lat = doc['location'].split(',')
             out.append({
                 'name': doc['name'],
-                'location': doc['location'],  # TODO: Should this be lat/lon
+                'lon': lon,
+                'lat': lat,
                 'distance': doc['_dist_'],
                 })
-        return {'results': out}
+        return {'query': query, 'results': out}
 
     def get_results(self, query, location):
         results = searcher.search_nearby(query, location)
@@ -25,7 +27,7 @@ class Search(ServiceView):
         if results.json['response']['numFound'] == 0:
             new_query = str(results.json['spellcheck']['suggestions'][-1])
             results = self.get_results(new_query, location)
-        return self.format_results(results.json)
+        return self.format_results(query, results.json)
 
     def handle_request(self):
         if not request.args:
