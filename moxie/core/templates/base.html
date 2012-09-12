@@ -57,6 +57,8 @@
     <!-- Leaflet JS -->
     <script src="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.js"></script>
 
-    <!-- Our app js minified -->
     <script src="{{ url_for('static', filename='js/moxie.min.js') }}"></script>
+
+    {% block js %}
+    {% endblock %}
 </body>
