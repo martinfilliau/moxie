@@ -39,7 +39,6 @@ oxpoints.json
 # Following files are created using 'make static'
 moxie/core/static/css/
 moxie/core/static/js/foundation.js
-moxie/core/static/js/foundation.min.js
 moxie/core/static/js/moxie.js
-moxie/core/static/js/moxie.min.js
-moxie/core/static/js/modernizr.min.js
+# All minified js
+*.min.js
