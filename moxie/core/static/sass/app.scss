@@ -164,6 +164,11 @@ ul#navbar {
 			width: auto !important; float: none;
 			height: 140px;
 		}
+        .leaflet-control-zoom {
+            @include respondTo(smallScreen) {
+                display: none;
+            }
+        }
 	}
 
 	#list-bar {
