@@ -25,8 +25,10 @@ $(document).ready(function() {
         return false;
     });
 
-    function initiate_geolocation() {
-        navigator.geolocation.getCurrentPosition(handle_geolocation_query);
+    function geo_error(error)
+    {
+        // TODO: How do we want to handle being unable to get user location data.
+        alert("Could not access your location.");
     }
     function handle_geolocation_query(position){
         $('#places-search input[name=lat]').val(position.coords.latitude);
@@ -34,6 +36,10 @@ $(document).ready(function() {
         var you = new L.LatLng($('#places-search input[name=lat]').val(), $('#places-search input[name=lon]').val());
         L.marker(you, {'title': "You are here."}).addTo(map);
         map.panTo(you);
+    }
+    function initiate_geolocation() {
+        // Watch the location using high accuracy. Allow results from within the last minute times out after 20secs
+        var wpid = navigator.geolocation.watchPosition(handle_geolocation_query, geo_error, {enableHighAccuracy:true, maximumAge:60000, timeout:20000});
     }
     function update_map_markers(){
         $('.results-list li').each(function(index) {
