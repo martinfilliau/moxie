@@ -1,0 +1,13 @@
+{% macro handlebar(name, app, filename) -%}
+    <script id="handlebar-{{name}}" type="text/x-handlebars-template" src="{{ url_for(app, filename=filename) }}"></script> 
+    <script type="text/javascript">
+        var source = $("#handlebar-{{name}}").html();
+        if (!Handlebars.templates) {
+            Handlebars.templates = {
+                {{name}}: Handlebars.compile(source),
+            }
+        } else {
+            Handlebars.templates.{{name}} = Handlebars.compile(source);
+        }
+    </script>
+{%- endmacro %}
