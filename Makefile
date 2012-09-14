@@ -7,7 +7,7 @@ MOXIE_JS_MIN = ${STATIC_DIR}/js/moxie.min.js
 
 PLACES_JS = ${PLACES_STATIC_DIR}/js/moxie.places.js
 PLACES_JS_MIN = ${PLACES_STATIC_DIR}/js/moxie.places.min.js
-PLACES_HANDLEBARS_DIR = moxie/places/templates
+PLACES_HANDLEBARS_DIR = ${PLACES_STATIC_DIR}/handlebars
 PLACES_HANDLEBARS_JS = ${PLACES_STATIC_DIR}/js/moxie.places.templates.min.js
 
 FOUNDATION_JS_DIR = ${STATIC_DIR}/js/foundation
@@ -27,3 +27,6 @@ static:
 	@uglifyjs -nc ${PLACES_JS} > ${PLACES_JS_MIN};
 	@handlebars -m ${PLACES_HANDLEBARS_DIR} > ${PLACES_HANDLEBARS_JS};
 	@echo "Static assets successfully built! - `date`";
+
+devcss:
+	@compass compile ${STATIC_DIR} -e development --force
