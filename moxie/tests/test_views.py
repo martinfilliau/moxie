@@ -30,6 +30,26 @@ class TestServiceView(ServiceView):
         return 'Hello %s!' % response['name'], 200
 
 
+class TestSecondServiceView(ServiceView):
+
+    def handle_request(self):
+        return {'name': 'Fred'}
+
+    @accepts('foo/bar')
+    def basic_response(self, response):
+        return 'Hello %s!' % response['name'], 200
+
+
+class TestInheritedServiceView(TestServiceView):
+    @accepts('foo/bar')
+    def foobar(self, response):
+        return "foobar!"
+
+
+class TestMultiInheritance(TestServiceView, TestSecondServiceView):
+    pass
+
+
 class ServiceViewTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -38,7 +58,8 @@ class ServiceViewTestCase(unittest.TestCase):
 
     def test_service_response(self):
         sv = TestServiceView()
-        self.assertEqual(sv.service_responses['foo/bar'], sv.basic_response)
+        #  im_func gets to the actual function of the unbound method
+        self.assertEqual(sv.service_responses['foo/bar'], sv.basic_response.im_func)
 
     def test_not_acceptable_request(self):
         with self.app.test_client() as c:
@@ -55,3 +76,17 @@ class ServiceViewTestCase(unittest.TestCase):
             rv = c.get('/foo', headers=[('Accept', 'application/json')])
             self.assertEqual(rv.status_code, 200)
             self.assertEqual(rv.content_type, 'application/json')
+
+    def test_inherited_service_response_override(self):
+        sv = TestInheritedServiceView()
+        self.assertNotEqual(sv.service_responses['foo/bar'], sv.basic_response.im_func)
+        self.assertEqual(sv.service_responses['foo/bar'], sv.foobar.im_func)
+
+    def test_multi_inheritance_service_response(self):
+        """This test tells us in the case of a multi-inheritance service view the bases
+        will be evaluated left to right. In this case the TestSecondServiceView overrides
+        the previously registered response for 'foo/bar' on TestServiceView.
+        """
+        sv = TestMultiInheritance()
+        self.assertEqual(sv.service_responses['foo/bar'], TestSecondServiceView.basic_response.im_func)
+        self.assertNotEqual(sv.service_responses['foo/bar'], TestServiceView.basic_response.im_func)
