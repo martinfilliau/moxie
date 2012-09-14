@@ -45,7 +45,6 @@ class ServiceView(View):
         If no good service_response can be found we generally want to
         return a NotAcceptable 406.
         """
-        print self.service_responses
         best_match = request.accept_mimetypes.best_match(
                 self.service_responses.keys())
         if best_match:
