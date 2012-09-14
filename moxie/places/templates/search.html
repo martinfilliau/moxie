@@ -22,6 +22,14 @@
         </div>
 {% endblock %}
 {% block js %}
+{% if config['DEBUG'] %}
+<!-- Places non-minified JS -->
+{% import 'handlebars.html' as handlebars with context %}
+{{ handlebars.handlebar('results', app='places.static', filename='results.handlebars') }}
+<script src="{{ url_for('places.static', filename='js/moxie.places.js') }}"></script> 
+{% else %}
+<!-- Places minified JS -->
 <script src="{{ url_for('places.static', filename='js/moxie.places.min.js') }}"></script> 
 <script src="{{ url_for('places.static', filename='js/moxie.places.templates.min.js') }}"></script> 
+{% endif %}
 {% endblock %}
