@@ -1,7 +1,6 @@
 from flask.views import View
 from flask import request, jsonify
 from werkzeug.exceptions import NotAcceptable
-from collections import defaultdict
 
 
 def accepts(*accept_values):
