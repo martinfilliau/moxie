@@ -39,4 +39,4 @@ class Search(ServiceView):
 
     @accepts('text/html')
     def as_html(self, response):
-        return render_template('search.html', **response)
+        return render_template('places/search.html', **response)

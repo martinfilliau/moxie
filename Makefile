@@ -1,5 +1,6 @@
 STATIC_DIR = moxie/core/static
 PLACES_STATIC_DIR = moxie/places/static
+PLACES_TEMPLATE_DIR = moxie/places/templates/places
 
 MOXIE_JS_DIR = ${STATIC_DIR}/js/moxie
 MOXIE_JS = ${STATIC_DIR}/js/moxie.js
@@ -7,7 +8,7 @@ MOXIE_JS_MIN = ${STATIC_DIR}/js/moxie.min.js
 
 PLACES_JS = ${PLACES_STATIC_DIR}/js/moxie.places.js
 PLACES_JS_MIN = ${PLACES_STATIC_DIR}/js/moxie.places.min.js
-PLACES_HANDLEBARS_DIR = ${PLACES_STATIC_DIR}/handlebars
+PLACES_HANDLEBARS_DIR = ${PLACES_TEMPLATE_DIR}
 PLACES_HANDLEBARS_JS = ${PLACES_STATIC_DIR}/js/moxie.places.templates.min.js
 
 FOUNDATION_JS_DIR = ${STATIC_DIR}/js/foundation
