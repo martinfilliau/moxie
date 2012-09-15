@@ -25,7 +25,7 @@
 {% if config['DEBUG'] %}
 <!-- Places non-minified JS -->
 {% import 'handlebars.html' as handlebars with context %}
-{{ handlebars.handlebar('results', app='places.static', filename='results.handlebars') }}
+{{ handlebars.handlebar('results', template_name='places/results.handlebars') }}
 <script src="{{ url_for('places.static', filename='js/moxie.places.js') }}"></script> 
 {% else %}
 <!-- Places minified JS -->

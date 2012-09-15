@@ -1,5 +1,7 @@
-{% macro handlebar(name, app, filename) -%}
-    <script id="handlebar-{{name}}" type="text/x-handlebars-template" src="{{ url_for(app, filename=filename) }}"></script> 
+{% macro handlebar(name, template_name) -%}
+    <script id="handlebar-{{name}}" type="text/x-handlebars-template">
+        {{ raw_include(template_name) }}
+    </script> 
     <script type="text/javascript">
         var source = $("#handlebar-{{name}}").html();
         if (!Handlebars.templates) {
