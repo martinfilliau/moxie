@@ -10,5 +10,10 @@ def create_app():
     except RuntimeError:
         # Env variable not set.
         pass
+    # Add context_processors to global context
+    with app.app_context():
+        import moxie.context_processors
+
+    # Register Moxie apps
     app.register_blueprint(places, url_prefix='/places')
     return app
