@@ -30,7 +30,9 @@ Running the application
 * `celery worker --app moxie.worker`
 * `python runserver.py`
 
-Periodically, and the first time, you have to run importers to import data into the search index. You can do this via a Python shell:
-`>>> from moxie.places.tasks import import_all
- >>> import_all.delay()`
+Periodically, and the first time, you have to run importers to import data into the search index.
+You can do this via a Python shell:
+
+    >>> from moxie.places.tasks import import_all
+    >>> import_all.delay()
 
