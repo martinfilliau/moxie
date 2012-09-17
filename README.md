@@ -19,6 +19,7 @@ Installation
 
 * `pip install -r requirements.txt`
 * `bundle install`
+* npm -g install uglify-js handlebars` (-g means install globally, it will be available from your PATH).
 
 Deployment
 
