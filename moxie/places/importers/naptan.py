@@ -93,7 +93,8 @@ class NaptanXMLHandler(ContentHandler):
                     sp.pop('Place_Location_Translation_Latitude'))
             data['location'] = "%s,%s" % (lon, lat)
             if 'Descriptor_Indicator' in sp:
-                data['name'] = "%s - %s" % (sp['Descriptor_CommonName'], sp['Descriptor_Indicator'])
+                indicator = self.get_indicator_name(str(sp['Descriptor_Indicator']))
+                data['name'] = "%s %s" % (indicator, sp['Descriptor_CommonName'])
             else:
                 data['name'] = sp['Descriptor_CommonName']
             data['tags'] = ['bus stop']
@@ -137,6 +138,29 @@ class NaptanXMLHandler(ContentHandler):
     def endDocument(self):
         areas = self.annotate_stop_area_ancestry(self.stop_areas)
         self.stop_points, self.stop_areas = self.annotate_stop_point_ancestry(self.stop_points, areas)
+
+    def get_indicator_name(self, indicator):
+        """
+        Get a "friendly" name for the indicator
+        @param indicator: indicator's name in Naptan format
+        @return: "friendly" name
+        """
+        parts = []
+        for part in indicator.split():
+            # TODO plan i18n for this
+            parts.append({
+                'op': 'Opposite',
+                'opp': 'Opposite',
+                'opposite': 'Opposite',
+                'adj': 'Adjacent',
+                'outside': 'Outside',
+                'o/s': 'Outside',
+                'nr': 'Near',
+                'inside': 'Inside',
+                'stp': 'Stop',
+            }.get(part.lower(), part))
+        indicator = ' '.join(parts)
+        return indicator
 
 
 class NaPTANImporter(object):
