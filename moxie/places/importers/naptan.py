@@ -186,13 +186,13 @@ class NaPTANImporter(object):
         for stop_area_code, data in self.handler.stop_areas.items():
             search_results = self.indexer.search_for_ids(
                 'identifiers', data['identifiers'])
-            doc = prepare_document(data, search_results.json, 10)
+            doc = prepare_document(data, search_results.json, self.precedence)
             doc = [doc]
             self.indexer.index(doc)
         for atco_code, sp in self.handler.stop_points.items():
             search_results = self.indexer.search_for_ids(
                 'identifiers', sp['identifiers'])
-            doc = prepare_document(sp, search_results.json, 10)
+            doc = prepare_document(sp, search_results.json, self.precedence)
             doc = [doc]
             self.indexer.index(doc)
 
