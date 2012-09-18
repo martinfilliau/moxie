@@ -195,6 +195,7 @@ class NaPTANImporter(object):
             doc = prepare_document(sp, search_results.json, self.precedence)
             doc = [doc]
             self.indexer.index(doc)
+        self.indexer.commit()
 
 
 def main():

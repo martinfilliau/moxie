@@ -66,6 +66,7 @@ class OxpointsImporter(object):
             result = prepare_document(doc, search_results.json, self.precedence)
             result = [result]
             self.indexer.index(result)
+        self.indexer.commit()
 
 
 def main():

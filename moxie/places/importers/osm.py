@@ -77,7 +77,7 @@ class OSMHandler(handler.ContentHandler):
                 self.indexer.index(result)
 
     def endDocument(self):
-        pass
+        self.indexer.commit()
 
 
 def main():
