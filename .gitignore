@@ -42,3 +42,8 @@ moxie/core/static/js/foundation.js
 moxie/core/static/js/moxie.js
 # All minified js
 *.min.js
+
+.DS_Store
+
+# Symbolset files
+moxie/core/static/webfonts/
