@@ -187,12 +187,24 @@ h2 { font-size: ms(2);}
 .results-list {
 	list-style: none;
 	li {
-		border: {
-			color: #aaa;
-			width: 1px;
-			style: solid;
-		};
-		background: #f3f3e9;
+		background: #fafafa;
+		@include background(
+			// Light top, dark bottom
+			linear-gradient(top, #efefef, #f4f4f4)
+		);
+		@include box-shadow(inset 0 10px 5px rgba(255,255,255,0.4) );
+		// Correct for column margin
 		margin: 0 -15px;
+		padding: 5px;
+		border-top: 2px solid #bbb;
+		border-bottom: 1px solid $white;
+
+
+		h3 {
+			font-size: ms(2);
+			font-weight: normal;
+			padding: 0;
+			margin: 0;
+		}
 	}
 }
