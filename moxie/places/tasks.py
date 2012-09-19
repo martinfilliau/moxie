@@ -104,12 +104,13 @@ def import_all(force_update_all=False):
 
 
 @celery.task
-def import_osm(url, force_update=False):
+def import_osm(url, precedence, id_prefix=None, force_update=False):
     osm = get_resource(url, force_update)
     logger.info("OSM Downloaded - Stored here: %s" % osm)
     osm = open(osm)
     with app.app_context():
-        handler = OSMHandler(searcher, 5)
+        id_prefix = id_prefix or app.config['DEFAULT_IDENTIFIER_PREFIX']
+        handler = OSMHandler(searcher, precedence, id_prefix)
         parser = make_parser(['xml.sax.xmlreader.IncrementalParser'])
         parser.setContentHandler(handler)
         # Parse in 8k chunks
@@ -122,20 +123,23 @@ def import_osm(url, force_update=False):
 
 
 @celery.task
-def import_oxpoints(url, force_update=False):
+def import_oxpoints(url, precedence, id_prefix=None, force_update=False):
     oxpoints = get_resource(url, force_update)
     logger.info("OxPoints Downloaded - Stored here: %s" % oxpoints)
     oxpoints = open(oxpoints)
     with app.app_context():
-        importer = OxpointsImporter(searcher, 10, oxpoints)
+        id_prefix = id_prefix or app.config['DEFAULT_IDENTIFIER_PREFIX']
+        importer = OxpointsImporter(searcher, precedence, oxpoints, id_prefix)
         importer.import_data()
 
 
 @celery.task
-def import_naptan(url, force_update=False):
+def import_naptan(url, location_codes, precedence,
+        id_prefix=None, force_update=False):
     naptan = get_resource(url, force_update)
     archive = zipfile.ZipFile(open(naptan))
     f = archive.open('NaPTAN.xml')
     with app.app_context():
-        naptan_importer = NaPTANImporter(searcher, 10, f, ['340'], 'identifiers')
+        id_prefix = id_prefix or app.config['DEFAULT_IDENTIFIER_PREFIX']
+        naptan_importer = NaPTANImporter(searcher, precedence, f, location_codes, id_prefix)
         naptan_importer.run()

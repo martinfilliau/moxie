@@ -97,13 +97,16 @@ class SolrSearch(AbstractSearch):
         return self.connection(self.methods['update'], data=data,
                 params={'commit': 'true'}, headers=headers)
 
-    def search_for_ids(self, id_key, identifiers):
-        """
-        Search for documents by their identifiers (NB: this is not the unique ID used by Solr).
+    def search_for_ids(self, id_prefix, identifiers):
+        """Search for documents by their identifiers
+        NB: this is not the unique ID used by Solr
         """
         query = []
-        for id in identifiers:
-            query.append('%s:%s' % (id_key, self.solr_escape(id)))
+        for id_suffix, identifier in identifiers:
+            query.append('{prefix}{suffix}:{identifier}'.format(
+                prefix=id_prefix,
+                suffix=id_suffix,
+                identifier=identifier))
         query_string = {'q': " OR ".join(query)}
         results = self.search(query_string)
         return results
@@ -125,7 +128,3 @@ class SolrSearch(AbstractSearch):
         else:
             return requests.get(url, headers=headers,
                     params=params, timeout=self.DEFAULT_TIMEOUT)
-
-    @staticmethod
-    def solr_escape(string):
-        return string.replace(':', '\:')

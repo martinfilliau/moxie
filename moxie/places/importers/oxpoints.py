@@ -15,10 +15,10 @@ class OxpointsImporter(object):
         'oxp_hasOBNCode': 'obn',
     }
 
-    def __init__(self, indexer, precedence, oxpoints_file, identifier_key='identifiers'):
+    def __init__(self, indexer, precedence, oxpoints_file, id_prefix):
         self.indexer = indexer
         self.precedence = precedence
-        self.identifier_key = identifier_key
+        self.id_prefix = id_prefix
         self.oxpoints_file = oxpoints_file
 
     def import_data(self):
@@ -37,32 +37,30 @@ class OxpointsImporter(object):
             doc['tags'] = [oxpoints_type]
 
             ids = list()
-            ids.append('oxpoints:{0}'.format(oxpoints_id))
+            ids.append(('oxpoints', oxpoints_id))
 
             for oxp_property, identifier in self.IDENTIFIERS.items():
                 if oxp_property in datum:
+                    identifier = self.id_prefix + identifier
                     value = datum.pop(oxp_property)
                     if identifier == "osm":
                         value = value.split('/')[1]
                     if type(value) is list:
                         for val in value:
-                            ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
+                            ids.append((identifier, val.replace(' ', '-').replace('/', '-')))
                     else:
-                        ids.append('{0}:{1}'.format(identifier, value.replace(' ', '-').replace('/', '-')))
-
-            doc['identifiers'] = ids
-
+                        ids.append((identifier, value.replace(' ', '-').replace('/', '-')))
+            doc.update(dict(ids))
             if 'geo_lat' in datum and 'geo_long' in datum:
                 doc['location'] = "%s,%s" % (datum.pop('geo_long'), datum.pop('geo_lat'))
             else:
                 continue
             doc.update([('raw_oxpoints_{0}'.format(k), v) for k, v in datum.items()])
             for k, v in doc.items():
-                if type(v) not in [str, unicode] and k != self.identifier_key:
+                if type(v) not in [str, unicode]:
                     doc.pop(k)
 
-            search_results = self.indexer.search_for_ids(
-                    self.identifier_key, doc[self.identifier_key])
+            search_results = self.indexer.search_for_ids(self.id_prefix, ids)
             result = prepare_document(doc, search_results.json, self.precedence)
             result = [result]
             self.indexer.index(result)

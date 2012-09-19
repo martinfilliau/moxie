@@ -5,8 +5,8 @@
     <fields>
         <!-- Fields below are mandatory for every document -->
 
-        <!-- e.g. ID: osm:1938450 TODO: be able to search by part of ID? like naptan code-->
-        <field name="identifiers" type="string" indexed="true" stored="true" required="true" multiValued="true" />
+        <!-- e.g. id_osm:4325236543 each provider should pick an id prefix-->
+        <dynamicField name="id_*" type="string" indexed="true" stored="true" required="true" multiValued="true" />
 
         <!-- Tags eg. ['food', 'cafe', 'coffee'] -->
         <field name="tags" type="string" indexed="true" stored="true" required="false" multiValued="true" />
@@ -36,7 +36,7 @@
         <field name="location" type="location" indexed="true" stored="true" required="true" multiValued="false" />
         <dynamicField name="*_coordinate" type="tdouble" indexed="true" stored="false" />
 
-        <!-- all other fields are stored as string atm -->
+        <!-- all other fields are ignored -->
         <dynamicField name="raw_*" type="string" indexed="false" stored="false" multiValued="true" />
     </fields>
 

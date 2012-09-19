@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 
 class OSMHandler(handler.ContentHandler):
 
-    def __init__(self, indexer, precedence, identifier_key='identifiers'):
+    def __init__(self, indexer, precedence, id_prefix):
         self.indexer = indexer
         self.precedence = precedence
-        self.identifier_key = identifier_key
+        self.id_prefix = identifier_key
         self.indexed_tags = ['amenity', 'cuisine', 'shop']
 
     def startDocument(self):
