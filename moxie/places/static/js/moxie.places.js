@@ -9,33 +9,45 @@ $(document).ready(function() {
 
     map.attributionControl.setPrefix('');
 
-    $('#places-search').submit(function(ev) {
-        ev.preventDefault();
-        var form = ev.currentTarget;
+    function run_search() {
+        var form = $('#places-search');
+        var query = form.find(':input[name=q]').val();
+        var url = query ? "?"+$.param({'q': query}) : '';
         $.ajax({
-            data: $(form).serializeArray(),
+            url: url,
             dataType: 'json',
-            beforeSend: function(xhr, settings){
-                history.pushState({'results_html': $('.results-list').html()}, 'Moxie - Search', settings.url);
-            }
         }).success(function(data){
+            history.pushState({'results': data}, 'Moxie - Search', url);
             $('.results-list').html(Handlebars.templates.results(data));
             update_map_markers();
         });
+    }
+
+    $('#places-search input[name=q]').keypress(function(ev) {
+        if (ev.which == 13) {
+            ev.preventDefault();
+            run_search();
+            return false;
+        }
+    });
+
+    $('#home a').click(function(ev) {
+        ev.preventDefault();
+        window.history.back();
         return false;
     });
 
     function geo_error(error)
     {
         // TODO: How do we want to handle being unable to get user location data.
-        $('#places-search').submit();
         alert("Could not access your location.");
+        run_search();
     }
     function handle_geolocation_query(position){
         $('#places-search input[name=lat]').val(position.coords.latitude);
         $('#places-search input[name=lon]').val(position.coords.longitude);
+        run_search();
         var you = new L.LatLng($('#places-search input[name=lat]').val(), $('#places-search input[name=lon]').val());
-        $('#places-search').submit();
         L.marker(you, {'title': "You are here."}).addTo(map);
         map.panTo(you);
     }
@@ -43,19 +55,24 @@ $(document).ready(function() {
         // Watch the location using high accuracy. Allow results from within the last minute times out after 20secs
         var wpid = navigator.geolocation.watchPosition(handle_geolocation_query, geo_error, {enableHighAccuracy:true, maximumAge:60000, timeout:20000});
     }
+    var markers = [];
     function update_map_markers(){
+        $.each(markers, function(index) {
+            map.removeLayer(this);
+        });
         $('.results-list li').each(function(index) {
-            L.marker(new L.LatLng($(this).data('lat'), $(this).data('lon')),
-                {'title': $(this).find('h3').text()}
-                ).addTo(map);
+            var marker = L.marker(new L.LatLng($(this).data('lat'), $(this).data('lon')), {'title': $(this).find('h3').text()});
+            marker.addTo(map);
+            markers.push(marker);
         });
     }
     initiate_geolocation();
     update_map_markers();
     window.onpopstate = function(event) {
         if (event.state) {
-            console.log(event);
-            $('.results-list').html(event.state['results_html']);
+            $('.results-list').html(Handlebars.templates.results(event.state.results));
+            $('#places-search input[name=q]').val(event.state.results.query);
+            update_map_markers();
         }
     }
 });
