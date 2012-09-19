@@ -1,13 +1,10 @@
-from flask import request, render_template
+from flask import request, render_template, jsonify, current_app
 from moxie.core.views import ServiceView, accepts
 from moxie.core.search import searcher
 
 
 class Search(ServiceView):
     methods = ['GET']
-
-    def __init__(self, *args, **kwargs):
-        super(Search, self).__init__(*args, **kwargs)
 
     def format_results(self, query, results):
         out = []
@@ -29,14 +26,22 @@ class Search(ServiceView):
             results = self.get_results(new_query, location)
         return self.format_results(query, results.json)
 
-    def handle_request(self):
+    @accepts('application/json')
+    def as_json(self, response):
         if not request.args:
             # No search q and no location
             return dict()
         query = request.args.get('q', '*')
+        if not query:
+            query = '*'
         location = request.args.get('lat', None), request.args.get('lon', None)
-        return self.get_results(query, location)
+        response.update(self.get_results(query, location))
+        return jsonify(response)
 
     @accepts('text/html')
     def as_html(self, response):
+        response['query'] = request.args.get('q', '')
+        lat, lon = current_app.config['DEFAULT_LOCATION']
+        response['lat'] = request.args.get('lat', lat)
+        response['lon'] = request.args.get('lon', lon)
         return render_template('places/search.html', **response)
