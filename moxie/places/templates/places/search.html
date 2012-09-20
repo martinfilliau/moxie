@@ -5,19 +5,13 @@
         <div id="list-bar">
             <form id="places-search">
                 <input type="text" placeholder="Places search" name="q" value="{{ query }}">
-                <input type="hidden" name="lat" value="51.7531">
-                <input type="hidden" name="lon" value="-1.2584">
+                <input type="hidden" name="lat" value="{{ lat }}">
+                <input type="hidden" name="lon" value="{{ lon }}">
                 <input type="submit">
                 <span class="deleteicon ss-icon">delete</span>
             </form>
             <h2>Results near <span >here</span></h2>
             <ul class="results-list">
-                {% for result in results %}
-                <li data-lon={{ result.lon }} data-lat={{ result.lat }}>
-                <h3>{{ result.name }}</h3>
-                <p class="metadata">{{ result.distance }}km away.</p>
-                </li>
-                {% endfor %}
             </ul>
         </div>
 {% endblock %}
