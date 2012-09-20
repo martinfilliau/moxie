@@ -17,6 +17,7 @@ class Search(ServiceView):
                 'lat': lat,
                 'distance': doc['_dist_'],
                 'opening_hours': doc.get('opening_hours', ''),
+                'address': doc.get('address', ''),
                 })
         return {'query': query, 'results': out}
 
