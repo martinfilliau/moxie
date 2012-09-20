@@ -130,7 +130,13 @@ ul#navbar {
 	}
 	
 
-	#places-search {
+	#list-bar {
+		@include column(4);
+		@include pull(8);
+		@include respondTo(smallScreen) {
+			right: auto;
+			width: auto !important; float: none;
+		}
 		margin: 0;
 		position: relative;
 		input {
@@ -141,8 +147,8 @@ ul#navbar {
 			display: block;
 			line-height: 9px;
 			position: absolute;
-			right: 5px;
-			top: 9px;
+			right: 20px;
+			top: 15px;
 			padding: 4px 4px 2px 4px;
 			border-radius: 30px;
 			font-size: 9px;
@@ -153,8 +159,8 @@ ul#navbar {
 	}
 
 	#map {
-		@include column(7);
-		@include push(5);
+		@include column(8);
+		@include push(4);
 		height: 100%;
 		border-top: $grayBorder;
 		border-bottom: $grayBorder;
@@ -169,15 +175,6 @@ ul#navbar {
                 display: none;
             }
         }
-	}
-
-	#list-bar {
-		@include column(5);
-		@include pull(7);
-		@include respondTo(smallScreen) {
-			right: auto;
-			width: auto !important; float: none;
-		}
 	}
 }
 
