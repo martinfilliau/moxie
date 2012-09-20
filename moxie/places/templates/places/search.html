@@ -3,13 +3,8 @@
 {% block content %}
         <div id="map"></div>
         <div id="list-bar">
-            <form id="places-search">
-                <input type="text" placeholder="Places search" name="q" value="{{ query }}">
-                <input type="hidden" name="lat" value="{{ lat }}">
-                <input type="hidden" name="lon" value="{{ lon }}">
-                <input type="submit">
-                <span class="deleteicon ss-icon">delete</span>
-            </form>
+            <input type="text" placeholder="Places search" name="q" value="{{ query }}">
+            <span class="deleteicon ss-icon">delete</span>
             <h2>Results near <span >here</span></h2>
             <ul class="results-list">
             </ul>
