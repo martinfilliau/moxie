@@ -8,8 +8,11 @@
         <!-- e.g. ID: osm:1938450 TODO: be able to search by part of ID? like naptan code-->
         <field name="identifiers" type="string" indexed="true" stored="true" required="true" multiValued="true" />
 
-        <!-- Tags eg. ['food', 'cafe', 'coffee'] -->
+        <!-- Tags eg. ['pizza', 'italian'] -->
         <field name="tags" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+
+        <!-- Type of POI e.g. "/amenity/places-to-eat/restaurant" -->
+        <field name="type" type="text_path" indexed="true" stored="true" required="true" multiValued="true" />
 
         <!-- Unique ID - Generated UUID by Solr, if not provided then generated as using "NEW" -->
         <field name="id" type="uuid" indexed="true" stored="true"/>
@@ -164,6 +167,13 @@
               </analyzer>
             </fieldType>
 
+            <!-- Store a hierarchy e.g. /transport/bus-stop -->
+            <!-- TODO see http://stackoverflow.com/questions/6920506/solr-pathhierarchytokenizerfactory-facet-query -->
+            <fieldType name="text_path" class="solr.TextField" positionIncrementGap="100">
+                <analyzer>
+                    <tokenizer class="solr.PathHierarchyTokenizerFactory" delimiter="/" replace="/"/>
+                </analyzer>
+            </fieldType>
     </types>
 
 </schema>

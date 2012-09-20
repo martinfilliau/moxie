@@ -5,7 +5,7 @@
         <div id="list-bar">
             <input type="text" placeholder="Places search" name="q" value="{{ query }}">
             <span class="deleteicon ss-icon">delete</span>
-            <h2>Results near <span >here</span></h2>
+            <h5>Results near <span >here</span></h5>
             <ul class="results-list">
             </ul>
         </div>
@@ -21,4 +21,5 @@
 <script src="{{ url_for('places.static', filename='js/moxie.places.min.js') }}"></script> 
 <script src="{{ url_for('places.static', filename='js/moxie.places.templates.min.js') }}"></script> 
 {% endif %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/time_domain.js') }}"></script>
 {% endblock %}
