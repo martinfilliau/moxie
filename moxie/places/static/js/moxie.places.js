@@ -53,7 +53,7 @@ $(document).ready(function() {
     function handle_geolocation_query(position){
         user_position = [position.coords.latitude, position.coords.longitude];
         var you = new L.LatLng(position.coords.latitude, position.coords.longitude)
-        L.marker(you, {'title': "You are here."}).addTo(map);
+        L.circle(you, 10, {color: 'red', fillColor: 'red', fillOpacity: 1.0}).addTo(map)
         map.panTo(you);
         run_search();
     }
@@ -78,6 +78,7 @@ $(document).ready(function() {
             markers.push(marker);
         });
         var bounds = new L.LatLngBounds(latlngs);
+        bounds.extend(user_position);
         bounds.pad(5);
         map.fitBounds(bounds);
     }
