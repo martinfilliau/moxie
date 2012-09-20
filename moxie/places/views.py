@@ -28,11 +28,20 @@ class Search(ServiceView):
             results = self.get_results(new_query, location)
         return self.format_results(original_query, results.json)
 
+    def handle_request(self):
+        response = dict()
+        if 'Geo-Position' in request.headers:
+            response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
+        return response
+
     @accepts('application/json')
     def as_json(self, response):
         query = request.args.get('q', None)
-        default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
-        location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
+        if 'lat' in response and 'lon' in response:
+            location = response['lat'], response['lon']
+        else:
+            default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
+            location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         response.update(self.get_results(query, location))
         return jsonify(response)
 
