@@ -11,6 +11,7 @@
         </div>
 {% endblock %}
 {% block js %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/time_domain.js') }}"></script>
 {% if config['DEBUG'] %}
 <!-- Places non-minified JS -->
 {% import 'handlebars.html' as handlebars with context %}
@@ -21,5 +22,4 @@
 <script src="{{ url_for('places.static', filename='js/moxie.places.min.js') }}"></script> 
 <script src="{{ url_for('places.static', filename='js/moxie.places.templates.min.js') }}"></script> 
 {% endif %}
-<script type="text/javascript" src="{{ url_for('static', filename='js/time_domain.js') }}"></script>
 {% endblock %}
