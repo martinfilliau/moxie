@@ -87,4 +87,13 @@ $(document).ready(function() {
             return " (closed)";
         }
     });
+
+    Handlebars.registerHelper('humaniseDistance', function(distance) {
+        distance = parseFloat(distance);
+        if(distance >= 1.0) {
+            return Math.round(distance*10)/10 + " km";
+        } else {
+            return Math.round(distance*1000) + " m";
+        }
+    });
 });
