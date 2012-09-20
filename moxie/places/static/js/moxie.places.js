@@ -75,4 +75,16 @@ $(document).ready(function() {
             update_map_markers();
         }
     }
+
+    Handlebars.registerHelper('openingHours', function(string) {
+        if(string === "") {
+            return ""
+        }
+        result = TimeDomain.evaluateInTime(string);
+        if(result.value === true) {
+            return " (open)";
+        } else {
+            return " (closed)";
+        }
+    });
 });
