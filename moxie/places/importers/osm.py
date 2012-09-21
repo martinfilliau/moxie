@@ -69,6 +69,15 @@ class OSMHandler(handler.ContentHandler):
             address = "{0} {1} {2} {3}".format(self.tags.get("addr:housename", ""), self.tags.get("addr:housenumber", ""),
                 self.tags.get("addr:street", ""), self.tags.get("addr:postcode", ""))
             result['address'] = " ".join(address.split())
+
+            # TODO handle formatting of phone numbers(?)
+            # TODO handle multiple phone numbers(?) (seems to be separated by a "/" in OSM.
+            if 'phone' in self.tags:
+                result['phone'] = self.tags['phone']
+
+            if 'website' in self.tags:
+                result['website'] = self.tags['website']
+
             if 'opening_hours' in self.tags:
                 result['opening_hours'] = self.tags['opening_hours']
             if result['name']:

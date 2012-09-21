@@ -35,6 +35,7 @@ class OxpointsImporter(object):
 
             oxpoints_type = datum.get('type', '').rsplit('#')[-1]
             doc['tags'] = [oxpoints_type]
+            doc['type'] = "/university/{0}".format(oxpoints_type)
 
             ids = list()
             ids.append('oxpoints:{0}'.format(oxpoints_id))
@@ -66,6 +67,14 @@ class OxpointsImporter(object):
             result = prepare_document(doc, search_results.json, self.precedence)
             result = [result]
             self.indexer.index(result)
+
+
+
+            "vCard_postal-code":"OX2 6JF",
+"vCard_locality":"Oxford",
+"vCard_extended-address":"St Antony's College",
+"vCard_street-address":"62 Woodstock Road"},
+
         self.indexer.commit()
 
 

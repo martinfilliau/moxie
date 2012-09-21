@@ -1,0 +1,95 @@
+university:
+    name_singular: University
+    name_plural: Universities
+    types:
+        building:
+        college:
+        library:
+        unit:
+        university-library:
+amenities:
+    name_singular: Amenity
+    name_plural: Amenities
+    types:
+        bank:
+          name_singular: Bank
+          name_plural: Banks
+        bar:
+          name_singular: Bar
+          name_plural: Bars
+        cafe:
+          name_singular: Café
+          name_plural: Cafés
+        health:
+          name_singular: Place relating to health
+          name_plural: Places relating to health
+          types:
+            pharmacy:
+              name_singular: Pharmacy
+              name_plural: Pharmacies
+            doctor:
+              name_singular: Doctor
+              name_plural: Doctors
+            hospital:
+              name_singular: Hospital
+              name_plural: Hospitals
+        places-to-eat:
+          name_singular: Place to eat
+          name_plural: Places to eat
+          types:
+            pub:
+              name_singular: Pub
+              name_plural: Pub
+            cafe:
+              name_singular: Café
+              name_plural: Cafés
+            restaurant:
+              name_singular: Restaurant
+              name_plural: Restaurants
+            ice-cream-cafe:
+              name_singular: Ice cream café
+              name_plural: Ice cream cafés
+            bar:
+              name_singular: Bar
+              name_plural: Bars
+            fast-food:
+              name_singular: Fast food
+              name_plural: Fast foods
+        post-office:
+            name_singular: Post office
+            name_plural: Post offices
+        pub:
+            name_singular: Pub
+            name_plural: Pubs
+        public-library:
+        recycling-facility:
+        shop:
+transport:
+    name_singular: Transport
+    name_plural: Transports
+    types:
+        bus-stop:
+          name_singular: Bus stop
+          name_plural: Bus stops
+        stop-area:
+          name_singular: Bus stop area
+          name_plural: Bus stop areas
+        car-park:
+          name_singular: Car park
+          name_plural: Car parks
+        park-and-ride:
+          name_singular: Park and Ride
+          name_plural: Park and Rides
+        taxi-rank:
+          name_singular: Taxi rank
+          name_plural: Taxi ranks
+leisure:
+    name_singular: Leisure
+    types:
+      cinema:
+      museum:
+      park:
+      sport:
+      punt:
+      swimming-pool:
+      theatre:

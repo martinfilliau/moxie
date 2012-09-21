@@ -76,7 +76,7 @@ class NaptanXMLHandler(ContentHandler):
                     sa.pop('Location_Translation_Latitude'))
             data['location'] = "%s,%s" % (lon, lat)
             data['name'] = sa['Name']
-            data['tags'] = ['bus stop area']
+            data['type'] = "/transport/bus-stop-area"
             data['id'] = str(uuid.uuid1())
             self.stop_areas[sa['StopAreaCode']] = data
 
@@ -97,7 +97,7 @@ class NaptanXMLHandler(ContentHandler):
                 data['name'] = "%s %s" % (indicator, sp['Descriptor_CommonName'])
             else:
                 data['name'] = sp['Descriptor_CommonName']
-            data['tags'] = ['bus stop']
+            data['type'] = "/transport/bus-stop"
             data['id'] = str(uuid.uuid1())
             self.stop_points[sp['AtcoCode']] = data
 
