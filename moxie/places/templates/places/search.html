@@ -3,19 +3,15 @@
 {% block content %}
         <div id="map"></div>
         <div id="list-bar">
-            <form id="places-search">
-                <input type="text" placeholder="Places search" name="q" value="{{ query }}">
-                <input type="hidden" name="lat" value="{{ lat }}">
-                <input type="hidden" name="lon" value="{{ lon }}">
-                <!--<input type="submit">-->
-                <span class="deleteicon ss-icon">delete</span>
-            </form>
-            <!--<h2>Results near <span >here</span></h2>-->
+            <input type="text" placeholder="Places search" name="q" value="{{ query }}">
+            <span class="deleteicon ss-icon">delete</span>
+            <h5>Results near <span >here</span></h5>
             <ul class="results-list">
             </ul>
         </div>
 {% endblock %}
 {% block js %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/time_domain.js') }}"></script>
 {% if config['DEBUG'] %}
 <!-- Places non-minified JS -->
 {% import 'handlebars.html' as handlebars with context %}
@@ -26,5 +22,4 @@
 <script src="{{ url_for('places.static', filename='js/moxie.places.min.js') }}"></script> 
 <script src="{{ url_for('places.static', filename='js/moxie.places.templates.min.js') }}"></script> 
 {% endif %}
-<script type="text/javascript" src="{{ url_for('static', filename='js/time_domain.js') }}"></script>
 {% endblock %}
