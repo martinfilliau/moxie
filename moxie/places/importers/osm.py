@@ -71,6 +71,7 @@ class OSMHandler(handler.ContentHandler):
             # For example, post boxes and car parks.
             result['name'] = self.tags.get('name', self.tags.get('operator', None))
 
+            # TODO deal with unicode
             try:
                 address = "{0} {1} {2} {3}".format(self.tags.get("addr:housename", ""), self.tags.get("addr:housenumber", ""),
                     self.tags.get("addr:street", ""), self.tags.get("addr:postcode", ""))
