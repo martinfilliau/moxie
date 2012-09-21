@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 
 from xml.sax import handler
@@ -12,7 +13,10 @@ class OSMHandler(handler.ContentHandler):
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
+        # k/v from OSM that we want to import in our "tags"
         self.indexed_tags = ['amenity', 'cuisine', 'shop']
+        # We only import element that have one of these key
+        self.element_tags = ['amenity', 'shop', 'naptan:AtcoCode']
 
     def startDocument(self):
         self.tags = {}
@@ -50,52 +54,59 @@ class OSMHandler(handler.ContentHandler):
                 min_ = min(min_[0], lon), min(min_[1], lat)
                 max_ = max(max_[0], lon), max(max_[1], lat)
             location = (min_[0] + max_[0]) / 2, (min_[1] + max_[1]) / 2
-        if element_type in ['way', 'node'] and any([x in self.tags for x in ['amenity', 'naptan:AtcoCode']]):
-            result = dict([('raw_osm_%s' % k, v) for k, v in self.tags.items()])
-            result['raw_osm_type'] = element_type
-            result['raw_osm_version'] = self.attrs['version']
-            result[self.identifier_key] = ['osm:%s' % self.id]
-            atco = self.tags.get('naptan:AtcoCode', None)
-            if atco:
-                result[self.identifier_key].append('atco:%s' % atco)
-            result['tags'] = []
-            for it in self.indexed_tags:
-                doc_tags = [t.replace('_', ' ').strip() for t in self.tags.get(it, '').split(';')]
-                if doc_tags and doc_tags != ['']:
-                    result['tags'].extend(doc_tags)
-            if "amenity" in self.tags:
-                result["type"] = "/amenity/{0}".format(self.tags.get("amenity").replace(" ", "-"))
-            else:
-                result["type"] = "/other"
-            # Some ameneties do not have names, this is correct behaviour.
-            # For example, post boxes and car parks.
-            result['name'] = self.tags.get('name', self.tags.get('operator', None))
+        try:
+            if self.tags.get('life_cycle', 'in_use') != 'in_use' or self.tags.get('disused') in ('1', 'yes', 'true'):
+                return
 
-            # TODO deal with unicode
-            try:
+            if element_type in ['way', 'node'] and any([x in self.tags for x in self.element_tags]):
+                result = dict([('raw_osm_%s' % k, v) for k, v in self.tags.items()])
+                result['raw_osm_type'] = element_type
+                result['raw_osm_version'] = self.attrs['version']
+
+                result[self.identifier_key] = ['osm:%s' % self.id]
+                atco = self.tags.get('naptan:AtcoCode', None)
+                if atco:
+                    result[self.identifier_key].append('atco:%s' % atco)
+
+                result['tags'] = []
+                for it in self.indexed_tags:
+                    doc_tags = [t.replace('_', ' ').strip() for t in self.tags.get(it, '').split(';')]
+                    if doc_tags and doc_tags != ['']:
+                        result['tags'].extend(doc_tags)
+
+                if "amenity" in self.tags:
+                    result["type"] = "/amenity/{0}".format(self.tags.get("amenity").replace(" ", "-"))
+                else:
+                    result["type"] = "/other"
+
+                name = self.tags.get('name', self.tags.get('operator', None))
+                if name is None:
+                    name = u"↝ %f, %f" % location
+                result['name'] = name
+
                 address = "{0} {1} {2} {3}".format(self.tags.get("addr:housename", ""), self.tags.get("addr:housenumber", ""),
-                    self.tags.get("addr:street", ""), self.tags.get("addr:postcode", ""))
+                        self.tags.get("addr:street", ""), self.tags.get("addr:postcode", ""))
                 result['address'] = " ".join(address.split())
-            except Exception as e:
-                logger.warning("Couldn't format address", e)
 
-            # TODO handle formatting of phone numbers(?)
-            # TODO handle multiple phone numbers(?) (seems to be separated by a "/" in OSM.
-            if 'phone' in self.tags:
-                result['phone'] = self.tags['phone']
+                # TODO handle formatting of phone numbers(?)
+                # TODO handle multiple phone numbers(?) (seems to be separated by a "/" in OSM.
+                if 'phone' in self.tags:
+                    result['phone'] = self.tags['phone']
 
-            if 'website' in self.tags:
-                result['website'] = self.tags['website']
+                if 'website' in self.tags:
+                    result['website'] = self.tags['website']
 
-            if 'opening_hours' in self.tags:
-                result['opening_hours'] = self.tags['opening_hours']
-            if result['name']:
+                if 'opening_hours' in self.tags:
+                    result['opening_hours'] = self.tags['opening_hours']
+
                 result['location'] = "%s,%s" % location
                 search_results = self.indexer.search_for_ids(
                         self.identifier_key, result[self.identifier_key])
                 result = prepare_document(result, search_results.json, self.precedence)
                 result = [result]
                 self.indexer.index(result)
+        except Exception as e:
+            logger.warning("Couldn't index a POI: " + e, exc_info=True)
 
     def endDocument(self):
         self.indexer.commit()

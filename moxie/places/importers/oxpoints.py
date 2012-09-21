@@ -18,6 +18,25 @@ class OxpointsImporter(object):
         'oxp_hasOBNCode': 'obn',
     }
 
+    # Alignment between OxPoints types we want to store and our hierarchy of types
+    OXPOINTS_TYPES = {
+        'College': '/university/college',
+        'Department': '/university/department',
+        'Carpark': '/transport/car-park',   # TODO should it be different?
+        'Room': '/university/room',
+        'Library': '/university/library',
+        'SubLibrary': '/university/library/sub-library',
+        'Museum': '/leisure/museum',
+        'Building': '/university/building',
+        'Unit': '/university/unit',
+        'Faculty': '/university/faculty',
+        'Division': '/university/division',
+        'University': '/university',
+        'Space': '/university/space',
+        'Site': '/university/site',
+        'Hall': '/university/hall',
+    }
+
     def __init__(self, indexer, precedence, oxpoints_file, identifier_key='identifiers'):
         self.indexer = indexer
         self.precedence = precedence
@@ -30,7 +49,7 @@ class OxpointsImporter(object):
             try:
                 self.process_datum(datum)
             except Exception as e:
-                logger.warning("Couldn't process an item", e)
+                logger.warning("Couldn't process an item: " + e, exc_info=True)
         self.indexer.commit()
 
     def process_datum(self, datum):
@@ -38,18 +57,25 @@ class OxpointsImporter(object):
         Process a single OxPoint
         @param datum: dict with item
         """
-        name = datum.get('oxp_fullyQualifiedTitle', datum.get('dc_title', ''))
-        if not name:
-            pass
+
         oxpoints_id = datum['uri'].rsplit('/')[-1]
-        if datum.get('type', '') == 'http://xmlns.com/foaf/0.1/Image' or oxpoints_id.endswith('.jpg'):
-            pass
+        oxpoints_type = datum['type'].rsplit('#')[-1]
+        name = datum.get('oxp_fullyQualifiedTitle', datum.get('dc_title', ''))
+
+        if not oxpoints_type in self.OXPOINTS_TYPES:
+            return
+
+        if not name:
+            return
+
         doc = dict()
         doc['name'] = name
+        doc['type'] = self.OXPOINTS_TYPES.get(oxpoints_type, '/other')
 
-        oxpoints_type = datum.get('type', '').rsplit('#')[-1]
-        doc['tags'] = [oxpoints_type]
-        doc['type'] = "/university/{0}".format(oxpoints_type)
+        if 'geo_lat' in datum and 'geo_long' in datum:
+            doc['location'] = "%s,%s" % (datum.pop('geo_long'), datum.pop('geo_lat'))
+        else:
+            return
 
         ids = list()
         ids.append('oxpoints:{0}'.format(oxpoints_id))
@@ -80,11 +106,8 @@ class OxpointsImporter(object):
         if 'foaf_homepage' in datum:
             doc['website'] = datum['foaf_homepage']
 
-        if 'geo_lat' in datum and 'geo_long' in datum:
-            doc['location'] = "%s,%s" % (datum.pop('geo_long'), datum.pop('geo_lat'))
-        else:
-            pass
         doc.update([('raw_oxpoints_{0}'.format(k), v) for k, v in datum.items()])
+
         for k, v in doc.items():
             if type(v) not in [str, unicode] and k != self.identifier_key:
                 doc.pop(k)
