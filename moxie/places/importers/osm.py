@@ -63,12 +63,20 @@ class OSMHandler(handler.ContentHandler):
                 doc_tags = [t.replace('_', ' ').strip() for t in self.tags.get(it, '').split(';')]
                 if doc_tags and doc_tags != ['']:
                     result['tags'].extend(doc_tags)
+            if "amenity" in self.tags:
+                result["type"] = "/amenity/{0}".format(self.tags.get("amenity").replace(" ", "-"))
+            else:
+                result["type"] = "/other"
             # Some ameneties do not have names, this is correct behaviour.
             # For example, post boxes and car parks.
             result['name'] = self.tags.get('name', self.tags.get('operator', None))
-            address = "{0} {1} {2} {3}".format(self.tags.get("addr:housename", ""), self.tags.get("addr:housenumber", ""),
-                self.tags.get("addr:street", ""), self.tags.get("addr:postcode", ""))
-            result['address'] = " ".join(address.split())
+
+            try:
+                address = "{0} {1} {2} {3}".format(self.tags.get("addr:housename", ""), self.tags.get("addr:housenumber", ""),
+                    self.tags.get("addr:street", ""), self.tags.get("addr:postcode", ""))
+                result['address'] = " ".join(address.split())
+            except Exception as e:
+                logger.warning("Couldn't format address", e)
 
             # TODO handle formatting of phone numbers(?)
             # TODO handle multiple phone numbers(?) (seems to be separated by a "/" in OSM.
