@@ -3,10 +3,21 @@ university:
     name_plural: Universities
     types:
         building:
+          name_singular: Building
+          name_plural: Buildings
         college:
+          name_singular: College
+          name_plural: Colleges
         library:
+          name_singular: Library
+          name_plural: Librairies
+          types:
+            sub-library:
+              name_singular: Sub-library
+              name_plural: Sub-librairies
         unit:
-        university-library:
+          name_singular: Unit
+          name_plural: Units
 amenities:
     name_singular: Amenity
     name_plural: Amenities
@@ -62,8 +73,14 @@ amenities:
             name_singular: Pub
             name_plural: Pubs
         public-library:
+            name_singular: Public library
+            name_plural: Public libraries
         recycling-facility:
+            name_singular: Recycling facility
+            name_plural: Recycling facilities
         shop:
+            name_singular: Shop
+            name_plural: Shops
 transport:
     name_singular: Transport
     name_plural: Transports
@@ -85,11 +102,26 @@ transport:
           name_plural: Taxi ranks
 leisure:
     name_singular: Leisure
+    name_plural: Leisure
     types:
       cinema:
+        name_singular: Cinema
+        name_plural: Cinemas
       museum:
+        name_singular: Museum
+        name_plural: Museums
       park:
+        name_singular: Park
+        name_plural: Parks
       sport:
+        name_singular: Sport
+        name_plural: Sports
       punt:
+        name_singular: Punt hire
+        name_plural: Punt hire
       swimming-pool:
+        name_singular: Swimming pool
+        name_plural: Swimming pools
       theatre:
+        name_singular: Theatre
+        name_plural: Theatres
