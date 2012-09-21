@@ -26,7 +26,10 @@
         <!-- e.g. "Oxford University Computing Services" -->
         <field name="name" type="text_en_splitting" indexed="true" stored="true" required="true" />
 
+        <!-- Address / phone / website (vCard like) properties for POIs -->
         <field name="address" type="string" stored="true" indexed="false" required="false" multiValued="false" />
+        <field name="phone" type="string" stored="true" indexed="false" required="false" multiValued="false" />
+        <field name="website" type="string" stored="true" indexed="false" required="false" multiValued="false" />
 
         <!-- Unique ID of parent(s) of the present document -->
         <field name="child_of" type="uuid" indexed="true" stored="true" multiValued="true" />
