@@ -1,4 +1,7 @@
 import yaml
+import logging
+
+logger = logging.getLogger(__name__)
 
 #TODO managed keys should come from the configuration files
 managed_keys = ['name', 'location']
@@ -11,6 +14,22 @@ class ACIDException(Exception):
 
 
 def prepare_document(doc, results, precedence):
+    """
+    Prepare a document to be inserted in a datastore
+    @param doc: doc to be inserted
+    @param results: results of the search concerning this doc
+    @param precedence: precedence to be applied depending on importers
+    @return: document updated to fill
+    """
+    # TODO this function shouldn't be called by importers but should be part of the import process at a lower level
+
+    # Add the "friendly" name of the type to the full-text search field
+    try:
+        doc['fts'] = find_type_name(doc["type"])
+    except KeyError:
+        logger.warning("Couldn't find name for type '{0}'.".format(doc["type"]))
+
+    # Attempt to merge documents
     if len(results['response']['docs']) == 0:
         doc[precedence_key] = precedence
         return doc
