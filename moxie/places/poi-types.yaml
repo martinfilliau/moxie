@@ -22,6 +22,9 @@ amenities:
     name_singular: Amenity
     name_plural: Amenities
     types:
+        atm:
+          name_singular: ATM
+          name_plural: ATMs
         bank:
           name_singular: Bank
           name_plural: Banks
