@@ -1,6 +1,7 @@
 from flask import request, render_template, jsonify, current_app
 from moxie.core.views import ServiceView, accepts
 from moxie.core.search import searcher
+from moxie.places.importers.helpers import find_type_name
 
 
 class Search(ServiceView):
@@ -20,6 +21,7 @@ class Search(ServiceView):
                 'address': doc.get('address', ''),
                 'website': doc.get('website', ''),
                 'phone': doc.get('phone', ''),
+                'type': find_type_name(doc.get('type')[0])
                 })
         return {'query': query, 'results': out}
 
