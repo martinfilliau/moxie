@@ -25,14 +25,34 @@ def find_type_name(type_path, singular=True):
     Find the name of the type from its path
     @param type_path: a path e.g. /transport/bus-stop
     @param singular: optional parameter whether it should be a singular or plural name
-    @return: name (singular or plural)
+    @return: name (singular or plural) (e.g. "Bus stop")
     """
-    f = open("moxie/places/poi-types.yaml")
-    data = yaml.load(f)
-    f.close()
-    for part in type_path.split("/"):
-        data.get(part)
+    # TODO path of yaml file has to be configurable
+    data = yaml.load(open("moxie/places/poi-types.yaml"))
+    to_find = type_path.split("/")[-1]
+    node = find_type(data, type_path, to_find, 1)
+    if singular:
+        return node["name_singular"]
+    else:
+        return node["name_plural"]
 
+
+def find_type(data, path, to_find, count):
+    """
+    Recursive function used by find_type_name to find a node in a tree
+    @param data: dictionary to use
+    @param path: path to traverse in the dictionary
+    @param to_find: actual node to find
+    @param count: current part of the path
+    @return: dictionary
+    """
+    part = path.split("/")[count]
+    if part == to_find:
+        return data[part]
+    else:
+        count += 1
+        if 'types' in data[part]:
+            return find_type(data[part]["types"], path, to_find, count)
 
 
 def merge_docs(current_doc, new_doc, new_precedence):

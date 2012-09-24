@@ -1,6 +1,6 @@
 import unittest
 
-from moxie.places.importers.helpers import merge_docs, merge_keys, merge_values
+from moxie.places.importers.helpers import merge_docs, merge_keys, merge_values, find_type_name
 
 
 class HelpersTestCase(unittest.TestCase):
@@ -62,3 +62,9 @@ class HelpersTestCase(unittest.TestCase):
         b = ['a', 'b', 'c', 3]
         merged = merge_values(a, b)
         self.assertEqual(set([1, 2, 3, 'a', 'b', 'c']), set(merged))
+
+    def test_find_type_name(self):
+        self.assertEqual("University car park", find_type_name("/transport/car-park/university"))
+        self.assertEqual("Transport", find_type_name("/transport"))
+        self.assertEqual("Car park", find_type_name("/transport/car-park"))
+        self.assertEqual("Book shops", find_type_name("/amenities/shop/book", singular=False))
