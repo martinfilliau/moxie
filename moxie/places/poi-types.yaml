@@ -81,6 +81,22 @@ amenities:
         shop:
             name_singular: Shop
             name_plural: Shops
+            types:
+              bicycle:
+                name_singular: Bicycle shop
+                name_plural: Bicycle shops
+              supermarket:
+                name_singular: Supermarket
+                name_plural: Supermarkets
+              convenience:
+                name_singular: Convenience store
+                name_plural: Convenience stores
+              hairdresser:
+                name_singular: Hairdresser
+                name_plural: Hairdressers
+              book:
+                name_singular: Book shop
+                name_plural: Book shops
 transport:
     name_singular: Transport
     name_plural: Transports
@@ -94,12 +110,16 @@ transport:
         car-park:
           name_singular: Car park
           name_plural: Car parks
-        park-and-ride:
-          name_singular: Park and Ride
-          name_plural: Park and Rides
+          types:
+            park-and-ride:
+              name_singular: Park and Ride
+              name_plural: Park and Rides
         taxi-rank:
           name_singular: Taxi rank
           name_plural: Taxi ranks
+        bicycle-parking:
+          name_singular: Bicycle parking
+          name_plural: Bicycle parkings
 leisure:
     name_singular: Leisure
     name_plural: Leisure
