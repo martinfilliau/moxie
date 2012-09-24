@@ -44,6 +44,9 @@ amenities:
             doctor:
               name_singular: Doctor
               name_plural: Doctors
+            dentist:
+              name_singular: Dentist
+              name_plural: Dentists
             hospital:
               name_singular: Hospital
               name_plural: Hospitals
@@ -72,6 +75,9 @@ amenities:
         post-office:
             name_singular: Post office
             name_plural: Post offices
+        post-box:
+            name_singular: Post box
+            name_plural: Post boxes
         pub:
             name_singular: Pub
             name_plural: Pubs

@@ -7,6 +7,37 @@ from moxie.places.importers.helpers import prepare_document
 logger = logging.getLogger(__name__)
 
 
+SHOPS = { 'supermarket': '/amenities/shop/supermarket',
+          'bicycle': '/amenities/shop/bicycle',
+          'convenience': '/amenities/shop/convenience',
+          'hairdresser': '/amenities/shop/hairdresser',
+          'book': '/amenities/shop/book',
+          }
+
+AMENITIES = { 'atm': '/amenities/atm',
+              'bank': '/amenities/bank',
+              'bar': '/amenities/bar',
+              'bicycle_parking': '/transport/bicycle-parking',
+              'cafe': '/amenities/cafe',  # TODO food=yes?
+              'cinema': '/leisure/cinema',
+              'dentist': '/amenities/dentist',
+              'doctors': '/amenities/health/doctor',
+              'fast_food': '/amenities/places-to-eat/fast-food',
+              'hospital': '/amenities/health/hospital',
+              'library': '/amenities/public-library', # TODO is it?
+              'parking': '/amenities/car-park',
+              'pharmacy': '/amenities/health/pharmacy',
+              'post_box': '/amenities/post-box',
+              'post_office': '/amenities/post-office',
+              'pub': '/amenities/pub',
+              'recycling': '/amenities/recycling-facility',
+              'restaurant': '/amenities/places-to-eat/restaurant',
+              'swimming_pool': '/leisure/swimming-pool',
+              'taxi': '/transport/taxi-rank',
+              'theatre': '/leisure/theatre',
+              'waste_basket': '/amenities/recycling-facility',
+              }
+
 class OSMHandler(handler.ContentHandler):
 
     def __init__(self, indexer, precedence, identifier_key='identifiers'):
@@ -14,7 +45,7 @@ class OSMHandler(handler.ContentHandler):
         self.precedence = precedence
         self.identifier_key = identifier_key
         # k/v from OSM that we want to import in our "tags"
-        self.indexed_tags = ['amenity', 'cuisine', 'shop']
+        self.indexed_tags = ['cuisine',]
         # We only import element that have one of these key
         self.element_tags = ['amenity', 'shop', 'naptan:AtcoCode']
 
@@ -74,10 +105,19 @@ class OSMHandler(handler.ContentHandler):
                     if doc_tags and doc_tags != ['']:
                         result['tags'].extend(doc_tags)
 
-                if "amenity" in self.tags:
-                    result["type"] = "/amenity/{0}".format(self.tags.get("amenity").replace(" ", "-"))
+                # Filter elements depending on amenity / shop tags
+                if 'amenity' in self.tags:
+                    if self.tags['amenity'] in AMENITIES:
+                        result['type'] = AMENITIES[self.tags['amenity']]
+                    else:
+                        return
+                elif 'shop' in self.tags:
+                    if self.tags['shop'] in SHOPS:
+                        result['type'] = SHOPS[self.tags['shop']]
+                    else:
+                        return
                 else:
-                    result["type"] = "/other"
+                    return
 
                 name = self.tags.get('name', self.tags.get('operator', None))
                 if name is None:
