@@ -22,7 +22,7 @@ class OxpointsImporter(object):
     OXPOINTS_TYPES = {
         'College': '/university/college',
         'Department': '/university/department',
-        'Carpark': '/transport/car-park',   # TODO should it be different?
+        'Carpark': '/transport/car-park/university',
         'Room': '/university/room',
         'Library': '/university/library',
         'SubLibrary': '/university/library/sub-library',

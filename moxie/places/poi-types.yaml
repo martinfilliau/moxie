@@ -114,6 +114,9 @@ transport:
             park-and-ride:
               name_singular: Park and Ride
               name_plural: Park and Rides
+            university:
+              name_singular: University car park
+              name_plural: University car parks
         taxi-rank:
           name_singular: Taxi rank
           name_plural: Taxi ranks
