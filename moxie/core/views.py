@@ -1,5 +1,5 @@
 from flask.views import View
-from flask import request, jsonify
+from flask import request, jsonify, make_response, current_app
 from werkzeug.exceptions import NotAcceptable
 
 
@@ -39,17 +39,41 @@ class ServiceView(View):
     __metaclass__ = ServiceMetaclass
     default_response = NotAcceptable
 
+    default_allow_origin = '*'
+    default_allow_headers = ''
+    default_cors_max_age = 21600
+
+    @classmethod
+    def as_view(cls, *args, **kwargs):
+        view = super(ServiceView, cls).as_view(*args, **kwargs)
+        view.provide_automatic_options = False
+        return view
+
+    def _handle_options(self):
+        options_resp = current_app.make_default_options_response()
+        h = options_resp.headers
+        h['Access-Control-Allow-Origin'] = self.default_allow_origin
+        h['Access-Control-Allow-Methods'] = h['allow']
+        h['Access-Control-Max-Age'] = str(self.default_cors_max_age)
+        h['Access-Control-Allow-Headers'] = self.default_allow_headers
+        return options_resp
+
     def dispatch_request(self):
         """Finds the best_match service_response from those registered
         If no good service_response can be found we generally want to
         return a NotAcceptable 406.
         """
+        if request.method == 'OPTIONS':
+            return self._handle_options()
         best_match = request.accept_mimetypes.best_match(
                 self.service_responses.keys())
         if best_match:
             service_response = self.service_responses[best_match]
             response = self.handle_request()
-            return service_response(self, response)
+            response = make_response(service_response(self, response))
+            response.headers['Access-Control-Allow-Origin'] = self.default_allow_origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            return response
         else:
             return self.default_response()
 
