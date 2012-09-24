@@ -4,8 +4,9 @@ from moxie.core.search import searcher
 
 
 class Search(ServiceView):
-    methods = ['GET']
+    methods = ['GET', 'OPTIONS']
     default_search = '*'
+    default_allow_headers = 'geo-position'
 
     def format_results(self, query, results):
         out = []
