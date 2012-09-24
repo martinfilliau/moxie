@@ -15,23 +15,23 @@ SHOPS = { 'supermarket': '/amenities/shop/supermarket',
           }
 
 AMENITIES = { 'atm': '/amenities/atm',
-              'bank': '/amenities/bank',
-              'bar': '/amenities/bar',
+              'bank': '/amenities/bank',            # TODO atm=yes?
+              'bar': '/amenities/food-drink/bar',
               'bicycle_parking': '/transport/bicycle-parking',
-              'cafe': '/amenities/cafe',  # TODO food=yes?
+              'cafe': '/amenities/food-drink/cafe',  # TODO food=yes?
               'cinema': '/leisure/cinema',
-              'dentist': '/amenities/dentist',
+              'dentist': '/amenities/health/dentist',
               'doctors': '/amenities/health/doctor',
-              'fast_food': '/amenities/places-to-eat/fast-food',
+              'fast_food': '/amenities/food-drink/fast-food',
               'hospital': '/amenities/health/hospital',
               'library': '/amenities/public-library', # TODO is it?
-              'parking': '/amenities/car-park',
+              'parking': '/transport/car-park',
               'pharmacy': '/amenities/health/pharmacy',
               'post_box': '/amenities/post-box',
               'post_office': '/amenities/post-office',
-              'pub': '/amenities/pub',
+              'pub': '/amenities/food-drink/pub',    # TODO food=yes?
               'recycling': '/amenities/recycling-facility',
-              'restaurant': '/amenities/places-to-eat/restaurant',
+              'restaurant': '/amenities/food-drink/restaurant',
               'swimming_pool': '/leisure/swimming-pool',
               'taxi': '/transport/taxi-rank',
               'theatre': '/leisure/theatre',
@@ -45,7 +45,7 @@ class OSMHandler(handler.ContentHandler):
         self.precedence = precedence
         self.identifier_key = identifier_key
         # k/v from OSM that we want to import in our "tags"
-        self.indexed_tags = ['cuisine',]
+        self.indexed_tags = ['cuisine', 'brand', 'brewery', 'operator']
         # We only import element that have one of these key
         self.element_tags = ['amenity', 'shop', 'naptan:AtcoCode']
 
@@ -132,6 +132,9 @@ class OSMHandler(handler.ContentHandler):
                 # TODO handle multiple phone numbers(?) (seems to be separated by a "/" in OSM.
                 if 'phone' in self.tags:
                     result['phone'] = self.tags['phone']
+
+                if 'url' in self.tags:
+                    result['website'] = self.tags['url']
 
                 if 'website' in self.tags:
                     result['website'] = self.tags['website']

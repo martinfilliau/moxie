@@ -8,6 +8,12 @@ university:
         college:
           name_singular: College
           name_plural: Colleges
+        department:
+          name_singular: Department
+          name_plural: Departments
+        division:
+          name_singular: Division
+          name_plural: Divisions
         library:
           name_singular: Library
           name_plural: Librairies
@@ -28,12 +34,6 @@ amenities:
         bank:
           name_singular: Bank
           name_plural: Banks
-        bar:
-          name_singular: Bar
-          name_plural: Bars
-        cafe:
-          name_singular: Café
-          name_plural: Cafés
         health:
           name_singular: Place relating to health
           name_plural: Places relating to health
@@ -50,9 +50,9 @@ amenities:
             hospital:
               name_singular: Hospital
               name_plural: Hospitals
-        places-to-eat:
-          name_singular: Place to eat
-          name_plural: Places to eat
+        food-drink:
+          name_singular: Food and drink
+          name_plural: Food and drinks
           types:
             pub:
               name_singular: Pub
@@ -78,9 +78,6 @@ amenities:
         post-box:
             name_singular: Post box
             name_plural: Post boxes
-        pub:
-            name_singular: Pub
-            name_plural: Pubs
         public-library:
             name_singular: Public library
             name_plural: Public libraries
