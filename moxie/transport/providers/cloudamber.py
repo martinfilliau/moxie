@@ -18,7 +18,6 @@ class CloudAmberBusRtiProvider(object):
         @param url: URL of CloudAmber instance
         """
         self.url = url
-        self.url = "http://www.oxontime.com"    # TODO add to configuration
 
     def get_url(self, naptan_code):
         """
