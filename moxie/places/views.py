@@ -5,8 +5,9 @@ from moxie.places.importers.helpers import find_type_name
 
 
 class Search(ServiceView):
-    methods = ['GET']
+    methods = ['GET', 'OPTIONS']
     default_search = '*'
+    default_allow_headers = 'geo-position'
 
     def format_results(self, query, results):
         out = []
