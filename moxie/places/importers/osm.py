@@ -2,7 +2,7 @@
 import logging
 
 from xml.sax import handler
-from moxie.places.importers.helpers import prepare_document
+from moxie.places.importers.helpers import prepare_document, format_uk_telephone
 
 logger = logging.getLogger(__name__)
 
@@ -128,10 +128,8 @@ class OSMHandler(handler.ContentHandler):
                         self.tags.get("addr:street", ""), self.tags.get("addr:postcode", ""))
                 result['address'] = " ".join(address.split())
 
-                # TODO handle formatting of phone numbers(?)
-                # TODO handle multiple phone numbers(?) (seems to be separated by a "/" in OSM.
                 if 'phone' in self.tags:
-                    result['phone'] = self.tags['phone']
+                    result['phone'] = format_uk_telephone(self.tags['phone'])
 
                 if 'url' in self.tags:
                     result['website'] = self.tags['url']
