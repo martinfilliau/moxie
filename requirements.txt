@@ -4,3 +4,4 @@ celery==3.0.9
 redis==2.6.2
 hiredis==0.1.1
 PyYAML==3.10
+lxml==2.3.5
