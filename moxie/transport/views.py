@@ -1,8 +1,8 @@
 import json
 
-from flask import request, current_app, jsonify
+from flask import request, current_app
 
-from moxie.core.views import ServiceView, accepts
+from moxie.core.views import ServiceView
 from moxie.core.kv import kv_store
 from moxie.transport.providers.cloudamber import CloudAmberBusRtiProvider
 
