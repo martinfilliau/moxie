@@ -142,6 +142,9 @@ class OSMHandler(handler.ContentHandler):
                 if 'opening_hours' in self.tags:
                     result['opening_hours'] = self.tags['opening_hours']
 
+                if 'collection_times' in self.tags:
+                    result['collection_times'] = self.tags['collection_times']
+
                 result['location'] = "%s,%s" % location
                 search_results = self.indexer.search_for_ids(
                         self.identifier_key, result[self.identifier_key])

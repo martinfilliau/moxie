@@ -20,6 +20,9 @@
         <!-- Basic field to store opening hours -->
         <field name="opening_hours" type="string" indexed="false" stored="true" required="false" />
 
+        <!-- Basic field to store collection times -->
+        <field name="collection_times" type="string" indexed="false" stored="true" required="false" />
+
         <!-- Precedence - int proportional to the reliability of the importer which set the value -->
         <field name="meta_precedence" type="int" indexed="false" stored="true" required="true" multiValued="false" />
 

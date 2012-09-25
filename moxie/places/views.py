@@ -13,17 +13,24 @@ class Search(ServiceView):
         out = []
         for doc in results['response']['docs']:
             lon, lat = doc['location'].split(',')
-            out.append({
+            poi = {
                 'name': doc['name'],
                 'lon': lon,
                 'lat': lat,
                 'distance': doc['_dist_'],
-                'opening_hours': doc.get('opening_hours', ''),
                 'address': doc.get('address', ''),
                 'website': doc.get('website', ''),
                 'phone': doc.get('phone', ''),
-                'type': find_type_name(doc.get('type')[0])
-                })
+            }
+            if 'opening_hours' in doc:
+                poi['opening_hours'] = doc.get('opening_hours')
+            if 'collection_times' in doc:
+                poi['collection_times'] = doc.get('collection_times')
+            try:
+                poi['type'] = find_type_name(doc.get('type')[0])
+            except KeyError:
+                pass
+            out.append(poi)
         return {'query': query, 'results': out}
 
     def get_results(self, original_query, location):
