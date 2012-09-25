@@ -1,5 +1,5 @@
-from flask import request, render_template, jsonify, current_app
-from moxie.core.views import ServiceView, accepts
+from flask import request, current_app
+from moxie.core.views import ServiceView
 from moxie.core.search import searcher
 from moxie.places.importers.helpers import find_type_name
 
