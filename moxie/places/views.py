@@ -39,10 +39,6 @@ class Search(ServiceView):
         response = dict()
         if 'Geo-Position' in request.headers:
             response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
-        return response
-
-    @accepts('application/json')
-    def as_json(self, response):
         query = request.args.get('q', None)
         if 'lat' in response and 'lon' in response:
             location = response['lat'], response['lon']
@@ -50,12 +46,4 @@ class Search(ServiceView):
             default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         response.update(self.get_results(query, location))
-        return jsonify(response)
-
-    @accepts('text/html')
-    def as_html(self, response):
-        response['query'] = request.args.get('q', '')
-        lat, lon = current_app.config['DEFAULT_LOCATION']
-        response['lat'] = request.args.get('lat', lat)
-        response['lon'] = request.args.get('lon', lon)
-        return render_template('places/search.html', **response)
+        return response
