@@ -1,4 +1,4 @@
-from flask import request, current_app
+from flask import request, current_app, url_for
 from moxie.core.views import ServiceView
 from moxie.core.search import searcher
 from moxie.places.importers.helpers import find_type_name
@@ -27,11 +27,11 @@ class Search(ServiceView):
                 poi['opening_hours'] = doc.get('opening_hours')
             if 'collection_times' in doc:
                 poi['collection_times'] = doc.get('collection_times')
-            # TODO URL of API method should NOT be hard-coded like this
             identifiers = doc['identifiers']
             for identifier in identifiers:
                 if identifier.startswith('naptan:'):
-                    poi['hasRti'] = "/transport/bus/rti?id={0}".format(identifier.split(":")[1])
+                    path = url_for('transport.busrti')
+                    poi['hasRti'] = "{0}?id={1}".format(path, identifier.split(":")[1])
             try:
                 poi['type'] = find_type_name(doc.get('type')[0])
             except KeyError:
