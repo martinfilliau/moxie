@@ -1,43 +1,13 @@
 from flask import request, current_app, url_for, abort, redirect, jsonify
 from moxie.core.views import ServiceView, accepts
 from moxie.core.search import searcher
-from moxie.places.importers.helpers import find_type_name
+from moxie.places.importers.helpers import simplify_doc_for_render
 
 
 class Search(ServiceView):
     methods = ['GET', 'OPTIONS']
     default_search = '*'
     default_allow_headers = 'geo-position'
-
-    def format_results(self, query, results):
-        out = []
-        for doc in results['response']['docs']:
-            lon, lat = doc['location'].split(',')
-            poi = {
-                'id': doc['id'],
-                'name': doc['name'],
-                'lon': lon,
-                'lat': lat,
-                'distance': doc['_dist_'],
-                'address': doc.get('address', ''),
-                'website': doc.get('website', ''),
-                'phone': doc.get('phone', ''),
-            }
-            if 'opening_hours' in doc:
-                poi['opening_hours'] = doc.get('opening_hours')
-            if 'collection_times' in doc:
-                poi['collection_times'] = doc.get('collection_times')
-            identifiers = doc['identifiers']
-            for identifier in identifiers:
-                if identifier.startswith('naptan:'):
-                    path = url_for('transport.busrti')
-                    poi['hasRti'] = "{0}?id={1}".format(path, identifier.split(":")[1])
-            try:
-                poi['type'] = find_type_name(doc.get('type')[0])
-            except KeyError:
-                pass
-            out.append(poi)
-        return {'query': query, 'results': out}
 
     def get_results(self, original_query, location):
         query = original_query or self.default_search
@@ -49,7 +19,10 @@ class Search(ServiceView):
                 return results
             else:
                 return {}
-        return self.format_results(original_query, results.json)
+        out = []
+        for doc in results.json['response']['docs']:
+            out.append(simplify_doc_for_render(doc))
+        return {'query': query, 'results': out}
 
     def handle_request(self):
         response = dict()
@@ -74,7 +47,7 @@ class PoiDetail(ServiceView):
         # First do a GET request by its ID
         if results.json['response']['docs']:
             doc = results.json['response']['docs'][0]
-            return jsonify(doc)
+            return jsonify(simplify_doc_for_render(doc))
         else:
             # If no result, do a SEARCH request on IDs
             results = searcher.search_for_ids("identifiers", [id])

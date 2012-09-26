@@ -1,6 +1,8 @@
 import yaml
 import logging
 
+from flask import url_for
+
 logger = logging.getLogger(__name__)
 
 #TODO managed keys should come from the configuration files
@@ -188,3 +190,36 @@ def format_uk_telephone(value):
         value = "(01865 " + value[8] + ")" + value[9:]
 
     return value
+
+
+def simplify_doc_for_render(doc):
+    lon, lat = doc['location'].split(',')
+    poi = {
+        'id': doc['id'],
+        'name': doc['name'],
+        'lon': lon,
+        'lat': lat,
+    }
+    if '_dist_' in doc:
+        poi['distance'] = doc.get('_dist_')
+    if 'address' in doc:
+        poi['address'] = doc.get('address')
+    if 'phone' in doc:
+        poi['phone'] = doc.get('phone')
+    if 'website' in doc:
+        poi['website'] = doc.get('website')
+    if 'opening_hours' in doc:
+        poi['opening_hours'] = doc.get('opening_hours')
+    if 'collection_times' in doc:
+        poi['collection_times'] = doc.get('collection_times')
+    identifiers = doc['identifiers']
+    # TODO this way of doing the link should be changed
+    for identifier in identifiers:
+        if identifier.startswith('naptan:'):
+            path = url_for('transport.busrti')
+            poi['hasRti'] = "{0}?id={1}".format(path, identifier.split(":")[1])
+    try:
+        poi['type'] = find_type_name(doc.get('type')[0])
+    except KeyError:
+        pass
+    return poi
