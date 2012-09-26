@@ -88,7 +88,12 @@ class NaptanXMLHandler(ContentHandler):
         area_code = sp['AtcoCode'][:3]
         if area_code in self.areas:
             data = dict([('raw_naptan_%s' % k, v) for k, v in sp.items()])
-            data[self.identifier_key] = ["atco:%s" % sp['AtcoCode']]
+            identifiers = []
+            identifiers.append("atco:%s" % sp['AtcoCode'])
+            if 'NaptanCode' in sp:
+                naptan_id = ''.join(map(self.naptan_dial, sp['NaptanCode']))
+                identifiers.append("naptan:%s" % naptan_id)
+            data[self.identifier_key] = identifiers
             lon, lat = (sp.pop('Place_Location_Translation_Longitude'),
                     sp.pop('Place_Location_Translation_Latitude'))
             data['location'] = "%s,%s" % (lon, lat)
@@ -139,7 +144,8 @@ class NaptanXMLHandler(ContentHandler):
         areas = self.annotate_stop_area_ancestry(self.stop_areas)
         self.stop_points, self.stop_areas = self.annotate_stop_point_ancestry(self.stop_points, areas)
 
-    def get_indicator_name(self, indicator):
+    @staticmethod
+    def get_indicator_name(indicator):
         """
         Get a "friendly" name for the indicator
         @param indicator: indicator's name in Naptan format
@@ -161,6 +167,16 @@ class NaptanXMLHandler(ContentHandler):
             }.get(part.lower(), part))
         indicator = ' '.join(parts)
         return indicator
+
+    @staticmethod
+    def naptan_dial(c):
+        """
+        Convert a alphabetical NaPTAN code in the database to the numerical code
+        used on bus stops
+        """
+        if c.isdigit():
+            return c
+        return unicode(min(9, (ord(c)-91)//3))
 
 
 class NaPTANImporter(object):
