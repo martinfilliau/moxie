@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 from xml.sax import ContentHandler, make_parser
 from collections import defaultdict
@@ -71,13 +70,13 @@ class NaptanXMLHandler(ContentHandler):
         area_code = sa['StopAreaCode'][:3]
         if area_code in self.areas:
             data = dict([('raw_naptan_%s' % k, v) for k, v in sa.items()])
-            data[self.identifier_key] = ["stoparea:%s" % sa['StopAreaCode']]
+            data['id'] = "stoparea:%s" % sa['StopAreaCode']
+            data[self.identifier_key] = [data['id']]
             lon, lat = (sa.pop('Location_Translation_Longitude'),
                     sa.pop('Location_Translation_Latitude'))
             data['location'] = "%s,%s" % (lon, lat)
             data['name'] = sa['Name']
             data['type'] = "/transport/bus-stop-area"
-            data['id'] = str(uuid.uuid1())
             self.stop_areas[sa['StopAreaCode']] = data
 
     @tag_handler('StopPoint')
@@ -88,8 +87,9 @@ class NaptanXMLHandler(ContentHandler):
         area_code = sp['AtcoCode'][:3]
         if area_code in self.areas:
             data = dict([('raw_naptan_%s' % k, v) for k, v in sp.items()])
+            data['id'] = "atco:%s" % sp['AtcoCode']
             identifiers = []
-            identifiers.append("atco:%s" % sp['AtcoCode'])
+            identifiers.append(data['id'])
             if 'NaptanCode' in sp:
                 naptan_id = ''.join(map(self.naptan_dial, sp['NaptanCode']))
                 identifiers.append("naptan:%s" % naptan_id)
@@ -103,7 +103,6 @@ class NaptanXMLHandler(ContentHandler):
             else:
                 data['name'] = sp['Descriptor_CommonName']
             data['type'] = "/transport/bus-stop"
-            data['id'] = str(uuid.uuid1())
             self.stop_points[sp['AtcoCode']] = data
 
     def annotate_stop_area_ancestry(self, stop_areas):

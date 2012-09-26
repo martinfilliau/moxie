@@ -798,17 +798,8 @@
        This handler will pick a response format to match the input
        if the 'wt' parameter is not explicit
     -->
-      <updateRequestProcessorChain name="setuuid">
-          <processor class="solr.UUIDUpdateProcessorFactory">
-              <str name="fieldName">id</str>
-          </processor>
-          <processor class="solr.LogUpdateProcessorFactory" />
-          <processor class="solr.RunUpdateProcessorFactory" />
-      </updateRequestProcessorChain>
+
   <requestHandler name="/update" class="solr.UpdateRequestHandler">
-       <lst name="defaults">
-         <str name="update.chain">setuuid</str>
-       </lst>
   </requestHandler>
   
 

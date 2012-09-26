@@ -94,10 +94,17 @@ class OSMHandler(handler.ContentHandler):
                 result['raw_osm_type'] = element_type
                 result['raw_osm_version'] = self.attrs['version']
 
-                result[self.identifier_key] = ['osm:%s' % self.id]
-                atco = self.tags.get('naptan:AtcoCode', None)
-                if atco:
-                    result[self.identifier_key].append('atco:%s' % atco)
+
+                osm_id = 'osm:%s' % self.id
+                atco_id = self.tags.get('naptan:AtcoCode', None)
+                result[self.identifier_key] = [osm_id]
+                # if it has an ATCO ID, we set the ATCO ID as the main ID for this document
+                # instead of the OSM ID
+                if atco_id:
+                    result['id'] = atco_id
+                    result[self.identifier_key].append('atco:%s' % atco_id)
+                else:
+                    result['id'] = osm_id
 
                 result['tags'] = []
                 for it in self.indexed_tags:

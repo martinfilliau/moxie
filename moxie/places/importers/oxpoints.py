@@ -70,6 +70,7 @@ class OxpointsImporter(object):
 
         doc = dict()
         doc['name'] = name
+        doc['id'] = 'oxpoints:{0}'.format(oxpoints_id)
         doc['type'] = self.OXPOINTS_TYPES.get(oxpoints_type, '/other')
 
         if 'geo_lat' in datum and 'geo_long' in datum:
@@ -78,7 +79,7 @@ class OxpointsImporter(object):
             return
 
         ids = list()
-        ids.append('oxpoints:{0}'.format(oxpoints_id))
+        ids.append(doc['id'])
 
         for oxp_property, identifier in self.IDENTIFIERS.items():
             if oxp_property in datum:

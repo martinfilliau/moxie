@@ -14,8 +14,8 @@
         <!-- Type of POI e.g. "/amenity/places-to-eat/restaurant" -->
         <field name="type" type="text_path" indexed="true" stored="true" required="true" multiValued="true" />
 
-        <!-- Unique ID - Generated UUID by Solr, if not provided then generated as using "NEW" -->
-        <field name="id" type="uuid" indexed="true" stored="true"/>
+        <!-- Unique ID - this is the preferred ID for a POI. e.g osm:139894 -->
+        <field name="id" type="string" indexed="true" stored="true"/>
 
         <!-- Basic field to store opening hours -->
         <field name="opening_hours" type="string" indexed="false" stored="true" required="false" />
@@ -35,10 +35,10 @@
         <field name="website" type="string" stored="true" indexed="false" required="false" multiValued="false" />
 
         <!-- Unique ID of parent(s) of the present document -->
-        <field name="child_of" type="uuid" indexed="true" stored="true" multiValued="true" />
+        <field name="child_of" type="string" indexed="true" stored="true" multiValued="true" />
 
         <!-- Unique ID of children of the present document -->
-        <field name="parent_of" type="uuid" indexed="true" stored="true" multiValued="true" />
+        <field name="parent_of" type="string" indexed="true" stored="true" multiValued="true" />
 
         <!-- Full Text Search for tags and name of document -->
         <field name="fts" type="text_en_splitting" indexed="true" stored="false" multiValued="true"/>
@@ -51,13 +51,6 @@
         <dynamicField name="raw_*" type="string" indexed="false" stored="false" multiValued="true" />
     </fields>
 
-    <!-- UniqueKey is not mandatory (except if we want the QueryElevation component (which allows
-         to alter top results if we want to return custom... results)), but it would be nice to have to
-         enforce the fact that one document, and only one, should have this ID (no duplicate), unfortunately, it
-         doesn't work (atm?) with multiValued=true...
-    <uniqueKey>id</uniqueKey>
-    -->
-    <!-- Actually, we need it for updating documents, below is a temporary solution... -->
     <uniqueKey>id</uniqueKey>
 
     <!-- Copying name and tags for full text search -->
@@ -65,9 +58,6 @@
     <copyField source="tags" dest="fts"/>
 
     <types>
-
-        <fieldType name="uuid" class="solr.UUIDField" indexed="true" />
-
         <!-- Simple type that doesn't do any analyze, perfect for IDs... -->
         <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
 
