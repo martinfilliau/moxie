@@ -1,5 +1,5 @@
-from flask import request, current_app, url_for
-from moxie.core.views import ServiceView
+from flask import request, current_app, url_for, abort, redirect, jsonify
+from moxie.core.views import ServiceView, accepts
 from moxie.core.search import searcher
 from moxie.places.importers.helpers import find_type_name
 
@@ -68,6 +68,23 @@ class Search(ServiceView):
 class PoiDetail(ServiceView):
 
     def handle_request(self, id):
+        if id.endswith('/'):
+            id = id.split('/')[0]
         results = searcher.get_by_ids([id])
-        doc = results.json['response']['docs'][0]
-        return doc
+        # First do a GET request by its ID
+        if results.json['response']['docs']:
+            doc = results.json['response']['docs'][0]
+            return jsonify(doc)
+        else:
+            # If no result, do a SEARCH request on IDs
+            results = searcher.search_for_ids("identifiers", [id])
+            if results.json['response']['docs']:
+                doc = results.json['response']['docs'][0]
+                path = url_for('places.poidetail', id=doc['id'])
+                return redirect(path, code=301)
+            else:
+                abort(404)
+
+    @accepts('application/json')
+    def as_json(self, response):
+        return response
