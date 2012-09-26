@@ -2,7 +2,6 @@ from flask import request, current_app
 from moxie.core.views import ServiceView
 from moxie.core.search import searcher
 from moxie.places.importers.helpers import find_type_name
-from moxie.transport.views import BusRti
 
 
 class Search(ServiceView):
@@ -15,6 +14,7 @@ class Search(ServiceView):
         for doc in results['response']['docs']:
             lon, lat = doc['location'].split(',')
             poi = {
+                'id': doc['id'],
                 'name': doc['name'],
                 'lon': lon,
                 'lat': lat,
@@ -60,3 +60,11 @@ class Search(ServiceView):
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         response.update(self.get_results(query, location))
         return response
+
+
+class PoiDetail(ServiceView):
+
+    def handle_request(self, id):
+        results = searcher.get_by_ids([id])
+        doc = results.json['response']['docs'][0]
+        return doc

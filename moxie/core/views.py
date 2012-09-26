@@ -58,7 +58,7 @@ class ServiceView(View):
         h['Access-Control-Allow-Headers'] = self.default_allow_headers
         return options_resp
 
-    def dispatch_request(self):
+    def dispatch_request(self, *args, **kwargs):
         """Finds the best_match service_response from those registered
         If no good service_response can be found we generally want to
         return a NotAcceptable 406.
@@ -69,7 +69,7 @@ class ServiceView(View):
                 self.service_responses.keys())
         if best_match:
             service_response = self.service_responses[best_match]
-            response = self.handle_request()
+            response = self.handle_request(*args, **kwargs)
             response = make_response(service_response(self, response))
             response.headers['Access-Control-Allow-Origin'] = self.default_allow_origin
             response.headers['Access-Control-Allow-Credentials'] = 'true'
