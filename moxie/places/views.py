@@ -44,8 +44,12 @@ class Search(ServiceView):
         results = searcher.search_nearby(query, location)
         # TODO(?) new query should be shown to the user
         if results.json['response']['numFound'] == 0:
-            new_query = str(results.json['spellcheck']['suggestions'][-1])
-            results = self.get_results(new_query, location)
+            if results.json['spellcheck']['suggestions']:
+                suggestion = str(results.json['spellcheck']['suggestions'][-1])
+                results = self.get_results(suggestion, location)
+                return results
+            else:
+                return {}
         return self.format_results(original_query, results.json)
 
     def handle_request(self):
