@@ -157,7 +157,7 @@ class OSMHandler(handler.ContentHandler):
                 result = [result]
                 self.indexer.index(result)
         except Exception as e:
-            logger.warning("Couldn't index a POI: " + e, exc_info=True)
+            logger.warning("Couldn't index a POI.", exc_info=True)
 
     def endDocument(self):
         self.indexer.commit()

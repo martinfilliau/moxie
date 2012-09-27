@@ -1,5 +1,4 @@
 import json
-import re
 import logging
 
 from moxie.places.importers.helpers import prepare_document
@@ -49,7 +48,7 @@ class OxpointsImporter(object):
             try:
                 self.process_datum(datum)
             except Exception as e:
-                logger.warning("Couldn't process an item: " + e, exc_info=True)
+                logger.warning("Couldn't process an item.", exc_info=True)
         self.indexer.commit()
 
     def process_datum(self, datum):
