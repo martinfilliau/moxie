@@ -1,7 +1,7 @@
 import yaml
 import logging
 
-from flask import url_for
+from flask import url_for, current_app
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def prepare_document(doc, results, precedence):
 
     # Add the "friendly" name of the type to the full-text search field
     try:
-        doc['fts'] = find_type_name(doc["type"])
+        doc['type_name'] = find_type_name(doc["type"])
     except KeyError:
         logger.warning("Couldn't find name for type '{0}'.".format(doc["type"]))
 
@@ -212,14 +212,12 @@ def simplify_doc_for_render(doc):
         poi['opening_hours'] = doc.get('opening_hours')
     if 'collection_times' in doc:
         poi['collection_times'] = doc.get('collection_times')
+    if 'type_name' in doc:
+        poi['type'] = doc.get('type_name')
     identifiers = doc['identifiers']
     # TODO this way of doing the link should be changed
     for identifier in identifiers:
         if identifier.startswith('naptan:'):
             path = url_for('transport.busrti')
             poi['hasRti'] = "{0}?id={1}".format(path, identifier.split(":")[1])
-    try:
-        poi['type'] = find_type_name(doc.get('type')[0])
-    except KeyError:
-        pass
     return poi

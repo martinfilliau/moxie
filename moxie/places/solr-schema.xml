@@ -14,6 +14,9 @@
         <!-- Type of POI e.g. "/amenity/places-to-eat/restaurant" -->
         <field name="type" type="text_path" indexed="true" stored="true" required="true" multiValued="true" />
 
+        <!-- Name of the type e.g. "Bus stop" -->
+        <field name="type_name" type="string" indexed="true" stored="true" multiValued="true" />
+
         <!-- Unique ID - this is the preferred ID for a POI. e.g osm:139894 -->
         <field name="id" type="string" indexed="true" stored="true"/>
 
@@ -55,6 +58,7 @@
 
     <!-- Copying name and tags for full text search -->
     <copyField source="name" dest="fts"/>
+    <copyField source="type_name" dest="fts"/>
     <copyField source="tags" dest="fts"/>
 
     <types>
