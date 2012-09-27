@@ -1,7 +1,8 @@
 import yaml
 import logging
 
-from flask import url_for, current_app
+from flask import url_for, _app_ctx_stack
+from werkzeug.local import LocalProxy
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,16 @@ precedence_key = 'meta_precedence'
 
 class ACIDException(Exception):
     pass
+
+
+def get_types_dict():
+    ctx = _app_ctx_stack.top
+    types = getattr(ctx, 'places_types', None)
+    if types is None:
+        types = yaml.load(open("moxie/places/poi-types.yaml"))
+        ctx.places_types = types
+    return types
+types = LocalProxy(get_types_dict)
 
 
 def prepare_document(doc, results, precedence):
@@ -48,10 +59,8 @@ def find_type_name(type_path, singular=True):
     @param singular: optional parameter whether it should be a singular or plural name
     @return: name (singular or plural) (e.g. "Bus stop")
     """
-    # TODO path of yaml file has to be configurable
-    data = yaml.load(open("moxie/places/poi-types.yaml"))
     to_find = type_path.split("/")[-1]
-    node = find_type(data, type_path, to_find, 1)
+    node = find_type(types, type_path, to_find, 1)
     if singular:
         return node["name_singular"]
     else:
