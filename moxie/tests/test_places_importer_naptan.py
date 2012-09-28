@@ -1,4 +1,5 @@
 import unittest
+import flask
 
 from mock import Mock
 from xml.sax import parse, parseString
@@ -62,6 +63,8 @@ test_stop_areas = """
         </NaPTAN>
         """
 
+app = flask.Flask(__name__)
+
 
 class NaptanTestCase(unittest.TestCase):
 
@@ -69,6 +72,8 @@ class NaptanTestCase(unittest.TestCase):
         self.naptan_file = 'moxie/tests/data/naptan.xml'
         self.mock_solr = Mock(spec=SolrSearch)
         self.mock_solr.search_for_ids.return_value.json = {'response': {'docs': []}}
+        self.ctx = app.test_request_context()
+        self.ctx.push()
 
     def test_finds_all_stops(self):
         xml_handler = NaptanXMLHandler(['639'], 'identifiers')
@@ -113,3 +118,6 @@ class NaptanTestCase(unittest.TestCase):
         points, areas = xml_handler.annotate_stop_point_ancestry(xml_handler.stop_points, areas)
         self.assertEqual(points['639000022']['child_of'][0], areas['639GSHI21581']['id'])
         self.assertEqual(areas['639GSHI21581']['parent_of'][0], points['639000022']['id'])
+
+    def tearDown(self):
+        self.ctx.pop()

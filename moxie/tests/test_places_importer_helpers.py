@@ -1,7 +1,11 @@
 import unittest
 
+import flask
+
 from moxie.places.importers.helpers import merge_docs, merge_keys, merge_values, find_type_name
 
+
+app = flask.Flask(__name__)
 
 class HelpersTestCase(unittest.TestCase):
 
@@ -11,6 +15,10 @@ class HelpersTestCase(unittest.TestCase):
             'foo_url': 'https://github.com/ox-it/moxie',
             'identifiers': ['foo:123'],
             }
+
+    def setUp(self):
+        self.ctx = app.test_request_context()
+        self.ctx.push()
 
     def test_lower_precedence(self):
         new_doc = {'name': 'molly', 'identifiers': ['bar:xyz'],
@@ -64,7 +72,11 @@ class HelpersTestCase(unittest.TestCase):
         self.assertEqual(set([1, 2, 3, 'a', 'b', 'c']), set(merged))
 
     def test_find_type_name(self):
+        #with app.test_client() as c:
         self.assertEqual("University car park", find_type_name("/transport/car-park/university"))
         self.assertEqual("Transport", find_type_name("/transport"))
         self.assertEqual("Car park", find_type_name("/transport/car-park"))
         self.assertEqual("Book shops", find_type_name("/amenities/shop/book", singular=False))
+
+    def tearDown(self):
+        self.ctx.pop()
