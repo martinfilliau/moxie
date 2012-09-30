@@ -12,11 +12,13 @@ API documentation
 .. hlist::
    :columns: 2
 
+    * :doc:`api/specification`
     * :doc:`api/places`
     * :doc:`api/transport`
 
 .. toctree::
 
+    api/specification
     api/places
     api/transport
 
