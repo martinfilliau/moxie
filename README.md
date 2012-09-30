@@ -31,3 +31,10 @@ You can do this via a Python shell:
 
     >>> from moxie.places.tasks import import_all
     >>> import_all.delay()
+
+Documentation
+-------------
+
+Documentation is available at `/docs`, you need to install required packages (Sphinx) from `requirements_dev.txt`.
+
+You can generate HTML documentation by running `make html` inside the `docs` directory.

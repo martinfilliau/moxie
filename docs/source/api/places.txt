@@ -1,0 +1,36 @@
+Places endpoint
+===============
+
+Endpoint to search and retrieve information about places.
+
+.. http:get:: /places/(string:id)
+
+    Get details of a place by its ID
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+    GET /places/osm:3646652 HTTP/1.1
+    Host: api.m.ox.ac.uk
+    Accept: application/json
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "id": "osm:3646652",
+        "name": "Tesco Metro",
+        "type": "Supermarket",
+        "lat": 0.232,
+        "lng": 51.456,
+        "address": "example"
+    }
+
+    :statuscode 200: resource found
+    :statuscode 404: no resource found
+

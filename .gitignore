@@ -47,3 +47,6 @@ moxie/core/static/js/moxie.js
 
 # Symbolset files
 moxie/core/static/webfonts/
+
+# Documentation build
+docs/build/

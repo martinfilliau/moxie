@@ -1,0 +1,30 @@
+.. Moxie API documentation master file, created by
+   sphinx-quickstart on Sun Sep 30 12:02:21 2012.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Moxie API's documentation!
+=====================================
+
+API documentation
+-----------------
+
+.. hlist::
+   :columns: 2
+
+    * :doc:`api/places`
+    * :doc:`api/transport`
+
+.. toctree::
+
+    api/places
+    api/transport
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
