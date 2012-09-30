@@ -3,6 +3,8 @@ moxie
 
 [![Build Status](https://secure.travis-ci.org/ox-it/moxie.png)](http://travis-ci.org/ox-it/moxie)
 
+[Documentation](http://moxie.readthedocs.org/en/latest/)
+
 The new Mobile Oxford
 
 This repository contains the (server-side) JSON API.
