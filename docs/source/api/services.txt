@@ -1,0 +1,4 @@
+Service
+=======
+
+Services are HTTP (transport layer) agnostic instead operating at the Application Layer. Services encapsulate all operations made on the data. Views should never directly access data sources without going through a Service.

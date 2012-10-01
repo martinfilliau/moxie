@@ -6,22 +6,23 @@
 Welcome to Moxie API's documentation!
 =====================================
 
-API documentation
+HTTP API
 -----------------
 
-.. hlist::
-   :columns: 2
-
-    * :doc:`http_api/specification`
-    * :doc:`http_api/places`
-    * :doc:`http_api/transport`
-
 .. toctree::
+    :glob:
 
     http_api/specification
-    http_api/places
-    http_api/transport
+    http_api/*
 
+Internal API
+-----------------
+
+.. toctree::
+    :glob:
+
+    api/overview
+    api/*
 
 Indices and tables
 ==================
