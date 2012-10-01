@@ -12,15 +12,15 @@ API documentation
 .. hlist::
    :columns: 2
 
-    * :doc:`api/specification`
-    * :doc:`api/places`
-    * :doc:`api/transport`
+    * :doc:`http_api/specification`
+    * :doc:`http_api/places`
+    * :doc:`http_api/transport`
 
 .. toctree::
 
-    api/specification
-    api/places
-    api/transport
+    http_api/specification
+    http_api/places
+    http_api/transport
 
 
 Indices and tables
