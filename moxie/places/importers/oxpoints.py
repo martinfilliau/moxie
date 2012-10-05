@@ -103,14 +103,31 @@ class OxpointsImporter(object):
         address = "{0} {1}".format(datum.get("vCard_street-address", ""), datum.get("vCard_postal-code", ""))
         doc['address'] = " ".join(address.split())
 
+        doc['parent_of'] = []
+        doc['child_of'] = []
+
+        if 'dct_isPartOf' in datum:
+            parent_id = datum['dct_isPartOf']['uri'].rsplit('/')[-1]
+            doc['child_of'].append('oxpoints:{0}'.format(parent_id))
+
+        if 'oxp_occupies' in datum:
+            for occupy in datum['oxp_occupies']:
+                doc['child_of'].append('oxpoints:{0}'.format(occupy['uri'].rsplit('/')[-1]))
+
+        if 'passiveProperties' in datum:
+            if 'dct_isPartOf' in datum['passiveProperties']:
+                for child in datum['passiveProperties']['dct_isPartOf']:
+                    doc['parent_of'].append('oxpoints:{0}'.format(child['uri'].rsplit('/')[-1]))
+
         if 'foaf_homepage' in datum:
             doc['website'] = datum['foaf_homepage']
 
-        doc.update([('raw_oxpoints_{0}'.format(k), v) for k, v in datum.items()])
-
-        for k, v in doc.items():
-            if type(v) not in [str, unicode] and k != self.identifier_key:
-                doc.pop(k)
+        # Add all other k/v to the doc, and then remove everythign but strings...
+        # ... useless
+        #doc.update([('raw_oxpoints_{0}'.format(k), v) for k, v in datum.items()])
+        #for k, v in doc.items():
+        #    if type(v) not in [str, unicode] and k != self.identifier_key:
+        #        doc.pop(k)
 
         search_results = self.indexer.search_for_ids(
             self.identifier_key, doc[self.identifier_key])
