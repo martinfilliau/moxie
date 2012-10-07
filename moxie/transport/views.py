@@ -25,5 +25,6 @@ class BusRti(ServiceView):
                 'services': services,
                 'messages': messages
             }
-            kv_store.setex(self.CACHE_KEY_FORMAT.format(__name__, naptan_code), 10, json.dumps(response))
+            kv_store.setex(self.CACHE_KEY_FORMAT.format(__name__, naptan_code),
+                    self.CACHE_EXPIRE, json.dumps(response))
             return response
