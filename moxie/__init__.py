@@ -1,7 +1,4 @@
 from flask import Flask
-from moxie.places import places
-from moxie.transport import transport
-from moxie.library import library
 
 
 def create_app():
@@ -13,8 +10,11 @@ def create_app():
         # Env variable not set.
         pass
 
-    # Register Moxie apps
-    app.register_blueprint(places, url_prefix='/places')
-    app.register_blueprint(transport, url_prefix='/transport')
-    app.register_blueprint(library, url_prefix='/library')
+    with app.app_context():
+        # Import Moxie apps
+        from moxie.places import places
+        from moxie.library import library
+        # Register Moxie apps
+        app.register_blueprint(places, url_prefix='/places')
+        app.register_blueprint(library, url_prefix='/library')
     return app
