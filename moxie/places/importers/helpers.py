@@ -227,6 +227,5 @@ def simplify_doc_for_render(doc):
     # TODO this way of doing the link should be changed
     for identifier in identifiers:
         if identifier.startswith('naptan:'):
-            path = url_for('transport.busrti')
-            poi['hasRti'] = "{0}?id={1}".format(path, identifier.split(":")[1])
+            poi['hasRti'] = True
     return poi
