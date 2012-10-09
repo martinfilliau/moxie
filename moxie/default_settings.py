@@ -11,5 +11,10 @@ OSM_IMPORT_URL = 'http://download.geofabrik.de/openstreetmap/europe/great_britai
 OXPOINTS_IMPORT_URL = 'http://oxpoints.oucs.ox.ac.uk/all.json'
 NAPTAN_IMPORT_URL = 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
 
-# Transport
-BUS_RTI_URL = 'http://www.oxontime.com'
+from moxie.transport.providers.cloudamber import CloudAmberBusRtiProvider
+SERVICES = {
+'places': {
+    'POIService': ([], {}),
+    'TransportService': ([], {'providers': [CloudAmberBusRtiProvider('http://www.oxontime.com')]}),
+    },
+}
