@@ -12,9 +12,10 @@ OXPOINTS_IMPORT_URL = 'http://oxpoints.oucs.ox.ac.uk/all.json'
 NAPTAN_IMPORT_URL = 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
 
 from moxie.transport.providers.cloudamber import CloudAmberBusRtiProvider
+bus_provider = CloudAmberBusRtiProvider('http://www.oxontime.com')
 SERVICES = {
 'places': {
-    'POIService': ([], {}),
-    'TransportService': ([], {'providers': [CloudAmberBusRtiProvider('http://www.oxontime.com')]}),
+    'POIService': ([], {'providers': [bus_provider]}),
+    'TransportService': ([], {'providers': [bus_provider]}),
     },
 }
