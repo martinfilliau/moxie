@@ -66,6 +66,6 @@ class RTI(ServiceView):
                 'services': services,
                 'messages': messages
             }
-            kv_store.setex(self.CACHE_KEY_FORMAT.format(__name__, id),
+            kv_store.setex(self.CACHE_KEY_FORMAT.format(__name__, ident),
                     self.CACHE_EXPIRE, json.dumps(response))
             return response
