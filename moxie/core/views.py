@@ -1,6 +1,7 @@
 from flask.views import View
 from flask import request, jsonify, make_response, current_app
 from werkzeug.exceptions import NotAcceptable
+from werkzeug.wrappers import BaseResponse
 
 
 def accepts(*accept_values):
@@ -87,4 +88,8 @@ class ServiceView(View):
 
     @accepts('application/json')
     def as_json(self, response):
-        return jsonify(response)
+        if issubclass(type(response),
+                (BaseResponse, current_app.response_class)):
+            return response
+        else:
+            return jsonify(response)

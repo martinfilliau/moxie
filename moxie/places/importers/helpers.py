@@ -223,10 +223,6 @@ def simplify_doc_for_render(doc):
         poi['collection_times'] = doc.get('collection_times')
     if 'type_name' in doc:
         poi['type'] = doc.get('type_name')
-    identifiers = doc['identifiers']
-    # TODO this way of doing the link should be changed
-    for identifier in identifiers:
-        if identifier.startswith('naptan:'):
-            path = url_for('transport.busrti')
-            poi['hasRti'] = "{0}?id={1}".format(path, identifier.split(":")[1])
+    if 'hasRti' in doc:
+        poi['hasRti'] = doc.get('hasRti')
     return poi

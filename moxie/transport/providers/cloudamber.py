@@ -1,13 +1,14 @@
 import logging
+import requests
 
 from lxml import etree
 from itertools import chain
-import requests
+from moxie.core.provider import Provider
 
 logger = logging.getLogger(__name__)
 
 
-class CloudAmberBusRtiProvider(object):
+class CloudAmberBusRtiProvider(Provider):
     """
     Parses an HTML page from a CloudAmber instance
     """
@@ -18,6 +19,18 @@ class CloudAmberBusRtiProvider(object):
         @param url: URL of CloudAmber instance
         """
         self.url = url
+
+    def handles(self, doc):
+        for ident in doc.get('identifiers', []):
+            if ident.startswith('naptan'):
+                return True
+        return False
+
+    def invoke(self, doc):
+        for ident in doc.get('identifiers', []):
+            if ident.startswith('naptan'):
+                _, naptan_code = ident.split(':')
+                return self.get_rti(naptan_code)
 
     def get_url(self, naptan_code):
         """
