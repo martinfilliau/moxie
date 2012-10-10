@@ -23,7 +23,7 @@ class POIService(Service):
             if self.provider_exists(doc):
                 doc['hasRti'] = url_for('places.rti', ident=doc['id'])
             out.append(doc)
-        return {'query': query, 'results': out}
+        return results['response']['docs']
 
     def get_place_by_identifier(self, ident):
         response = searcher.get_by_ids([ident])
@@ -31,8 +31,6 @@ class POIService(Service):
         # First do a GET request by its ID
         if results['response']['docs']:
             doc = results['response']['docs'][0]
-            if self.provider_exists(doc):
-                doc['hasRti'] = url_for('places.rti', ident=doc['id'])
             return doc
         else:
             # If no result, do a SEARCH request on IDs
@@ -40,8 +38,6 @@ class POIService(Service):
             results = response.json
             if results['response']['docs']:
                 doc = results['response']['docs'][0]
-                if self.provider_exists(doc):
-                    doc['hasRti'] = url_for('places.rti', ident=doc['id'])
                 return doc
             else:
                 return None
