@@ -5,15 +5,19 @@ class NoProviderFound(Exception):
     pass
 
 
+class NoConfiguredService(Exception):
+    pass
+
+
 class Service(object):
 
     def __init__(self, providers=None):
         self.providers = providers or []
 
     @classmethod
-    def from_context(cls, name='', blueprint_name=''):
+    def from_context(cls, blueprint_name=''):
         ctx = _app_ctx_stack.top
-        name = name or cls.__name__
+        name = cls.__name__
         if not blueprint_name and request:
             blueprint_name = request.blueprint
         service_key = '.'.join((blueprint_name, name))
@@ -22,7 +26,10 @@ class Service(object):
         if service_key in ctx.moxie_services:
             return ctx.moxie_services[service_key]
         else:
-            args, kwargs = ctx.app.config['SERVICES'][blueprint_name][name]
+            try:
+                args, kwargs = ctx.app.config['SERVICES'][blueprint_name][name]
+            except KeyError:
+                raise NoConfiguredService('The service: %s is not configured on blueprint: %s' % (name, blueprint_name))
             service = cls(*args, **kwargs)
             ctx.moxie_services[service_key] = service
             return service
