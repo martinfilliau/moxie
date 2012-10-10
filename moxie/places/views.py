@@ -1,11 +1,7 @@
-import json
+from flask import request, current_app, url_for, abort, redirect, json
 
-from flask import request, current_app, url_for, abort, redirect, jsonify
-
-from moxie.core.views import ServiceView, accepts
-from moxie.core.search import searcher
+from moxie.core.views import ServiceView
 from moxie.core.kv import kv_store
-
 from moxie.transport.services import TransportService
 
 from .importers.helpers import simplify_doc_for_render
@@ -20,7 +16,8 @@ class Search(ServiceView):
         response = dict()
         if 'Geo-Position' in request.headers:
             response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
-        query = request.args.get('q', None)
+        query = request.args.get('q', '')
+        response['query'] = query
         if 'lat' in response and 'lon' in response:
             location = response['lat'], response['lon']
         else:
@@ -28,7 +25,12 @@ class Search(ServiceView):
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         poi_service = POIService.from_context()
         results = poi_service.get_results(query, location)
-        response.update(results)
+        simplified_results = []
+        for doc in results:
+            if poi_service.provider_exists(doc):
+                doc['hasRti'] = url_for('places.rti', ident=doc['id'])
+            simplified_results.append(simplify_doc_for_render(doc))
+        response['results'] = simplified_results
         return response
 
 
@@ -46,6 +48,8 @@ class PoiDetail(ServiceView):
             return redirect(path, code=301)
         else:
             current_app.logger.info(doc)
+            if poi_service.provider_exists(doc):
+                doc['hasRti'] = url_for('places.rti', ident=doc['id'])
             return simplify_doc_for_render(doc)
 
 
