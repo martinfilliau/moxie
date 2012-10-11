@@ -47,7 +47,6 @@ class PoiDetail(ServiceView):
             path = url_for('places.poidetail', ident=doc['id'])
             return redirect(path, code=301)
         else:
-            current_app.logger.info(doc)
             if poi_service.provider_exists(doc):
                 doc['hasRti'] = url_for('places.rti', ident=doc['id'])
             return simplify_doc_for_render(doc)
