@@ -10,12 +10,41 @@ class NoConfiguredService(Exception):
 
 
 class Service(object):
+    """Services are HTTP (transport layer) agnostic instead operating at
+    the Application Layer. Services encapsulate all operations made on
+    the data. Views should never directly access data sources without going
+    through a Service.
+
+    Configuration of services can be done for each Blueprint. Within the
+    `Application context <http://flask.pocoo.org/docs/appcontext/>`_ they
+    will be cached, this means the following code accesses the same
+    Service object.::
+
+        with app.app_context():
+            service_one = MyService.from_context()
+            service_two = MyService.from_context()
+            assert(service_one is service_two)
+    """
 
     def __init__(self, providers=None):
         self.providers = providers or []
 
     @classmethod
     def from_context(cls, blueprint_name=''):
+        """Create a :py:class:`Service` from the application and request
+        context. args and kwargs for the :py:class:`Service` are read from
+        the ``Flask.config``. Configuration should follow this pattern::
+
+            SERVICES = {
+                'my_blueprint': {
+                    'MyService': (args, kwargs),
+                    'MySecondService: ((1,2,3), {'foo': 'bar'},
+                    }
+                }
+
+        :param blueprint_name: Override the blueprint name so it isn't read
+                               from the request context.
+        """
         ctx = _app_ctx_stack.top
         name = cls.__name__
         if not blueprint_name and request:
@@ -37,7 +66,7 @@ class Service(object):
     def provider_exists(self, doc):
         for provider in self.providers:
             if provider.handles(doc):
-                return True
+                return provider
         return False
 
     def invoke_provider(self, doc):
