@@ -5,3 +5,6 @@ class Provider(object):
 
     def invoke(self, doc):
         raise NotImplementedError("You must implement the 'invoke' method")
+
+    def __call__(self, doc):
+        return self.invoke(doc)

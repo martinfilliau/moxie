@@ -1,10 +1,6 @@
 from flask import _app_ctx_stack, request
 
 
-class NoProviderFound(Exception):
-    pass
-
-
 class NoConfiguredService(Exception):
     pass
 
@@ -63,14 +59,11 @@ class Service(object):
             ctx.moxie_services[service_key] = service
             return service
 
-    def provider_exists(self, doc):
+    def get_provider(self, doc):
+        """Returns a :class:`~moxie.core.provider.Provider` which can handle
+        your ``doc``.  If no provider can be found, returns ``None``.
+        """
         for provider in self.providers:
             if provider.handles(doc):
                 return provider
-        return False
-
-    def invoke_provider(self, doc):
-        for provider in self.providers:
-            if provider.handles(doc):
-                return provider.invoke(doc)
-        raise NoProviderFound()
+        return None
