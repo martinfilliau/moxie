@@ -2,11 +2,13 @@ import unittest
 
 from moxie import create_app
 from moxie.core.provider import Provider
-from moxie.core.service import Service, NoProviderFound, NoConfiguredService
+from moxie.core.service import Service, NoConfiguredService
+
 
 class ProvidesAll(Provider):
     def handles(self, doc):
         return True
+
     def invoke(self, doc):
         return doc
 
@@ -14,13 +16,14 @@ class ProvidesAll(Provider):
 class ProvidesNone(Provider):
     def handles(self, doc):
         return False
+
     def invoke(self, doc):
         return doc
 
 
 class TestProvider(Service):
     def annotate_provider(self, doc):
-        if self.provider_exists(doc):
+        if self.get_provider(doc):
             doc['provider_exists'] = True
             return doc
         return doc
@@ -45,11 +48,11 @@ class ServiceTest(unittest.TestCase):
                 }
         self.app.config['SERVICES'] = services
 
-    def test_provider_exists(self):
-        self.assertTrue(self.any_service.provider_exists(self.doc))
+    def test_get_provider(self):
+        self.assertTrue(self.any_service.get_provider(self.doc))
 
-    def test_no_provider_exists(self):
-        self.assertFalse(self.no_service.provider_exists(self.doc))
+    def test_none_get_provider(self):
+        self.assertEqual(None, self.no_service.get_provider(self.doc))
 
     def test_annotated_doc(self):
         doc = self.any_service.annotate_provider(self.doc)
@@ -61,11 +64,8 @@ class ServiceTest(unittest.TestCase):
             doc['provider_exists']
 
     def test_invoked_provider_success(self):
-        self.assertEqual(self.any_service.invoke_provider(self.doc), self.doc)
-
-    def test_invoked_provider_fail(self):
-        with self.assertRaises(NoProviderFound):
-            self.no_service.invoke_provider(self.doc)
+        provider = self.any_service.get_provider(self.doc)
+        self.assertEqual(provider(self.doc), self.doc)
 
     def test_service_config_missing(self):
         with self.app.app_context():
