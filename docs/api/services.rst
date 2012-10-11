@@ -1,7 +1,5 @@
-.. py:module:: moxie.core.service
-
 Service
 =======
 
-.. autoclass:: Service
+.. automodule:: moxie.core.service
    :members:
