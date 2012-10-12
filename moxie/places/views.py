@@ -27,7 +27,7 @@ class Search(ServiceView):
         results = poi_service.get_results(query, location)
         simplified_results = []
         for doc in results:
-            if poi_service.provider_exists(doc):
+            if poi_service.get_provider(doc):
                 doc['hasRti'] = url_for('places.rti', ident=doc['id'])
             simplified_results.append(simplify_doc_for_render(doc))
         response['results'] = simplified_results
@@ -47,7 +47,7 @@ class PoiDetail(ServiceView):
             path = url_for('places.poidetail', ident=doc['id'])
             return redirect(path, code=301)
         else:
-            if poi_service.provider_exists(doc):
+            if poi_service.get_provider(doc):
                 doc['hasRti'] = url_for('places.rti', ident=doc['id'])
             return simplify_doc_for_render(doc)
 

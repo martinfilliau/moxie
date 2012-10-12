@@ -1,5 +1,3 @@
-from flask import url_for
-
 from moxie.core.service import Service
 from moxie.core.search import searcher
 
@@ -18,11 +16,6 @@ class POIService(Service):
                 return results
             else:
                 return {}
-        out = []
-        for doc in results['response']['docs']:
-            if self.provider_exists(doc):
-                doc['hasRti'] = url_for('places.rti', ident=doc['id'])
-            out.append(doc)
         return results['response']['docs']
 
     def get_place_by_identifier(self, ident):

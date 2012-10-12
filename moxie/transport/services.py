@@ -13,4 +13,5 @@ class TransportService(Service):
         # First do a GET request by its ID
         if results.json['response']['docs']:
             doc = results.json['response']['docs'][0]
-        return self.invoke_provider(doc)
+        provider = self.get_provider(doc)
+        return provider(doc)
