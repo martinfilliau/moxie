@@ -4,8 +4,6 @@ python:
 install:
   - pip install -q -r requirements.txt --use-mirrors
 script:
-  - python runtests.py
+  - python setup.py test
 notifications:
-  irc:
-    channels: "irc.ox.ac.uk#mox"
-    on_success: change
+  irc: "irc.ox.ac.uk#mox"
