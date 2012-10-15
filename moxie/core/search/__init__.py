@@ -36,4 +36,11 @@ class SearchService(Service):
     def get_by_ids(self, ids):
         return self.backend.get_by_ids(ids)
 
+    def search_for_ids(self, id_key, identifiers):
+        return self.backend.search_for_ids(id_key, identifiers)
+
+    def index(self, document):
+        return self.backend.index(document)
+
+
 searcher = LocalProxy(SearchService.from_context)
