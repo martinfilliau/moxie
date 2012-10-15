@@ -11,7 +11,8 @@ class KVService(Service):
     def __init__(self, backend_uri):
         self.backend = self._get_backend(backend_uri)
 
-    def _get_backend(self, kv_url):
+    @staticmethod
+    def _get_backend(kv_url):
         kv_url = urlparse.urlparse(kv_url)
         if kv_url.scheme not in SUPPORTED_KV_STORES:
             raise NotImplemented("Moxie does not support %s." % kv_url.scheme)

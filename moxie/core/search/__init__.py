@@ -13,7 +13,8 @@ class SearchService(Service):
     def __init__(self, backend_uri):
         self.backend = self._get_backend(backend_uri)
 
-    def _get_backend(self, backend_uri):
+    @staticmethod
+    def _get_backend(backend_uri):
         """Parse the URI and imports the appropriate AbstractSearch
         implementation
         """
