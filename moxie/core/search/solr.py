@@ -2,15 +2,11 @@ import logging
 import requests
 import json
 
-from urllib import urlencode
-
-from moxie.core.search import AbstractSearch
-
 
 logger = logging.getLogger(name=__name__)
 
 
-class SolrSearch(AbstractSearch):
+class SolrSearch(object):
 
     DEFAULT_TIMEOUT = 1     # default timeout in seconds
 
@@ -29,7 +25,6 @@ class SolrSearch(AbstractSearch):
                 'json': 'application/json',
                 'form': 'application/x-www-form-urlencoded',
                 }
-        super(SolrSearch, self).__init__(core)
 
     def search_nearby(self, query, location, location_field='location'):
         lat, lon = location
