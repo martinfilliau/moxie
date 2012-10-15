@@ -1,5 +1,6 @@
 import yaml
 import logging
+import os
 
 from flask import url_for, _app_ctx_stack
 from werkzeug.local import LocalProxy
@@ -20,7 +21,7 @@ def get_types_dict():
     ctx = _app_ctx_stack.top
     types = getattr(ctx, 'places_types', None)
     if types is None:
-        types = yaml.load(open("moxie/places/poi-types.yaml"))
+        types = yaml.load(open(os.path.join(os.path.dirname(__file__), '..', 'poi-types.yaml')))
         ctx.places_types = types
     return types
 types = LocalProxy(get_types_dict)

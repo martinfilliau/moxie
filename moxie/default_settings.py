@@ -13,7 +13,7 @@ SERVICES = {
 'places': {
     'POIService': ([], {'providers': [bus_provider]}),
     'TransportService': ([], {'providers': [bus_provider]}),
-    'SearchService': (['solr+http://localhost:8983/solr/collection1'], {}),
+    'SearchService': (['solr+http://localhost:8080/solr/places'], {}),
     'KVService': (['redis://localhost:6379/0'], {}),
     },
 }
