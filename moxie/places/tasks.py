@@ -8,14 +8,17 @@ from tempfile import NamedTemporaryFile
 from xml.sax import make_parser
 
 from moxie import create_app
-from moxie.core.kv import kv_store
-from moxie.core.search import searcher
+from moxie.core.kv import KVService
+from moxie.core.search import SearchService
 from moxie.worker import celery
 from moxie.places.importers.osm import OSMHandler
 from moxie.places.importers.oxpoints import OxpointsImporter
 from moxie.places.importers.naptan import NaPTANImporter
 
 app = create_app()
+with app.app_context():
+    kv_store = KVService.from_context(blueprint_name='places')
+    searcher = SearchService.from_context(blueprint_name='places')
 logger = logging.getLogger(__name__)
 ETAG_KEY_FORMAT = "%s_etag_%s"
 LOCATION_KEY_FORMAT = "%s_location_%s"
