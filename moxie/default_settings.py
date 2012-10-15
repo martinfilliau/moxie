@@ -2,7 +2,7 @@
 DEBUG = True
 
 # Moxie data API config
-SEARCHER_URL = 'solr+http://localhost:8983/solr/collection1'
+SEARCHER_URL = 'solr+http://localhost:8080/solr/places'
 KV_STORE_URL = 'redis://localhost:6379/0'
 
 # Places app
