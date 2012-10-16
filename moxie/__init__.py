@@ -1,6 +1,7 @@
 from flask import Flask
 from moxie.places import create_blueprint as create_places_blueprint
 from moxie.library import create_blueprint as create_library_blueprint
+from moxie.oxford_dates import create_blueprint as create_oxford_dates_blueprint
 
 
 def create_app():
@@ -17,4 +18,6 @@ def create_app():
             url_prefix='/places')
     app.register_blueprint(create_library_blueprint('library'),
             url_prefix='/library')
+    app.register_blueprint(create_oxford_dates_blueprint('oxford_dates'),
+            url_prefix='/dates')
     return app
