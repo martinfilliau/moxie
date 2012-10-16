@@ -16,4 +16,7 @@ SERVICES = {
     'SearchService': (['solr+http://localhost:8080/solr/places'], {}),
     'KVService': (['redis://localhost:6379/0'], {}),
     },
+'oxford_dates': {
+    'OxfordDatesService': ([], {}),
+    }
 }

@@ -7,6 +7,25 @@ from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
 
+NAPTAN_MAPPING = {
+    'TXR': '/transport/taxi-rank',
+    'BCT': '/transport/bus-stop',
+    'AIR': '/transport/airport',
+}
+
+
+if indicator is None and self.meta['stop-type'] in ('AIR', 'FTD', 'RSE', 'TMU', 'BCE'):
+    # Translators: This is referring to public transport entities
+    title = ugettext('Entrance to %s') % common_name
+
+elif indicator is None and self.meta['stop-type'] in ('FBT',):
+    # Translators: This is referring to ferry ports
+    title = ugettext('Berth at %s') % common_name
+
+elif indicator is None and self.meta['stop-type'] in ('RPL','PLT'):
+# Translators: This is referring to rail and metro stations
+
+
 
 def tag_handler(tag):
     def wrapper(f):
@@ -94,15 +113,21 @@ class NaptanXMLHandler(ContentHandler):
                 naptan_id = ''.join(map(self.naptan_dial, sp['NaptanCode']))
                 identifiers.append("naptan:%s" % naptan_id)
             data[self.identifier_key] = identifiers
+
+            if sp['StopType'] in NAPTAN_MAPPING.keys():
+                data['type'] = NAPTAN_MAPPING[sp['StopType']]
+            else:
+                return
+
             lon, lat = (sp.pop('Place_Location_Translation_Longitude'),
                     sp.pop('Place_Location_Translation_Latitude'))
             data['location'] = "%s,%s" % (lon, lat)
+
             if 'Descriptor_Indicator' in sp:
                 indicator = self.get_indicator_name(str(sp['Descriptor_Indicator']))
                 data['name'] = "%s %s" % (indicator, sp['Descriptor_CommonName'])
             else:
                 data['name'] = sp['Descriptor_CommonName']
-            data['type'] = "/transport/bus-stop"
             self.stop_points[sp['AtcoCode']] = data
 
     def annotate_stop_area_ancestry(self, stop_areas):
