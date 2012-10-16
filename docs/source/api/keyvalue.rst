@@ -1,0 +1,7 @@
+Key-value Store
+===============
+
+.. automodule:: moxie.core.kv
+   :members:
+   :undoc-members:
+   :private-members:
