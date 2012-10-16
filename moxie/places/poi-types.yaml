@@ -129,6 +129,12 @@ transport:
         bicycle-parking:
           name_singular: Bicycle parking
           name_plural: Bicycle parkings
+        rail-station:
+          name_singular: Rail station
+          name_plural: Rail stations
+        airport:
+          name_singular: Airport
+          name_plural: Airports
 leisure:
     name_singular: Leisure
     name_plural: Leisure
