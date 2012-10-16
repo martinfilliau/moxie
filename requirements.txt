@@ -6,4 +6,4 @@ hiredis==0.1.1
 PyYAML==3.10
 lxml==2.3.5
 mollyZ3950==2.04-molly1
-oxford_term_dates
+oxford_term_dates==1.0.3
