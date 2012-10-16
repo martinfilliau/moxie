@@ -42,5 +42,8 @@ class SearchService(Service):
     def index(self, document):
         return self.backend.index(document)
 
+    def commit(self):
+        return self.backend.commit()
+
 
 searcher = LocalProxy(SearchService.from_context)
