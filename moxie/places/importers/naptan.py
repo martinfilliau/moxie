@@ -14,17 +14,12 @@ NAPTAN_MAPPING = {
 }
 
 
-if indicator is None and self.meta['stop-type'] in ('AIR', 'FTD', 'RSE', 'TMU', 'BCE'):
-    # Translators: This is referring to public transport entities
-    title = ugettext('Entrance to %s') % common_name
-
-elif indicator is None and self.meta['stop-type'] in ('FBT',):
-    # Translators: This is referring to ferry ports
-    title = ugettext('Berth at %s') % common_name
-
-elif indicator is None and self.meta['stop-type'] in ('RPL','PLT'):
-# Translators: This is referring to rail and metro stations
-
+#if self.meta['stop-type'] in ('AIR', 'FTD', 'RSE', 'TMU', 'BCE'):
+#    title = ugettext('Entrance to %s') % common_name
+#elif self.meta['stop-type'] in ('FBT',):
+#    title = ugettext('Berth at %s') % common_name
+#elif self.meta['stop-type'] in ('RPL','PLT'):
+## referring to rail and metro stations
 
 
 def tag_handler(tag):
@@ -114,8 +109,9 @@ class NaptanXMLHandler(ContentHandler):
                 identifiers.append("naptan:%s" % naptan_id)
             data[self.identifier_key] = identifiers
 
-            if sp['StopType'] in NAPTAN_MAPPING.keys():
-                data['type'] = NAPTAN_MAPPING[sp['StopType']]
+            # TODO: should add a test for this
+            if 'StopClassification_StopType' in sp:
+                data['type'] = NAPTAN_MAPPING[sp['StopClassification_StopType']]
             else:
                 return
 

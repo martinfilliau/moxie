@@ -56,6 +56,9 @@ test_stop_areas = """
                         </Translation>
                     </Location>
                 </Place>
+                <StopClassification>
+                    <StopType>BCT</StopType>
+                </StopClassification>
                 <StopAreas>
                     <StopAreaRef CreationDateTime="2009-10-29T00:00:00" ModificationDateTime="2009-10-29T00:00:00" Modification="revise" RevisionNumber="0" Status="active">639GSHI21581</StopAreaRef>
                 </StopAreas>
