@@ -45,7 +45,7 @@ def staging():
     env.environment = 'staging'
     env.hosts = ['api.m.ox.ac.uk']
     env.user = 'moxie'
-    env.remote_install_dir_api = '/srv/moxie/api.m.ox.ac.uk'
+    env.remote_install_dir_api = '/srv/moxie/torvalds.oucs.ox.ac.uk'
     env.remote_git_checkout_api = '/srv/moxie/moxie-api'
     env.remote_install_dir_front = '/srv/moxie/new.m.ox.ac.uk'
     env.remote_git_checkout_front = '/srv/moxie/moxie-js'
@@ -104,6 +104,8 @@ def deploy_front(version):
     with(cd(versioned_path)):
         run('compass compile')
         run('handlebars handlebars/places/ handlebars -f js/moxie.places.templates.js')
+    # Pre GZip static (html, css, js) files
+    run('sh {0}/gzip_static_files.sh {1}'.format(env.remote_git_checkout_front, versioned_path))
     run('rm -f %s' % env.remote_install_dir_front)
     run('ln -s %s %s' % (versioned_path, env.remote_install_dir_front))
 
