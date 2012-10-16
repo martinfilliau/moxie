@@ -110,7 +110,7 @@ class NaptanXMLHandler(ContentHandler):
             data[self.identifier_key] = identifiers
 
             # TODO: should add a test for this
-            if 'StopClassification_StopType' in sp:
+            if 'StopClassification_StopType' in sp and sp['StopClassification_StopType'] in NAPTAN_MAPPING:
                 data['type'] = NAPTAN_MAPPING[sp['StopClassification_StopType']]
             else:
                 return
