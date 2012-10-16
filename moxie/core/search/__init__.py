@@ -65,3 +65,59 @@ class SearchService(Service):
 
 
 searcher = LocalProxy(SearchService.from_context)
+
+
+class SearchResponse(object):
+
+    def __init__(self, response):
+        """
+        Init a SearchResponse object
+        :param response: raw response from a Request
+        """
+        raise Exception("This class should be sub-classed and init by its subclass.")
+
+    def __repr__(self):
+        return "<SearchResponse ['{0}']>".format(self.query)
+
+    @property
+    def query(self):
+        """String of the query (FTS)
+        :rtype string
+        """
+        return self._query
+
+    @property
+    def results(self):
+        """Response documents
+        :return list of dict or None if no results
+        :rtype list of dict
+        """
+        return self._results
+
+    @property
+    def facets(self):
+        """Facets of the query
+        :rtype list of facets"""
+        return self.facets
+
+    @property
+    def spellchecks(self):
+        """Spellchecks for the query
+        :return list of spellchecks or None
+        :rtype list of dict"""
+        return self._spellchecks
+
+    @property
+    def as_json(self):
+        """Raw response as JSON
+        :rtype string of JSON
+        """
+        import json
+        return json.loads(self._raw_response)
+
+    @property
+    def as_dict(self):
+        """Raw response as a dict
+        :rtype dict
+        """
+        return self._raw_response

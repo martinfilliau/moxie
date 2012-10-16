@@ -2,6 +2,8 @@ import logging
 import requests
 import json
 
+from moxie.core.search import SearchResponse
+
 
 logger = logging.getLogger(name=__name__)
 
@@ -38,7 +40,7 @@ class SolrSearch(object):
                 'fl': '*,_dist_:geodist()',
                 }
         results = self.search(q)
-        return results
+        return SolrSearchResponse(results.json)
 
     def search(self, query):
         l = []
@@ -59,7 +61,7 @@ class SolrSearch(object):
     def get_by_ids(self, document_ids):
         """
         Get documents by their ID (using the real-time GET feature of Solr 4).
-        Query string to build is as "?ids=5a9b4f27-310f-4207-8a97-1dce48fdf31d,a791b6e9-e532-461f-8ae1-12218f0db81e"
+        Query string to build is as "?ids=oxpoints:23232805,oxpoints:23232801"
         (i.e. param is ids, and IDs are comma-separated.
         @param document_ids list of document ids
         @return list of documents
@@ -68,7 +70,7 @@ class SolrSearch(object):
         params = { 'ids': ids }
         results = self.connection(self.methods['get'],
             params=params)
-        return results
+        return SolrSearchResponse(results.json)
 
     def index(self, document, params=None):
         data = json.dumps(document)
@@ -101,7 +103,7 @@ class SolrSearch(object):
             query.append('%s:%s' % (id_key, self.solr_escape(id)))
         query_string = {'q': " OR ".join(query)}
         results = self.search(query_string)
-        return results
+        return SolrSearchResponse(results.json)
 
     def connection(self, method, params=None, data=None, headers=None):
         """
@@ -124,3 +126,18 @@ class SolrSearch(object):
     @staticmethod
     def solr_escape(string):
         return string.replace(':', '\:')
+
+
+class SolrSearchResponse(SearchResponse):
+
+    def __init__(self, response):
+        self._raw_response = response
+        try:
+            self._query = self._raw_response['responseHeader']['params']['q']
+        except:
+            self._query = None      # e.g. when doing a GET query
+        try:
+            self._spellchecks = self._raw_response['spellcheck']['suggestions']
+        except:
+            self._spellchecks = None
+        self._results = self._raw_response['response']['docs']

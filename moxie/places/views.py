@@ -17,20 +17,22 @@ class Search(ServiceView):
         if 'Geo-Position' in request.headers:
             response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
         query = request.args.get('q', '')
-        response['query'] = query
         if 'lat' in response and 'lon' in response:
             location = response['lat'], response['lon']
         else:
             default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         poi_service = POIService.from_context()
-        results = poi_service.get_results(query, location)
+        r = poi_service.get_results(query, location)
         simplified_results = []
-        for doc in results:
+        for doc in r.results:
             if poi_service.get_provider(doc):
+                # Add a property hasRti if one provider is able to handle
+                # this document for real-time information
                 doc['hasRti'] = url_for('places.rti', ident=doc['id'])
             simplified_results.append(simplify_doc_for_render(doc))
         response['results'] = simplified_results
+        response['query'] = r.query
         return response
 
 
