@@ -4,7 +4,8 @@ import flask
 from mock import Mock
 from xml.sax import parse, parseString
 
-from moxie.core.search.solr import SolrSearch
+from moxie.core.search.solr import SolrSearchResponse
+from moxie.core.search import SearchService
 from moxie.places.importers.naptan import NaptanXMLHandler, NaPTANImporter
 
 
@@ -73,8 +74,9 @@ class NaptanTestCase(unittest.TestCase):
 
     def setUp(self):
         self.naptan_file = 'moxie/tests/data/naptan.xml'
-        self.mock_solr = Mock(spec=SolrSearch)
-        self.mock_solr.search_for_ids.return_value.json = {'response': {'docs': []}}
+        self.mock_solr = Mock(spec=SearchService)
+        # TODO SolrSearchResponse should not be called in that case
+        self.mock_solr.search_for_ids.return_value = SolrSearchResponse({'response': {'docs': []}})
         self.ctx = app.test_request_context()
         self.ctx.push()
 
