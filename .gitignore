@@ -44,6 +44,7 @@ moxie/core/static/js/moxie.js
 *.min.js
 
 .DS_Store
+*.swp
 
 # Symbolset files
 moxie/core/static/webfonts/
