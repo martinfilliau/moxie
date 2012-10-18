@@ -10,8 +10,8 @@ class POIService(Service):
         response = searcher.search_nearby(query, location)
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
-            if response.spellchecks:
-                suggestion = response.spellchecks[-1]
+            if response.query_suggestion:
+                suggestion = response.query_suggestion
                 return self.get_results(suggestion, location)
         return response
 
