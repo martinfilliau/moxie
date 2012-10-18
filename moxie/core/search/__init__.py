@@ -69,15 +69,23 @@ searcher = LocalProxy(SearchService.from_context)
 
 class SearchResponse(object):
 
-    def __init__(self, response):
+    def __init__(self, raw_response, query, results, query_suggestion=None, facets=None):
         """
         Init a SearchResponse object
-        :param response: raw response from a Request
+        :param raw_response: full response from the search server
+        :param query: query has searched by the search server
+        :param results: list of documents
+        :param query_suggestion: suggestion of a new query to make (generally a recommendation from a spellchecker)
+        :param facets: facets for this search response
         """
-        raise Exception("This class should be sub-classed and init by its subclass.")
+        self._raw_response = raw_response
+        self._query = query
+        self._results = results
+        self._query_suggestion = query_suggestion
+        self._facets = facets
 
     def __repr__(self):
-        return "<SearchResponse ['{0}']>".format(self.query)
+        return "<SearchResponse ['{0}'] ({1})>".format(self._query, len(self._results))
 
     @property
     def query(self):
@@ -101,11 +109,11 @@ class SearchResponse(object):
         return self.facets
 
     @property
-    def spellchecks(self):
-        """Spellchecks for the query
-        :return list of spellchecks or None
-        :rtype list of dict"""
-        return self._spellchecks
+    def query_suggestion(self):
+        """Suggestion of a new query
+        :return query suggestion
+        :rtype string"""
+        return self._query_suggestion
 
     @property
     def as_json(self):

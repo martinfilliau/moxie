@@ -40,7 +40,7 @@ class SolrSearch(object):
                 'fl': '*,_dist_:geodist()',
                 }
         results = self.search(q)
-        return SolrSearchResponse(results.json)
+        return get_search_response(results.json)
 
     def search(self, query):
         l = []
@@ -63,14 +63,14 @@ class SolrSearch(object):
         Get documents by their ID (using the real-time GET feature of Solr 4).
         Query string to build is as "?ids=oxpoints:23232805,oxpoints:23232801"
         (i.e. param is ids, and IDs are comma-separated.
-        @param document_ids list of document ids
-        @return list of documents
+        :param document_ids: list of document ids
+        :return list of documents
         """
         ids = ",".join(document_ids)
         params = { 'ids': ids }
         results = self.connection(self.methods['get'],
             params=params)
-        return SolrSearchResponse(results.json)
+        return get_search_response(results.json)
 
     def index(self, document, params=None):
         data = json.dumps(document)
@@ -95,21 +95,19 @@ class SolrSearch(object):
                 params={'commit': 'true'}, headers=headers)
 
     def search_for_ids(self, id_key, identifiers):
-        """
-        Search for documents by their identifiers (NB: this is not the unique ID used by Solr).
+        """Search for documents by their identifiers (NB: this is not the unique ID used by Solr).
         """
         query = []
         for id in identifiers:
             query.append('%s:%s' % (id_key, self.solr_escape(id)))
         query_string = {'q': " OR ".join(query)}
         results = self.search(query_string)
-        return SolrSearchResponse(results.json)
+        return get_search_response(results.json)
 
     def connection(self, method, params=None, data=None, headers=None):
-        """
-        Does a GET request if there is no data otherwise a POST
-        @param params URL parameters as a dict
-        @param data POST form
+        """Does a GET request if there is no data otherwise a POST
+        :param params: URL parameters as a dict
+        :param data: POST form
         """
         headers = headers or dict()
         params = params or dict()
@@ -128,16 +126,18 @@ class SolrSearch(object):
         return string.replace(':', '\:')
 
 
-class SolrSearchResponse(SearchResponse):
+def get_search_response(solr_response):
+    """Prepare a :py:class:`SearchResponse` object
+    :param solr_response: response from Solr
+    :return :py:class:`SearchResponse`
+    """
+    try:
+        query = solr_response['responseHeader']['params']['q']
+    except:
+        query = None
+    try:
+        suggestion = solr_response['spellcheck']['suggestions'][-1]
+    except:
+        suggestion = None
 
-    def __init__(self, response):
-        self._raw_response = response
-        try:
-            self._query = self._raw_response['responseHeader']['params']['q']
-        except:
-            self._query = None      # e.g. when doing a GET query
-        try:
-            self._spellchecks = self._raw_response['spellcheck']['suggestions']
-        except:
-            self._spellchecks = None
-        self._results = self._raw_response['response']['docs']
+    return SearchResponse(solr_response, query, solr_response['response']['docs'], suggestion)
