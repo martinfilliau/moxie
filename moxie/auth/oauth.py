@@ -4,7 +4,7 @@ import logging
 
 from moxie.core.service import Service
 from requests.auth import OAuth1
-from flask import session
+from flask import request, session
 
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class OAuthCredential(object):
         store = self.get_credential_store(instance)
         if self.key in store:
             return store[self.key]
-        elif session and self.key in session:
+        elif request and self.key in session:
             creds = session[self.key]
             store[self.key] = creds
             return creds
@@ -39,14 +39,14 @@ class OAuthCredential(object):
     def __set__(self, instance, value):
         store = self.get_credential_store(instance)
         store[self.key] = value
-        if session:
+        if request:
             session[self.key] = value
 
     def __delete__(self, instance):
         store = self.get_credential_store(instance)
         if self.key in store:
             del store[self.key]
-        if session and self.key in session:
+        if request and self.key in session:
             del session[self.key]
 
 
