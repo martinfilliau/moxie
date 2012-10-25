@@ -10,29 +10,44 @@ from flask import session
 logger = logging.getLogger(__name__)
 
 
-class OAuthCredentials(object):
-    def __init__(self, client=None, temporary=None, access=None):
-        self._credentials = {
-                'client': client,
-                'temporary': temporary,
-                'access': access
-                }
+class OAuthCredential(object):
+    """Descriptor for caching our OAuth credentials in a user session.
+    Only if one is available. Caches to the :py:class:`OAuth1Service`
+    object in an attribute named :py:attr:`OAuthCredential.credential_store`.
+    """
+    credential_store = '_credentials'
+
+    def __init__(self, key):
+        self.key = 'oauth_%s' % key
+
+    def get_credential_store(self, instance):
+        if not hasattr(instance, self.credential_store):
+            setattr(instance, self.credential_store, dict())
+        return getattr(instance, self.credential_store)
 
     def __get__(self, instance, owner):
-        print instance
-        print owner
-        session_key = "oath_%s" % instance
-        if instance not in self._credentials.keys():
-            raise AttributeError()
-        credentials = self._credentials[instance]
-        if credentials:
-            return credentials
-        elif session and session_key in session:
-            return session[session_key]
+        store = self.get_credential_store(instance)
+        if self.key in store:
+            return store[self.key]
+        elif session and self.key in session:
+            creds = session[self.key]
+            store[self.key] = creds
+            return creds
         else:
-            return None
+            return None, None
 
+    def __set__(self, instance, value):
+        store = self.get_credential_store(instance)
+        store[self.key] = value
+        if session:
+            session[self.key] = value
 
+    def __delete__(self, instance):
+        store = self.get_credential_store(instance)
+        if self.key in store:
+            del store[self.key]
+        if session and self.key in session:
+            del session[self.key]
 
 
 class OAuth1Service(Service):
@@ -42,8 +57,12 @@ class OAuth1Service(Service):
     :param oauth_endpoint: URL of the form http://service.foo/oauth/
     """
 
+    temporary_credentials = OAuthCredential('temporary')
+    access_credentials = OAuthCredential('access')
+
     def __init__(self, oauth_endpoint, client_identifier, client_secret,
-            request_token_path='request_token', access_token_path='access_token',
+            request_token_path='request_token',
+            access_token_path='access_token',
             authorize_path='authorize'):
         self.oauth_endpoint = oauth_endpoint
         self.client_identifier = unicode(client_identifier)
@@ -54,47 +73,51 @@ class OAuth1Service(Service):
         self.access_token_path = access_token_path
         self.authorize_path = authorize_path
 
-        self.temporary_token_identifier = None
-        self.temporary_token_secret = None
-        self.access_token_identifier = None
-        self.access_token_secret = None
-
     def refresh_temporary_credentials(self):
         url = urlparse.urljoin(self.oauth_endpoint, self.request_token_path)
         temp_oa = OAuth1(client_key=self.client_identifier,
                 client_secret=self.client_secret)
         response = requests.get(url, auth=temp_oa)
         qs = urlparse.parse_qs(response.text)
-        self.temporary_token_identifier = unicode(qs['oauth_token'][0])
-        self.temporary_token_secret = unicode(qs['oauth_token_secret'][0])
-        return self.temporary_token_identifier, self.temporary_token_secret
+        self.temporary_credentials = (unicode(qs['oauth_token'][0]),
+                unicode(qs['oauth_token_secret'][0]))
+        return self.temporary_credentials
 
     @property
     def authorization_url(self, token_param='oauth_token'):
-        if not self.temporary_token_identifier:
-            self.refresh_temporary_credentials()
+        temporary_identifier, _ = self.temporary_credentials
+        if not temporary_identifier:
+            temporary_identifier, _ = self.refresh_temporary_credentials()
         url = urlparse.urljoin(self.oauth_endpoint, self.authorize_path)
-        params = {token_param: self.temporary_token_identifier}
+        params = {token_param: temporary_identifier}
         request = requests.Request(url=url, params=params)
         return request.full_url
 
-    def refresh_access_credentials(self, verifier):
+    def verify(self, verifier):
         verifier = unicode(verifier)
         url = urlparse.urljoin(self.oauth_endpoint, self.access_token_path)
+        resource_owner_key, resource_owner_secret = self.temporary_credentials
         access_oa = OAuth1(client_key=self.client_identifier,
                 client_secret=self.client_secret,
-                resource_owner_key=self.temporary_token_identifier,
-                resource_owner_secret=self.temporary_token_secret,
+                resource_owner_key=resource_owner_key,
+                resource_owner_secret=resource_owner_secret,
                 verifier=verifier)
         response = requests.get(url=url, auth=access_oa)
         qs = urlparse.parse_qs(response.text)
-        self.access_token_identifier = unicode(qs['oauth_token'][0])
-        self.access_token_secret = unicode(qs['oauth_token_secret'][0])
-        return self.access_token_identifier, self.access_token_secret
+        self.access_credentials = (unicode(qs['oauth_token'][0]),
+                unicode(qs['oauth_token_secret'][0]))
+        return self.access_credentials
 
     @property
     def signer(self):
+        """Returns a :py:class:`OAuth1` object which can be used to sign
+        http requests bound for protected resources:
+
+            oa = OAuth1Service('http://private.foo/oauth', 'private', 'key')
+            requests.get('http://private.foo/private_resource', auth=oa.signer)
+        """
+        resource_owner_key, resource_owner_secret = self.access_credentials
         return OAuth1(client_key=self.client_identifier,
                 client_secret=self.client_secret,
-                resource_owner_key=self.access_token_identifier,
-                resource_owner_secret=self.access_token_secret)
+                resource_owner_key=resource_owner_key,
+                resource_owner_secret=resource_owner_secret)
