@@ -73,6 +73,14 @@ class OAuth1Service(Service):
         self.access_token_path = access_token_path
         self.authorize_path = authorize_path
 
+    @property
+    def authenticated(self):
+        resource_owner_key, resource_owner_secret = self.access_credentials
+        if resource_owner_key and resource_owner_secret:
+            return True
+        else:
+            return False
+
     def refresh_temporary_credentials(self):
         url = urlparse.urljoin(self.oauth_endpoint, self.request_token_path)
         temp_oa = OAuth1(client_key=self.client_identifier,
