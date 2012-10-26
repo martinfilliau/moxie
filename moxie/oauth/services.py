@@ -74,7 +74,7 @@ class OAuth1Service(Service):
         self.authorize_path = authorize_path
 
     @property
-    def authenticated(self):
+    def authorized(self):
         resource_owner_key, resource_owner_secret = self.access_credentials
         if resource_owner_key and resource_owner_secret:
             return True
@@ -82,9 +82,13 @@ class OAuth1Service(Service):
             return False
 
     def refresh_temporary_credentials(self):
+        if 'callback_uri' in request.values:
+            callback_uri = unicode(request.values['callback_uri'])
+        else:
+            callback_uri = None
         url = urlparse.urljoin(self.oauth_endpoint, self.request_token_path)
         temp_oa = OAuth1(client_key=self.client_identifier,
-                client_secret=self.client_secret)
+                client_secret=self.client_secret, callback_uri=callback_uri)
         response = requests.get(url, auth=temp_oa)
         qs = urlparse.parse_qs(response.text)
         self.temporary_credentials = (unicode(qs['oauth_token'][0]),
