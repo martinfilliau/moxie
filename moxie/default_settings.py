@@ -1,5 +1,9 @@
 # Moxie general config
 DEBUG = True
+SECRET_KEY = 'put-your-secret-key-here-dummy'
+DEFAULT_ALLOW_ORIGINS = ['http://localhost']
+DEFAULT_CORS_MAX_AGE = 21600
+DEFAULT_ALLOW_HEADERS = ''
 
 # Places app
 DEFAULT_LOCATION = (51.7531, -1.2584)
