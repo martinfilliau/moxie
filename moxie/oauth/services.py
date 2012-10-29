@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 class OAuthCredential(object):
     """Descriptor for caching our OAuth credentials in a user session.
-    Only if one is available. Caches to the :py:class:`OAuth1Service`
-    object in an attribute named :py:attr:`OAuthCredential.credential_store`.
+    Only if one is available. Caches on the :py:class:`OAuth1Service`
+    object in an attribute named by :py:attr:`OAuthCredential.credential_store`
     """
     credential_store = '_credentials'
 
@@ -54,7 +54,16 @@ class OAuth1Service(Service):
     """Enables using 3-legged authentication with OAuth v1 the Moxie client
     handles making actual redirections and user interactions.
 
+    .. note:: OAuth1 terminology varies, between the original spec and the
+       formal `RFC`_ the terminology is far from consistent.
+       We have tried to follow the `RFC`_ where possible however, we use
+       ``requests.auth`` which uses differing terminology.
+
+    .. _RFC: http://tools.ietf.org/html/rfc5849#page-5
+
     :param oauth_endpoint: URL of the form http://service.foo/oauth/
+    :param client_identifier: Client token identifier.
+    :param client_secret: Shared secret paired with the above identifier.
     """
 
     temporary_credentials = OAuthCredential('temporary')
@@ -75,17 +84,20 @@ class OAuth1Service(Service):
 
     @property
     def authorized(self):
+        """Returns ``True`` if resource owner credentials are available."""
         resource_owner_key, resource_owner_secret = self.access_credentials
         if resource_owner_key and resource_owner_secret:
             return True
         else:
             return False
 
-    def refresh_temporary_credentials(self):
-        if 'callback_uri' in request.values:
-            callback_uri = unicode(request.values['callback_uri'])
-        else:
-            callback_uri = None
+    def refresh_temporary_credentials(self, callback_uri=None):
+        """Requests new temporary credentials from the OAuth server.
+
+        :param callback_uri: the request is (optionally) signed with this
+               URL and the user should be redirected back here upon
+               completing the OAuth workflow.
+        """
         url = urlparse.urljoin(self.oauth_endpoint, self.request_token_path)
         temp_oa = OAuth1(client_key=self.client_identifier,
                 client_secret=self.client_secret, callback_uri=callback_uri)
@@ -95,17 +107,26 @@ class OAuth1Service(Service):
                 unicode(qs['oauth_token_secret'][0]))
         return self.temporary_credentials
 
-    @property
-    def authorization_url(self, token_param='oauth_token'):
-        temporary_identifier, _ = self.temporary_credentials
-        if not temporary_identifier:
-            temporary_identifier, _ = self.refresh_temporary_credentials()
+    def authorization_url(self, token_param='oauth_token', callback_uri=None):
+        """Convenience method to both generate a new temporary credential and
+        return a URL where a user can continue the OAuth workflow
+        authentication. Always generates new temporary credentials.
+        """
+        token, _ = self.refresh_temporary_credentials(callback_uri)
         url = urlparse.urljoin(self.oauth_endpoint, self.authorize_path)
-        params = {token_param: temporary_identifier}
+        params = {token_param: token}
         request = requests.Request(url=url, params=params)
         return request.full_url
 
     def verify(self, verifier):
+        """Sends a signed request to the OAuth server trading in your temporary
+        credentials for *access credentials* these can be used to sign requests
+        for the users protected resources.
+
+        :param verifier: Verification code passed from the OAuth server through
+               the users OAuth workflow. Can be either passed in a redirect or
+               the user could be instructed to copy it over.
+        """
         verifier = unicode(verifier)
         url = urlparse.urljoin(self.oauth_endpoint, self.access_token_path)
         resource_owner_key, resource_owner_secret = self.temporary_credentials
@@ -123,7 +144,7 @@ class OAuth1Service(Service):
     @property
     def signer(self):
         """Returns a :py:class:`OAuth1` object which can be used to sign
-        http requests bound for protected resources:
+        http requests bound for protected resources::
 
             oa = OAuth1Service('http://private.foo/oauth', 'private', 'key')
             requests.get('http://private.foo/private_resource', auth=oa.signer)
