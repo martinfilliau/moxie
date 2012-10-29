@@ -1,15 +1,20 @@
-from flask import request, abort, redirect
+from flask import request, redirect
 
 from moxie.core.views import ServiceView
 from .services import OAuth1Service
 
 
 class Authorize(ServiceView):
+    """Returns a 302 to the OAuth server to begin the OAuth workflow"""
     methods = ['GET', 'OPTIONS']
 
     def handle_request(self):
         oauth = OAuth1Service.from_context()
-        return redirect(oauth.authorization_url)
+        callback_uri = request.values.get('callback_uri', None)
+        if callback_uri:
+            callback_uri = unicode(callback_uri)
+        redirection_url = oauth.authorization_url(callback_uri=callback_uri)
+        return redirect(redirection_url)
 
 
 class Authorized(ServiceView):
@@ -20,7 +25,7 @@ class Authorized(ServiceView):
         if oauth.authorized:
             return {'authorized': True}
         else:
-            abort(403)
+            return {'authorized': False}
 
 
 class VerifyCallback(ServiceView):
@@ -33,4 +38,4 @@ class VerifyCallback(ServiceView):
         if oauth.authorized:
             return {'authorized': True}
         else:
-            abort(403)
+            return {'authorized': False}
