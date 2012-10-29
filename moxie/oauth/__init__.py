@@ -1,19 +1,18 @@
-from flask import Blueprint
-
 from .views import Authorized, Authorize, VerifyCallback
 
 
-def create_blueprint(blueprint_name):
-    oauth_blueprint = Blueprint(blueprint_name, __name__)
-
+def attach_oauth(blueprint, prefix='/oauth',
+        authorized_route='/authorized',
+        authorize_route='/authorize',
+        verify_route='/verify'):
     # URL Rules
-    oauth_blueprint.add_url_rule('/authorized',
+    blueprint.add_url_rule(prefix + authorized_route,
             view_func=Authorized.as_view('authorized'))
 
-    oauth_blueprint.add_url_rule('/authorize',
+    blueprint.add_url_rule(prefix + authorize_route,
             view_func=Authorize.as_view('authorize'))
 
-    oauth_blueprint.add_url_rule('/verify',
+    blueprint.add_url_rule(prefix + verify_route,
             view_func=VerifyCallback.as_view('verify'))
 
-    return oauth_blueprint
+    return blueprint
