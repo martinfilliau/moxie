@@ -53,7 +53,7 @@ class ServiceView(View):
         options_resp = current_app.make_default_options_response()
         h = options_resp.headers
         origin = request.headers.get('origin', '')
-        if origin in current_app.config['DEFAULT_ALLOW_ORIGINS']:
+        if origin in current_app.config.get('DEFAULT_ALLOW_ORIGINS', []):
             h['Access-Control-Allow-Origin'] = origin
         h['Access-Control-Allow-Methods'] = h['allow']
         h['Access-Control-Max-Age'] = str(self.default_cors_max_age)
@@ -74,7 +74,7 @@ class ServiceView(View):
             response = self.handle_request(*args, **kwargs)
             response = make_response(service_response(self, response))
             origin = request.headers.get('origin', '')
-            if origin in current_app.config['DEFAULT_ALLOW_ORIGINS']:
+            if origin in current_app.config.get('DEFAULT_ALLOW_ORIGINS', []):
                 response.headers['Access-Control-Allow-Origin'] = origin
             response.headers['Access-Control-Allow-Credentials'] = 'true'
             return response
