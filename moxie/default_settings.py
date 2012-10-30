@@ -1,5 +1,7 @@
 # Moxie general config
 DEBUG = True
+SECRET_KEY = 'put-your-secret-key-here-dummy'
+DEFAULT_ALLOW_ORIGINS = ['http://localhost']
 
 # Places app
 DEFAULT_LOCATION = (51.7531, -1.2584)
