@@ -40,7 +40,7 @@ class SolrSearch(object):
                 'fl': '*,_dist_:geodist()',
                 }
         results = self.search(q)
-        return get_search_response(results.json)
+        return SolrSearchResponse(results.json)
 
     def search(self, query):
         l = []
@@ -70,7 +70,7 @@ class SolrSearch(object):
         params = { 'ids': ids }
         results = self.connection(self.methods['get'],
             params=params)
-        return get_search_response(results.json)
+        return SolrSearchResponse(results.json)
 
     def index(self, document, params=None):
         data = json.dumps(document)
@@ -102,7 +102,7 @@ class SolrSearch(object):
             query.append('%s:%s' % (id_key, self.solr_escape(id)))
         query_string = {'q': " OR ".join(query)}
         results = self.search(query_string)
-        return get_search_response(results.json)
+        return SolrSearchResponse(results.json)
 
     def connection(self, method, params=None, data=None, headers=None):
         """Does a GET request if there is no data otherwise a POST
@@ -126,18 +126,19 @@ class SolrSearch(object):
         return string.replace(':', '\:')
 
 
-def get_search_response(solr_response):
-    """Prepare a :py:class:`SearchResponse` object
-    :param solr_response: response from Solr
-    :return :py:class:`SearchResponse`
-    """
-    try:
-        query = solr_response['responseHeader']['params']['q']
-    except:
-        query = None
-    try:
-        suggestion = solr_response['spellcheck']['suggestions'][-1]
-    except:
-        suggestion = None
+class SolrSearchResponse(SearchResponse):
 
-    return SearchResponse(solr_response, query, solr_response['response']['docs'], suggestion)
+    def __init__(self, solr_response):
+        """Prepare a :py:class:`SearchResponse` object
+        :param solr_response: response from Solr
+        """
+        try:
+            query = solr_response['responseHeader']['params']['q']
+        except:
+            query = None
+        try:
+            suggestion = solr_response['spellcheck']['suggestions'][-1]
+        except:
+            suggestion = None
+
+        super(SolrSearchResponse, self).__init__(solr_response, query, solr_response['response']['docs'], suggestion)
