@@ -1,6 +1,7 @@
 from flask import Blueprint
 
-from .views import Search, PoiDetail, RTI
+from moxie.transport.views import RTI
+from .views import Search, PoiDetail
 
 
 def create_blueprint(blueprint_name):

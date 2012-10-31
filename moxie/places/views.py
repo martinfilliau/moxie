@@ -1,8 +1,6 @@
-from flask import request, current_app, url_for, abort, redirect, json
+from flask import request, current_app, url_for, abort, redirect
 
 from moxie.core.views import ServiceView
-from moxie.core.kv import kv_store
-from moxie.transport.services import TransportService
 
 from .importers.helpers import simplify_doc_for_render
 from .services import POIService
@@ -52,25 +50,3 @@ class PoiDetail(ServiceView):
             if poi_service.get_provider(doc):
                 doc['hasRti'] = url_for('places.rti', ident=doc['id'])
             return simplify_doc_for_render(doc)
-
-
-class RTI(ServiceView):
-    methods = ['GET', 'OPTIONS']
-
-    CACHE_KEY_FORMAT = '{0}_naptan_{1}'
-    CACHE_EXPIRE = 10   # seconds for cache to expire
-
-    def handle_request(self, ident):
-        cache = kv_store.get(self.CACHE_KEY_FORMAT.format(__name__, ident))
-        if cache:
-            return json.loads(cache)
-        else:
-            transport_service = TransportService.from_context()
-            services, messages = transport_service.get_rti(ident)
-            response = {
-                'services': services,
-                'messages': messages
-            }
-            kv_store.setex(self.CACHE_KEY_FORMAT.format(__name__, ident),
-                    self.CACHE_EXPIRE, json.dumps(response))
-            return response

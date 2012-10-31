@@ -22,9 +22,6 @@ class Service(object):
             assert(service_one is service_two)
     """
 
-    def __init__(self, providers=None):
-        self.providers = providers or []
-
     @classmethod
     def from_context(cls, blueprint_name=''):
         """Create a :py:class:`Service` from the application and request
@@ -58,12 +55,3 @@ class Service(object):
             service = cls(*args, **kwargs)
             ctx.moxie_services[service_key] = service
             return service
-
-    def get_provider(self, doc):
-        """Returns a :class:`~moxie.core.provider.Provider` which can handle
-        your ``doc``.  If no provider can be found, returns ``None``.
-        """
-        for provider in self.providers:
-            if provider.handles(doc):
-                return provider
-        return None
