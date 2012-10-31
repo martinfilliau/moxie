@@ -2,6 +2,8 @@ import logging
 import requests
 import json
 
+from moxie.core.search import SearchResponse
+
 
 logger = logging.getLogger(name=__name__)
 
@@ -38,7 +40,7 @@ class SolrSearch(object):
                 'fl': '*,_dist_:geodist()',
                 }
         results = self.search(q)
-        return results
+        return SolrSearchResponse(results.json)
 
     def search(self, query):
         l = []
@@ -59,16 +61,16 @@ class SolrSearch(object):
     def get_by_ids(self, document_ids):
         """
         Get documents by their ID (using the real-time GET feature of Solr 4).
-        Query string to build is as "?ids=5a9b4f27-310f-4207-8a97-1dce48fdf31d,a791b6e9-e532-461f-8ae1-12218f0db81e"
+        Query string to build is as "?ids=oxpoints:23232805,oxpoints:23232801"
         (i.e. param is ids, and IDs are comma-separated.
-        @param document_ids list of document ids
-        @return list of documents
+        :param document_ids: list of document ids
+        :return list of documents
         """
         ids = ",".join(document_ids)
         params = { 'ids': ids }
         results = self.connection(self.methods['get'],
             params=params)
-        return results
+        return SolrSearchResponse(results.json)
 
     def index(self, document, params=None):
         data = json.dumps(document)
@@ -93,21 +95,19 @@ class SolrSearch(object):
                 params={'commit': 'true'}, headers=headers)
 
     def search_for_ids(self, id_key, identifiers):
-        """
-        Search for documents by their identifiers (NB: this is not the unique ID used by Solr).
+        """Search for documents by their identifiers (NB: this is not the unique ID used by Solr).
         """
         query = []
         for id in identifiers:
             query.append('%s:%s' % (id_key, self.solr_escape(id)))
         query_string = {'q': " OR ".join(query)}
         results = self.search(query_string)
-        return results
+        return SolrSearchResponse(results.json)
 
     def connection(self, method, params=None, data=None, headers=None):
-        """
-        Does a GET request if there is no data otherwise a POST
-        @param params URL parameters as a dict
-        @param data POST form
+        """Does a GET request if there is no data otherwise a POST
+        :param params: URL parameters as a dict
+        :param data: POST form
         """
         headers = headers or dict()
         params = params or dict()
@@ -124,3 +124,21 @@ class SolrSearch(object):
     @staticmethod
     def solr_escape(string):
         return string.replace(':', '\:')
+
+
+class SolrSearchResponse(SearchResponse):
+
+    def __init__(self, solr_response):
+        """Prepare a :py:class:`SearchResponse` object
+        :param solr_response: response from Solr
+        """
+        try:
+            query = solr_response['responseHeader']['params']['q']
+        except:
+            query = None
+        try:
+            suggestion = solr_response['spellcheck']['suggestions'][-1]
+        except:
+            suggestion = None
+
+        super(SolrSearchResponse, self).__init__(solr_response, query, solr_response['response']['docs'], suggestion)

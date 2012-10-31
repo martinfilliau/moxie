@@ -65,3 +65,67 @@ class SearchService(Service):
 
 
 searcher = LocalProxy(SearchService.from_context)
+
+
+class SearchResponse(object):
+
+    def __init__(self, raw_response, query, results, query_suggestion=None, facets=None):
+        """
+        Init a SearchResponse object
+        :param raw_response: full response from the search server
+        :param query: query has searched by the search server
+        :param results: list of documents
+        :param query_suggestion: suggestion of a new query to make (generally a recommendation from a spellchecker)
+        :param facets: facets for this search response
+        """
+        self._raw_response = raw_response
+        self._query = query
+        self._results = results
+        self._query_suggestion = query_suggestion
+        self._facets = facets
+
+    def __repr__(self):
+        return "<SearchResponse ['{0}'] ({1})>".format(self._query, len(self._results))
+
+    @property
+    def query(self):
+        """String of the query (FTS)
+        :rtype string
+        """
+        return self._query
+
+    @property
+    def results(self):
+        """Response documents
+        :return list of dict or None if no results
+        :rtype list of dict
+        """
+        return self._results
+
+    @property
+    def facets(self):
+        """Facets of the query
+        :rtype list of facets"""
+        return self.facets
+
+    @property
+    def query_suggestion(self):
+        """Suggestion of a new query
+        :return query suggestion
+        :rtype string"""
+        return self._query_suggestion
+
+    @property
+    def as_json(self):
+        """Raw response as JSON
+        :rtype string of JSON
+        """
+        import json
+        return json.loads(self._raw_response)
+
+    @property
+    def as_dict(self):
+        """Raw response as a dict
+        :rtype dict
+        """
+        return self._raw_response

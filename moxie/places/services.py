@@ -8,29 +8,22 @@ class POIService(Service):
     def get_results(self, original_query, location):
         query = original_query or self.default_search
         response = searcher.search_nearby(query, location)
-        results = response.json
-        if results['response']['numFound'] == 0:
-            if results['spellcheck']['suggestions']:
-                suggestion = str(results['spellcheck']['suggestions'][-1])
-                results = self.get_results(suggestion, location)
-                return results
-            else:
-                return {}
-        return results['response']['docs']
+        # if no results, try to use spellcheck suggestion to make a new request
+        if not response.results:
+            if response.query_suggestion:
+                suggestion = response.query_suggestion
+                return self.get_results(suggestion, location)
+        return response
 
     def get_place_by_identifier(self, ident):
         response = searcher.get_by_ids([ident])
-        results = response.json
         # First do a GET request by its ID
-        if results['response']['docs']:
-            doc = results['response']['docs'][0]
-            return doc
+        if response.results:
+            return response.results[0]
         else:
             # If no result, do a SEARCH request on IDs
             response = searcher.search_for_ids("identifiers", [ident])
-            results = response.json
-            if results['response']['docs']:
-                doc = results['response']['docs'][0]
-                return doc
+            if response.results:
+                return response.results[0]
             else:
                 return None

@@ -44,11 +44,11 @@ def prepare_document(doc, results, precedence):
         logger.warning("Couldn't find name for type '{0}'.".format(doc["type"]))
 
     # Attempt to merge documents
-    if len(results['response']['docs']) == 0:
+    if len(results.results) == 0:
         doc[precedence_key] = precedence
         return doc
-    elif len(results['response']['docs']) == 1:
-        return merge_docs(doc, results['response']['docs'][0], precedence)
+    elif len(results.results) == 1:
+        return merge_docs(doc, results.results[0], precedence)
     else:
         raise ACIDException()
 

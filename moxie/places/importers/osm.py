@@ -153,7 +153,7 @@ class OSMHandler(handler.ContentHandler):
                 result['location'] = "%s,%s" % location
                 search_results = self.indexer.search_for_ids(
                         self.identifier_key, result[self.identifier_key])
-                result = prepare_document(result, search_results.json, self.precedence)
+                result = prepare_document(result, search_results, self.precedence)
                 result = [result]
                 self.indexer.index(result)
         except Exception as e:

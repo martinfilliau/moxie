@@ -131,7 +131,7 @@ class OxpointsImporter(object):
 
         search_results = self.indexer.search_for_ids(
             self.identifier_key, doc[self.identifier_key])
-        result = prepare_document(doc, search_results.json, self.precedence)
+        result = prepare_document(doc, search_results, self.precedence)
         result = [result]
         self.indexer.index(result)
 
