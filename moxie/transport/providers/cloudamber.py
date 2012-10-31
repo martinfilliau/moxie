@@ -3,12 +3,12 @@ import requests
 
 from lxml import etree
 from itertools import chain
-from moxie.core.provider import Provider
+from . import TransportRTIProvider
 
 logger = logging.getLogger(__name__)
 
 
-class CloudAmberBusRtiProvider(Provider):
+class CloudAmberBusRtiProvider(TransportRTIProvider):
     """
     Parses an HTML page from a CloudAmber instance
     """
