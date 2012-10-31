@@ -1,9 +1,9 @@
 import unittest
 
-from moxie.core.provider import Provider
+from moxie.transport.providers import TransportRTIProvider
 
 
-class FooProvider(Provider):
+class FooProvider(TransportRTIProvider):
 
     def handles(self, foo):
         if foo == 'foo':
@@ -19,11 +19,11 @@ class ProviderTest(unittest.TestCase):
         self.provider = FooProvider()
 
     def test_base_provider_handles(self):
-        self.assertFalse(Provider().handles('foo'))
+        self.assertFalse(TransportRTIProvider().handles('foo'))
 
     def test_base_provider_invoke(self):
         with self.assertRaises(NotImplementedError):
-            Provider().invoke('foo')
+            TransportRTIProvider().invoke('foo')
 
     def test_foo_provider_callable(self):
         self.assertTrue(callable(self.provider))
