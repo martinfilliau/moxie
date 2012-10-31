@@ -6,4 +6,7 @@ install:
 script:
   - python setup.py test
 notifications:
-  irc: "irc.ox.ac.uk#mox"
+  irc:
+    channels:
+        - "irc.ox.ac.uk#mox"
+    on_success: change
