@@ -9,11 +9,19 @@ NAPTAN_IMPORT_URL = 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
 
 from moxie.transport.providers.cloudamber import CloudAmberBusRtiProvider
 bus_provider = CloudAmberBusRtiProvider('http://www.oxontime.com')
+
+from moxie.library.providers.oxford_z3950 import Z3950
+z = Z3950('library.ox.ac.uk', 'ALEPH', results_encoding='unicode')
+
 SERVICES = {
 'places': {
     'POIService': ([], {'providers': [bus_provider]}),
     'TransportService': ([], {'providers': [bus_provider]}),
     'SearchService': (['solr+http://localhost:8080/solr/places'], {}),
+    'KVService': (['redis://localhost:6379/0'], {}),
+    },
+'library': {
+    'LibrarySearchService': ([], {'providers': [z]}),
     'KVService': (['redis://localhost:6379/0'], {}),
     },
 'oxford_dates': {
