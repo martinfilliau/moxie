@@ -21,9 +21,7 @@ class TransportService(Service):
         accessing POI detail view
         """
         # Should we improve this API to only return the doc?
-        results = searcher.get_by_ids([ident])
+        doc = searcher.get_by_ids([ident]).results[0]
         # First do a GET request by its ID
-        if results.json['response']['docs']:
-            doc = results.json['response']['docs'][0]
         provider = self.get_provider(doc)
         return provider(doc)
