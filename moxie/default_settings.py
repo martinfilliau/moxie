@@ -26,7 +26,7 @@ SERVICES = {
     'POIService': ([], {}),
     'LibrarySearchService': ([], {'providers': [z]}),
     'KVService': (['redis://localhost:6379/0'], {}),
-    'SearchService': (['solr+http://localhost:8983/solr/collection1'], {}),
+    'SearchService': (['solr+http://localhost:8080/solr/places'], {}),
     },
 'oxford_dates': {
     'OxfordDatesService': ([], {}),
