@@ -17,7 +17,7 @@ z = Z3950('library.ox.ac.uk', 'ALEPH', results_encoding='unicode')
 
 SERVICES = {
 'places': {
-    'POIService': ([], {'providers': [bus_provider]}),
+    'POIService': ([], {}),
     'TransportService': ([], {'providers': [bus_provider]}),
     'SearchService': (['solr+http://localhost:8080/solr/places'], {}),
     'KVService': (['redis://localhost:6379/0'], {}),
