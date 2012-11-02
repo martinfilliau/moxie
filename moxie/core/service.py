@@ -1,3 +1,5 @@
+import importlib
+
 from flask import _app_ctx_stack, request
 
 
@@ -49,9 +51,24 @@ class Service(object):
             return ctx.moxie_services[service_key]
         else:
             try:
-                args, kwargs = ctx.app.config['SERVICES'][blueprint_name][name]
+                kwargs = ctx.app.config['SERVICES'][blueprint_name][name]
             except KeyError:
                 raise NoConfiguredService('The service: %s is not configured on blueprint: %s' % (name, blueprint_name))
-            service = cls(*args, **kwargs)
+            service = cls(**kwargs)
             ctx.moxie_services[service_key] = service
             return service
+
+    def _import_provider(self, config):
+        """Given a provider config of the form::
+
+            ('moxie.app.providers.ProviderClass', {'location': 'Oxford'})
+
+        Imports the first element and instantiate using the `**kwargs` in the
+        second element. Providers are used throughout Moxie, this is the
+        consistent way to import them in your `Service`.
+        """
+        provider, conf = config
+        module_name, _, klass_name = provider.rpartition('.')
+        module = importlib.import_module(module_name)
+        klass = getattr(module, klass_name)
+        return klass(**conf)
