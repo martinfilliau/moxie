@@ -226,5 +226,5 @@ def simplify_doc_for_render(doc):
         poi['type'] = doc.get('type_name')
     if 'hasRti' in doc:
         poi['hasRti'] = doc.get('hasRti')
-    poi['_self'] = url_for('places.poidetail', ident=doc['id'])
+    poi['links'] = { 'self': url_for('places.poidetail', ident=doc['id']) }
     return poi
