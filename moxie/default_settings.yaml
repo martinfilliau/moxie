@@ -25,9 +25,9 @@ services:
             providers:
                 moxie.transport.providers.cloudamber.CloudAmberBusRtiProvider:
                     url: 'http://www.oxontime.com'
-        SearchService: &places_index
+        SearchService:
             backend_uri: 'solr+http://localhost:8080/solr/places'
-        KVService:     &primary_kvstore
+        KVService:
             backend_uri: 'redis://localhost:6379/0'
     oxford_dates:
         OxfordDatesService: {}
@@ -39,8 +39,10 @@ services:
                     host: 'library.ox.ac.uk'
                     database: 'ALEPH'
                     results_encoding: 'unicode'
-        SearchService:  *places_index
-        KVService:      *primary_kvstore
+        SearchService:
+            backend_uri: 'solr+http://localhost:8080/solr/places'
+        KVService:
+            backend_uri: 'redis://localhost:6379/0'
     courses:
         OAuth1Service:
             oauth_endpoint: 'http://oauth-endpoint.foo/oauth'
