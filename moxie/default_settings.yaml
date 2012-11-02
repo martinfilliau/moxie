@@ -1,0 +1,48 @@
+flask:
+    DEBUG: True
+    SECRET_KEY: 'put-your-secret-key-here'
+    DEFAULT_ALLOW_ORIGINS:
+        - 'http://localhost'
+
+blueprints:
+    places:
+        url_prefix: /places
+        factory: moxie.places.create_blueprint
+    oxford_dates:
+        url_prefix: /oxford_dates
+        factory: moxie.oxford_dates.create_blueprint
+    library:
+        url_prefix: /library
+        factory: moxie.library.create_blueprint
+    courses:
+        url_prefix: /courses
+        factory: moxie_courses.create_blueprint
+
+services:
+    places:
+        POIService: {}
+        TransportService:
+            providers:
+                moxie.transport.providers.cloudamber.CloudAmberBusRtiProvider:
+                    url: 'http://www.oxontime.com'
+        SearchService: &places_index
+            backend_uri: 'solr+http://localhost:8080/solr/places'
+        KVService:     &primary_kvstore
+            backend_uri: 'redis://localhost:6379/0'
+    oxford_dates:
+        OxfordDatesService: {}
+    library:
+        POIService: {}
+        LibrarySearchService:
+            search_provider_config:
+                moxie.library.providers.oxford_z3950.Z3950:
+                    host: 'library.ox.ac.uk'
+                    database: 'ALEPH'
+                    results_encoding: 'unicode'
+        SearchService:  *places_index
+        KVService:      *primary_kvstore
+    courses:
+        OAuth1Service:
+            oauth_endpoint: 'http://oauth-endpoint.foo/oauth'
+            client_identifier: 'identifier'
+            client_secret: 'secrets'
