@@ -6,6 +6,15 @@ Formats
 
 The API returns only JSON at the moment.
 
+HATEOAS links
+-------------
+
+Responses may have a `links` attribute containing links to help in the navigation (e.g. when results need pagination).
+
+Each individual entity has a `self` attribute in `links` that represents the path to itself.
+
+It is highly recommended for clients to use these links to navigate between resources.
+
 CORS
 ----
 
