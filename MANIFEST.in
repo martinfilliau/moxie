@@ -1,1 +1,2 @@
 include moxie/places/poi-types.yaml
+include moxie/default_settings.yaml
