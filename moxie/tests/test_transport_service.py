@@ -31,8 +31,10 @@ class TestProvider(TransportService):
 class TransportServiceTest(unittest.TestCase):
 
     def setUp(self):
-        self.any_service = TestProvider(providers=[ProvidesAll()])
-        self.no_service = TestProvider(providers=[ProvidesNone()])
+        provides_all_conf = {'moxie.tests.test_transport_service.ProvidesAll': {}}
+        provides_none_conf = {'moxie.tests.test_transport_service.ProvidesNone': {}}
+        self.any_service = TestProvider(providers=provides_all_conf)
+        self.no_service = TestProvider(providers=provides_none_conf)
         self.doc = {'foo': 'bar'}
 
     def test_get_provider(self):
