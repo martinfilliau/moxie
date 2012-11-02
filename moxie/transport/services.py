@@ -4,8 +4,8 @@ from moxie.core.search import searcher
 
 class TransportService(Service):
 
-    def __init__(self, providers=None):
-        self.providers = providers or []
+    def __init__(self, providers={}):
+        self.providers = map(self._import_provider, providers.items())
 
     def get_provider(self, doc):
         """Returns a :class:`~moxie.core.provider.Provider` which can handle
