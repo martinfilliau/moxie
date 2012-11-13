@@ -9,8 +9,7 @@ class TestProvider(Service):
 
 
 class ArgService(Service):
-    def __init__(self, *args, **kwargs):
-        self.args = args
+    def __init__(self, **kwargs):
         self.kwargs = kwargs
 
 
@@ -18,9 +17,9 @@ class ServiceTest(unittest.TestCase):
 
     def setUp(self):
         self.app = create_app()
-        services = {'foobar': {'TestProvider': ([], {})},
-                'barfoo': {'TestProvider': ([], {})},
-                'blueblue': {'ArgService': ([1, 2, 3], {'mox': 'ie'})},
+        services = {'foobar': {'TestProvider': {}},
+                'barfoo': {'TestProvider': {}},
+                'blueblue': {'ArgService': {'mox': 'ie'}},
                 }
         self.app.config['SERVICES'] = services
 
@@ -44,5 +43,4 @@ class ServiceTest(unittest.TestCase):
     def test_service_configured_args(self):
         with self.app.app_context():
             argserv = ArgService.from_context(blueprint_name='blueblue')
-            self.assertEqual(argserv.args, (1, 2, 3))
             self.assertEqual(argserv.kwargs, {'mox': 'ie'})

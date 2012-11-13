@@ -1,23 +1,12 @@
 from flask import Flask
-from moxie.places import create_blueprint as create_places_blueprint
-from moxie.library import create_blueprint as create_library_blueprint
-from moxie.oxford_dates import create_blueprint as create_oxford_dates_blueprint
+from os import path
+from moxie.core.configurator import Configurator
 
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object('moxie.default_settings')
-    try:
-        app.config.from_envvar('MOXIE_SETTINGS')
-    except RuntimeError:
-        # Env variable not set.
-        pass
-
-    # Register Moxie apps
-    app.register_blueprint(create_places_blueprint('places'),
-            url_prefix='/places')
-    app.register_blueprint(create_library_blueprint('library'),
-            url_prefix='/library')
-    app.register_blueprint(create_oxford_dates_blueprint('oxford_dates'),
-            url_prefix='/dates')
+    configurator = Configurator(app)
+    cfg_path = path.join(app.root_path, 'default_settings.yaml')
+    configurator.from_yaml(cfg_path)
+    configurator.from_envvar('MOXIE_SETTINGS', silent=True)
     return app
