@@ -73,6 +73,12 @@ class SolrSearch(object):
         return SolrSearchResponse(results.json)
 
     def index(self, document, params=None):
+        """Index a list of objects
+        :param document: must be a list of objects to index
+        :param params: additional parameters to add
+        """
+        # TODO this method should be able to chunk a list in a smaller amount
+        # of documents
         data = json.dumps(document)
         headers = {'Content-Type': self.content_types[self.return_type]}
         response = self.connection(self.methods['update'], params=params,
