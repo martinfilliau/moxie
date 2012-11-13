@@ -129,3 +129,7 @@ class SearchResponse(object):
         :rtype dict
         """
         return self._raw_response
+
+
+class SearchServerException(Exception):
+    pass

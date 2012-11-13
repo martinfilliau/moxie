@@ -2,7 +2,7 @@ import logging
 import requests
 import json
 
-from moxie.core.search import SearchResponse
+from moxie.core.search import SearchResponse, SearchServerException
 
 
 logger = logging.getLogger(name=__name__)
@@ -78,7 +78,8 @@ class SolrSearch(object):
         response = self.connection(self.methods['update'], params=params,
                 data=data, headers=headers)
         if response.status_code != 200:
-            raise Exception
+            raise SearchServerException("Server returned HTTP {code}".format(
+                code=response.status_code))
 
     def commit(self):
         return self.connection(self.methods['update'],
