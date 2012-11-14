@@ -1,20 +1,8 @@
-from moxie.core.service import Service
+from moxie.core.service import ProviderService
 from moxie.core.search import searcher
 
 
-class TransportService(Service):
-
-    def __init__(self, providers={}):
-        self.providers = map(self._import_provider, providers.items())
-
-    def get_provider(self, doc):
-        """Returns a :class:`~moxie.core.provider.Provider` which can handle
-        your ``doc``.  If no provider can be found, returns ``None``.
-        """
-        for provider in self.providers:
-            if provider.handles(doc):
-                return provider
-        return None
+class TransportService(ProviderService):
 
     def get_rti(self, ident):
         """TODO: We should have this perform the same redirect as when
