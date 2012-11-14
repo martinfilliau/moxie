@@ -72,3 +72,21 @@ class Service(object):
         module = importlib.import_module(module_name)
         klass = getattr(module, klass_name)
         return klass(**conf)
+
+
+class ProviderService(Service):
+    """Used where a :class:`Service` deals with many external providers.
+    Example usage can be found in the
+    :class:`~moxie.transport.services.TransportService`
+    """
+    def __init__(self, providers={}):
+        self.providers = map(self._import_provider, providers.items())
+
+    def get_provider(self, doc):
+        """Returns a :class:`~moxie.core.provider.Provider` which can handle
+        your ``doc``.  If no provider can be found, returns ``None``.
+        """
+        for provider in self.providers:
+            if provider.handles(doc):
+                return provider
+        return None
