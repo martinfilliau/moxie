@@ -72,17 +72,27 @@ class SolrSearch(object):
             params=params)
         return SolrSearchResponse(results.json)
 
-    def index(self, document, params=None):
-        """Index a list of objects
+    def index(self, document, params=None, count_per_page=50):
+        """Index a list of objects, do paging
         :param document: must be a list of objects to index
         :param params: additional parameters to add
+        :param count_per_page: number of items per page to send
         """
-        # TODO this method should be able to chunk a list in a smaller amount
-        # of documents
+        if len(document) < count_per_page:
+            self.index_all(document, params)
+        else:
+            for i in range(0, len(document), count_per_page):
+                self.index_all(document[i:i+count_per_page], params)
+
+    def index_all(self, document, params=None):
+        """Index a list of objects
+        :param document: list of documents
+        :param params: additional parameters
+        """
         data = json.dumps(document)
         headers = {'Content-Type': self.content_types[self.return_type]}
         response = self.connection(self.methods['update'], params=params,
-                data=data, headers=headers)
+            data=data, headers=headers)
         if response.status_code != 200:
             raise SearchServerException("Server returned HTTP {code}".format(
                 code=response.status_code))
