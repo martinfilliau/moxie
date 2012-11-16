@@ -39,8 +39,7 @@ class SolrSearch(object):
                 'sort': 'geodist() asc',
                 'fl': '*,_dist_:geodist()',
                 }
-        results = self.search(q)
-        return SolrSearchResponse(results.json)
+        return self.search(q)
 
     def search(self, query):
         l = []
@@ -50,7 +49,7 @@ class SolrSearch(object):
         headers = {'Content-Type': self.content_types['form']}
         results = self.connection(self.methods['select'],
                 data=data, headers=headers)
-        return results
+        return SolrSearchResponse(results.json)
 
     def suggest(self, query):
         params = {'q': query}
@@ -59,8 +58,7 @@ class SolrSearch(object):
         return results
 
     def get_by_ids(self, document_ids):
-        """
-        Get documents by their ID (using the real-time GET feature of Solr 4).
+        """Get documents by their ID (using the real-time GET feature of Solr 4).
         Query string to build is as "?ids=oxpoints:23232805,oxpoints:23232801"
         (i.e. param is ids, and IDs are comma-separated.
         :param document_ids: list of document ids
@@ -118,8 +116,7 @@ class SolrSearch(object):
         for id in identifiers:
             query.append('%s:%s' % (id_key, self.solr_escape(id)))
         query_string = {'q': " OR ".join(query)}
-        results = self.search(query_string)
-        return SolrSearchResponse(results.json)
+        return self.search(query_string)
 
     def connection(self, method, params=None, data=None, headers=None):
         """Does a GET request if there is no data otherwise a POST

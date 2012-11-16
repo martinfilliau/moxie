@@ -48,6 +48,13 @@ class SearchService(Service):
         searcher = getattr(searcher, search_klass)
         return searcher(index_name, searcher_url)
 
+    def search(self, query):
+        """Generic search query
+        :param query: dict of k/v corresponding to parameters to search
+        :return :py:data:`moxie.core.search.SearchResponse`
+        """
+        return self._backend.search(query)
+
     def search_nearby(self, query, location):
         return self._backend.search_nearby(query, location)
 
