@@ -151,8 +151,12 @@ class SolrSearchResponse(SearchResponse):
         except:
             query = None
         try:
+            results = solr_response['response']['docs']
+        except:
+            results = None
+        try:
             suggestion = solr_response['spellcheck']['suggestions'][-1]
         except:
             suggestion = None
 
-        super(SolrSearchResponse, self).__init__(solr_response, query, solr_response['response']['docs'], suggestion)
+        super(SolrSearchResponse, self).__init__(solr_response, query, results, suggestion)

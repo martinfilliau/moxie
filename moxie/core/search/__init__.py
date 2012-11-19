@@ -76,7 +76,7 @@ searcher = LocalProxy(SearchService.from_context)
 
 class SearchResponse(object):
 
-    def __init__(self, raw_response, query, results, query_suggestion=None, facets=None):
+    def __init__(self, raw_response, query, results=None, query_suggestion=None, facets=None):
         """
         Init a SearchResponse object
         :param raw_response: full response from the search server
