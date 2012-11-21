@@ -1,5 +1,5 @@
 from flask.views import View
-from flask import request, jsonify, make_response, current_app
+from flask import request, jsonify, make_response, current_app, abort
 from werkzeug.exceptions import NotAcceptable
 from werkzeug.wrappers import BaseResponse
 
@@ -39,9 +39,11 @@ class ServiceView(View):
 
     __metaclass__ = ServiceMetaclass
     default_response = NotAcceptable
+    methods = ['GET', 'OPTIONS']
 
-    default_allow_headers = ''
-    default_cors_max_age = 21600
+    cors_allow_headers = ''
+    cors_allow_credentials = False
+    cors_max_age = 21600
 
     @classmethod
     def as_view(cls, *args, **kwargs):
@@ -51,14 +53,29 @@ class ServiceView(View):
 
     def _handle_options(self):
         options_resp = current_app.make_default_options_response()
-        h = options_resp.headers
-        origin = request.headers.get('origin', '')
-        if origin in current_app.config.get('DEFAULT_ALLOW_ORIGINS', []):
+        return self._cors_headers(options_resp, preflight=True)
+
+    def _cors_headers(self, response, preflight=False, origin=None):
+        """Applies the appropriate CORS headers for a given Response"""
+        if not origin and request:  # Origin must exist in a valid CORS request
+            origin = request.headers.get('origin')
+        h = {}
+        allow_origins = current_app.config.get('DEFAULT_ALLOW_ORIGINS', [])
+        if not self.cors_allow_credentials:
+            h['Access-Control-Allow-Origin'] = '*'
+        elif current_app.debug or origin in allow_origins:
             h['Access-Control-Allow-Origin'] = origin
-        h['Access-Control-Allow-Methods'] = h['allow']
-        h['Access-Control-Max-Age'] = str(self.default_cors_max_age)
-        h['Access-Control-Allow-Headers'] = self.default_allow_headers
-        return options_resp
+        else:
+            abort(400)
+        if preflight:
+            h['Access-Control-Allow-Methods'] = response.headers['allow']
+            h['Access-Control-Max-Age'] = str(self.cors_max_age)
+            if self.cors_allow_headers:
+                h['Access-Control-Allow-Headers'] = self.cors_allow_headers
+        if self.cors_allow_credentials:
+            h['Access-Control-Allow-Credentials'] = 'true'
+        response.headers.extend(h)
+        return response
 
     def dispatch_request(self, *args, **kwargs):
         """Finds the best_match service_response from those registered
@@ -73,11 +90,7 @@ class ServiceView(View):
             service_response = self.service_responses[best_match]
             response = self.handle_request(*args, **kwargs)
             response = make_response(service_response(self, response))
-            origin = request.headers.get('origin', '')
-            if origin in current_app.config.get('DEFAULT_ALLOW_ORIGINS', []):
-                response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            return response
+            return self._cors_headers(response)
         else:
             return self.default_response()
 
