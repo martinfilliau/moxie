@@ -1,5 +1,6 @@
 import unittest
 
+from flask import Blueprint
 from moxie import create_app
 from moxie.core.service import Service, NoConfiguredService
 
@@ -22,6 +23,8 @@ class ServiceTest(unittest.TestCase):
                 'blueblue': {'ArgService': {'mox': 'ie'}},
                 }
         self.app.config['SERVICES'] = services
+        bp = Blueprint('foobar', 'foobar')
+        self.app.register_blueprint(bp)
 
     def test_service_config_missing(self):
         with self.app.app_context():
@@ -44,3 +47,12 @@ class ServiceTest(unittest.TestCase):
         with self.app.app_context():
             argserv = ArgService.from_context(blueprint_name='blueblue')
             self.assertEqual(argserv.kwargs, {'mox': 'ie'})
+
+    def test_service_blueprint_context(self):
+        with self.app.blueprint_context('foobar'):
+            TestProvider.from_context()
+
+    def test_service_blueprint_context_not_configured(self):
+        with self.app.blueprint_context('foobar'):
+            with self.assertRaises(NoConfiguredService):
+                ArgService.from_context()
