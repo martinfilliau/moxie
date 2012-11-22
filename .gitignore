@@ -1,5 +1,7 @@
 *.py[co]
 
+moxie/local_settings.yaml
+
 # Packages
 *.egg
 *.egg-info
