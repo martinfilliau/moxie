@@ -9,7 +9,7 @@ from moxie.transport.services import TransportService
 
 class Search(ServiceView):
     methods = ['GET', 'OPTIONS']
-    default_allow_headers = 'geo-position'
+    cors_allow_headers = 'geo-position'
 
     def handle_request(self):
         response = dict()
