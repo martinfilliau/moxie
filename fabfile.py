@@ -23,6 +23,7 @@ Environments
 
 ENVIRONMENTS = ('dev', 'staging')
 
+
 @task
 def dev():
     """
@@ -35,6 +36,7 @@ def dev():
     env.remote_git_checkout_api = '/srv/moxie/source-moxie'
     env.remote_install_dir_front = '/srv/moxie/js.mox'
     env.remote_git_checkout_front = '/srv/moxie/source-moxie-js'
+    env.additional_requirements = '/srv/moxie/requirements.txt'
 
 
 @task
@@ -49,6 +51,7 @@ def staging():
     env.remote_git_checkout_api = '/srv/moxie/moxie-api'
     env.remote_install_dir_front = '/srv/moxie/new.m.ox.ac.uk'
     env.remote_git_checkout_front = '/srv/moxie/moxie-js'
+    env.additional_requirements = '/srv/moxie/requirements.txt'
 
 
 """
@@ -94,18 +97,18 @@ def deploy_front(version):
     if not version:
         utils.abort('You must specify a version (whether branch or tag).')
 
-    git_hash = git_branch(env.remote_git_checkout_front, MOXIE_CLIENT_REPO, version)
-
-    versioned_path = '/srv/%s/client-%s-%s' % (env.user, datetime.now().strftime('%Y%m%d%H%M')
-            , git_hash)
-            
+    git_hash = git_branch(env.remote_git_checkout_front,
+            MOXIE_CLIENT_REPO, version)
+    versioned_path = '/srv/%s/client-%s-%s' % (
+            env.user, datetime.now().strftime('%Y%m%d%H%M'), git_hash)
     run('mkdir {0}'.format(versioned_path))
-    run('cp -R {0}/* {1}'.format(env.remote_git_checkout_front, versioned_path))
+    run('cp -R {0}/* {1}'.format(
+        env.remote_git_checkout_front, versioned_path))
     with(cd(versioned_path)):
         run('compass compile')
-        run('handlebars handlebars/places/ handlebars -f js/moxie.places.templates.js')
     # Pre GZip static (html, css, js) files
-    run('sh {0}/gzip_static_files.sh {1}'.format(env.remote_git_checkout_front, versioned_path))
+    run('sh {0}/gzip_static_files.sh {1}'.format(
+        env.remote_git_checkout_front, versioned_path))
     run('rm -f %s' % env.remote_install_dir_front)
     run('ln -s %s %s' % (versioned_path, env.remote_install_dir_front))
 
@@ -113,6 +116,7 @@ def deploy_front(version):
 """
 Private methods
 """
+
 
 def createvirtualenv(path):
     run('virtualenv %s' % path)
@@ -122,6 +126,7 @@ def install_moxie():
     require('remote_git_checkout_api', provided_by=ENVIRONMENTS)
     with cd(env.remote_git_checkout_api):
         run('python setup.py install')
+    run('pip install -r %s' % env.additional_requirements)
 
 
 def git_branch(git_checkout, git_repo, name):
