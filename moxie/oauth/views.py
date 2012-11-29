@@ -20,6 +20,8 @@ class Authorize(ServiceView):
 class Authorized(ServiceView):
     methods = ['GET', 'OPTIONS']
 
+    cors_allow_credentials = True
+
     def handle_request(self):
         oauth = OAuth1Service.from_context()
         if oauth.authorized:
@@ -30,6 +32,8 @@ class Authorized(ServiceView):
 
 class VerifyCallback(ServiceView):
     methods = ['POST', 'GET', 'OPTIONS']
+
+    cors_allow_credentials = True
 
     def handle_request(self):
         oauth = OAuth1Service.from_context()
