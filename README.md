@@ -35,7 +35,12 @@ Installation
 Running the application
 
 * `celery worker --app moxie.worker`
-* `python runserver.py` (you can also run it with a profiler: `python runserver.py --profiler`)
+* `python runserver.py`
+
+Options available for runserver.py
+
+* run with a profiler: `python runserver.py --profiler`
+* specify the logging level (INFO by default): `python runserver.py --log-level DEBUG`
 
 Periodically, and the first time, you have to run importers to import data into the search index.
 You can do this via a Python shell:
