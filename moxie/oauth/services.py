@@ -39,10 +39,13 @@ class OAuthCredential(object):
     def __set__(self, instance, value):
         store = self.get_credential_store(instance)
         store[self.key] = value
+        logger.debug("Setting {key}: {value}".format(key=self.key, value=value))
         if request:
             session[self.key] = value
+            logger.debug(session)
 
-    def __delete__(self, instance):
+
+def __delete__(self, instance):
         store = self.get_credential_store(instance)
         if self.key in store:
             del store[self.key]
@@ -137,6 +140,7 @@ class OAuth1Service(Service):
                 verifier=verifier)
         response = requests.get(url=url, auth=access_oa)
         qs = urlparse.parse_qs(response.text)
+        logger.debug(qs)
         self.access_credentials = (unicode(qs['oauth_token'][0]),
                 unicode(qs['oauth_token_secret'][0]))
         return self.access_credentials

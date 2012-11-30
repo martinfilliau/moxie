@@ -1,7 +1,11 @@
+import logging
+
 from flask import request, redirect
 
 from moxie.core.views import ServiceView
 from .services import OAuth1Service
+
+logger = logging.getLogger(__name__)
 
 
 class Authorize(ServiceView):
@@ -39,6 +43,8 @@ class VerifyCallback(ServiceView):
         oauth = OAuth1Service.from_context()
         verifier = request.args['oauth_verifier']
         oauth.verify(verifier)
+        logger.debug("Verifier {verifier} auth status: {auth_status}"
+            .format(verifier=verifier, auth_status=oauth.authorized))
         if oauth.authorized:
             return {'authorized': True}
         else:
