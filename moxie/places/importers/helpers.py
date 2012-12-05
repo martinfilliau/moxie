@@ -227,5 +227,12 @@ def simplify_doc_for_render(doc):
     poi['_links'] = { 'self': { 'href': url_for('places.poidetail', ident=doc['id']) } }
     if 'hasRti' in doc:
         poi['_links']['rti'] = { 'href': doc.get('hasRti'), 'title': 'Real-Time information' }
+    if 'parent_of' in doc:
+        children = []
+        for c in doc['parent_of']:
+            children.append({'href': url_for('places.poidetail', ident=c)})
+        poi['_links']['child'] = children
+    if 'child_of' in doc:
+        poi['_links']['parent'] = { 'href': url_for('places.poidetail', ident=doc['child_of'][0])}
 
     return poi
