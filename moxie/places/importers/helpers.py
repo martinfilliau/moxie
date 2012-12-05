@@ -224,7 +224,8 @@ def simplify_doc_for_render(doc):
         poi['collection_times'] = doc.get('collection_times')
     if 'type_name' in doc:
         poi['type'] = doc.get('type_name')
+    poi['_links'] = { 'self': { 'href': url_for('places.poidetail', ident=doc['id']) } }
     if 'hasRti' in doc:
-        poi['hasRti'] = doc.get('hasRti')
-    poi['links'] = { 'self': url_for('places.poidetail', ident=doc['id']) }
+        poi['_links']['rti'] = { 'href': doc.get('hasRti'), 'title': 'Real-Time information' }
+
     return poi
