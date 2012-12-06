@@ -35,21 +35,8 @@ NaPTAN.xml
 oxfordshire.osm
 oxpoints.json
 
-# SASS cache created by COMPASS
-.sass-cache/
-
-# Following files are created using 'make static'
-moxie/core/static/css/
-moxie/core/static/js/foundation.js
-moxie/core/static/js/moxie.js
-# All minified js
-*.min.js
-
 .DS_Store
 *.swp
-
-# Symbolset files
-moxie/core/static/webfonts/
 
 # Documentation build
 docs/build/
