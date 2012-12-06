@@ -12,7 +12,6 @@ class TransportService(ProviderService):
         # Should we improve this API to only return the doc?
         doc = searcher.get_by_ids([ident]).results[0]
         return self.get_rti_from_poi(doc_to_poi(doc))
-        # First do a GET request by its ID
 
     def get_rti_from_poi(self, poi):
         """Get RTI from a POI object
