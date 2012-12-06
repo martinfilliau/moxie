@@ -30,7 +30,6 @@ class POIService(Service):
         response = searcher.get_by_ids([ident])
         # First do a GET request by its ID
         if response.results:
-
             return doc_to_poi(response.results[0])
         else:
             # If no result, do a SEARCH request on IDs
