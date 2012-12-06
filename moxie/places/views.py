@@ -1,9 +1,10 @@
 from flask import request, current_app, url_for, abort, redirect
 
 from moxie.core.views import ServiceView
+from moxie.places.representations import HalJsonPoisRepresentation
 
 from .services import POIService
-from .representations import HalJsonPoiRepresentation
+from .representations import HalJsonPoiRepresentation, JsonPoisRepresentation
 from moxie.transport.services import TransportService
 
 
@@ -22,18 +23,8 @@ class Search(ServiceView):
             default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         poi_service = POIService.from_context()
-        transport_service = TransportService.from_context()
         r = poi_service.get_results(query, location)
-        simplified_results = []
-        for doc in r.results:
-            if transport_service.get_provider(doc):
-                # Add a property hasRti if one provider is able to handle
-                # this document for real-time information
-                doc['hasRti'] = url_for('places.rti', ident=doc['id'])
-            simplified_results.append(simplify_doc_for_render(doc))
-        response['results'] = simplified_results
-        response['query'] = r.query
-        return response
+        return HalJsonPoisRepresentation(query, r, 0, 10, 10).as_dict()
 
 
 class PoiDetail(ServiceView):
