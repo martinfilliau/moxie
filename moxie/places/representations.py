@@ -3,7 +3,7 @@ from flask import url_for
 from moxie.transport.services import TransportService
 
 
-class PoiRepresentation(object):
+class JsonPoiRepresentation(object):
 
     def __init__(self, poi):
         self.poi = poi
@@ -21,10 +21,10 @@ class PoiRepresentation(object):
         return self.as_dict()
 
 
-class HalPoiRepresentation(PoiRepresentation):
+class HalJsonPoiRepresentation(JsonPoiRepresentation):
 
     def as_dict(self):
-        base = super(HalPoiRepresentation, self).as_dict()
+        base = super(HalJsonPoiRepresentation, self).as_dict()
         base['_links'] = {}
         base['_links']['self'] = {
                 'href': url_for('places.poidetail', ident=self.poi.id)

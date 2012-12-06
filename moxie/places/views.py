@@ -3,7 +3,7 @@ from flask import request, current_app, url_for, abort, redirect
 from moxie.core.views import ServiceView
 
 from .services import POIService
-from .representations import HalPoiRepresentation
+from .representations import HalJsonPoiRepresentation
 from moxie.transport.services import TransportService
 
 
@@ -49,4 +49,4 @@ class PoiDetail(ServiceView):
             path = url_for('places.poidetail', ident=doc.id)
             return redirect(path, code=301)
         else:
-            return HalPoiRepresentation(doc).as_dict()
+            return HalJsonPoiRepresentation(doc).as_dict()
