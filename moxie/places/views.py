@@ -1,11 +1,8 @@
 from flask import request, current_app, url_for, abort, redirect
 
 from moxie.core.views import ServiceView
-from moxie.places.representations import HalJsonPoisRepresentation
-
+from moxie.places.representations import HalJsonPoisRepresentation, HalJsonPoiRepresentation
 from .services import POIService
-from .representations import HalJsonPoiRepresentation, JsonPoisRepresentation
-from moxie.transport.services import TransportService
 
 
 class Search(ServiceView):
