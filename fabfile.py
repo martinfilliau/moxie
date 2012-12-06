@@ -3,7 +3,7 @@ from datetime import datetime
 
 from fabric.api import *
 from fabric.contrib import *
-from fabric.contrib.files import exists
+from fabric.contrib.files import exists, sed
 from fabric import utils
 
 MOXIE_REPO = "git://github.com/ox-it/moxie.git"
@@ -106,6 +106,12 @@ def deploy_front(version):
         env.remote_git_checkout_front, versioned_path))
     with(cd(versioned_path)):
         run('compass compile')
+        run('r.js -o app/moxie.build.js')
+        sed("index-prod.html", "\{\{build\}\}", git_hash)
+        if env.environment in ['staging', 'production']:
+            run('ln -s %s %s' % ('index-prod.html', 'index.html'))
+        else:
+            run('ln -s %s %s' % ('index-dev.html', 'index.html'))
     # Pre GZip static (html, css, js) files
     run('sh {0}/gzip_static_files.sh {1}'.format(
         env.remote_git_checkout_front, versioned_path))
