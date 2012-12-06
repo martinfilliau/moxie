@@ -8,6 +8,7 @@ def doc_to_poi(doc):
     """
     lon, lat = doc['location'].split(',')
     poi = POI(doc['id'], doc['name'], lat, lon, doc['type'])
+    poi.identifiers = doc.get('identifiers', [])
     poi.distance = doc.get('_dist_', 0)
     poi.address = doc.get('address', "")
     poi.phone = doc.get('phone', "")
