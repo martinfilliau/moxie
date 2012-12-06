@@ -5,7 +5,7 @@ import json
 from moxie.core.search import SearchResponse, SearchServerException
 
 
-logger = logging.getLogger(name=__name__)
+logger = logging.getLogger(__name__)
 
 
 class SolrSearch(object):
@@ -127,7 +127,7 @@ class SolrSearch(object):
         params = params or dict()
         params['wt'] = self.return_type
         url = '{0}{1}/{2}'.format(self.server_url, self.core, method)
-        logger.debug(url)
+        logger.debug(data)
         if data:
             return requests.post(url, data, headers=headers,
                     params=params, timeout=self.DEFAULT_TIMEOUT)
