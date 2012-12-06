@@ -3,7 +3,7 @@ from flask import request, current_app, url_for, abort, redirect
 from moxie.core.views import ServiceView
 
 from .services import POIService
-from .representations.json import HalPoiRepresentation
+from .representations import HalPoiRepresentation
 from moxie.transport.services import TransportService
 
 
