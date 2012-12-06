@@ -21,13 +21,13 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         self.url = url
 
     def handles(self, doc):
-        for ident in doc.get('identifiers', []):
+        for ident in doc.identifiers:
             if ident.startswith('naptan'):
                 return True
         return False
 
     def invoke(self, doc):
-        for ident in doc.get('identifiers', []):
+        for ident in doc.identifiers:
             if ident.startswith('naptan'):
                 _, naptan_code = ident.split(':')
                 return self.get_rti(naptan_code)
