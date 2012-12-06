@@ -19,7 +19,10 @@ class POIService(Service):
             if response.query_suggestion:
                 suggestion = response.query_suggestion
                 return self.get_results(suggestion, location)
-        return response
+        results = []
+        for r in response.results:
+            results.append(doc_to_poi(r))
+        return results
 
     def get_place_by_identifier(self, ident):
         """Get a place by its main identifier
