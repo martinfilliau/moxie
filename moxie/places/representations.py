@@ -1,9 +1,10 @@
 from flask import url_for
 
+from moxie.core.representations import JsonRepresentation, HalJsonRepresentation
 from moxie.transport.services import TransportService
 
 
-class JsonPoiRepresentation(object):
+class JsonPoiRepresentation(JsonRepresentation):
 
     def __init__(self, poi):
         self.poi = poi
@@ -26,32 +27,29 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
 
     def as_dict(self):
         base = super(HalJsonPoiRepresentation, self).as_dict()
-        base['_links'] = {}
-        base['_links']['self'] = {
+        links = {}
+        links['self'] = {
                 'href': url_for(self.endpoint, ident=self.poi.id)
         }
         if self.poi.parent:
-            base['_links']['parent'] = {
+            links['parent'] = {
                 'href': url_for(self.endpoint, ident=self.poi.parent)
             }
         if len(self.poi.children) > 0:
-            children = []
-            for child in self.poi.children:
-                children.append({'href': url_for(self.endpoint, ident=child)})
-            base['_links']['child'] = children
+            links['child'] = [{'href': url_for(self.endpoint, ident=child)} for child in self.poi.children]
 
         transport_service = TransportService.from_context()
         if transport_service.get_provider(self.poi):
-            base['_links']['curie'] = {
+            links['curie'] = {
                 'name': 'hl',
                 'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
                 'templated': True,
             }
-            base['_links']['hl:rti'] = {
+            links['hl:rti'] = {
                 'href': url_for('places.rti', ident=self.poi.id),
                 'title': 'Real-time information'
             }
-        return base
+        return HalJsonRepresentation(base, links).as_dict()
 
 
 class JsonPoisRepresentation(object):
@@ -75,12 +73,8 @@ class JsonPoisRepresentation(object):
         :param representation:
         :return dict with the representation as JSON
         """
-        repr = {'query': self.search }
-        res = []
-        for r in self.results:
-            res.append(representation(r).as_dict())
-        repr['results'] = res
-        return repr
+        return {'query': self.search,
+                'results': [representation(r) for r in self.results]}
 
 
 class HalJsonPoisRepresentation(JsonPoisRepresentation):
@@ -94,32 +88,30 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
             'query': self.search,
             'size': self.size,
         }
-        res = []
-        for r in self.results:
-            res.append(HalJsonPoiRepresentation(r, 'places.poidetail').as_dict())
-        response['_embedded'] = {'results': res }
-        response['_links'] = {}
-        response['_links']['self'] = {
+
+        pois = [HalJsonPoiRepresentation(r, 'places.poidetail').as_dict() for r in self.results]
+
+        links = {}
+        links['self'] = {
             'href': url_for(self.endpoint, q=self.search)
         }
-        response['_links']['curie'] = {
+        links['curie'] = {
             'name': 'hl',
             'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
             'templated': True,
         }
-        response['_links']['hl:last'] = {
+        links['hl:last'] = {
             'href': url_for(self.endpoint, q=self.search, start=self.size-self.count, count=self.count)
         }
-        response['_links']['hl:first'] = {
+        links['hl:first'] = {
             'href': url_for(self.endpoint, q=self.search, count=self.count)
         }
         if self.size > self.start+self.count:
-            response['links']['hl:next'] = {
+            links['hl:next'] = {
                 'href': url_for(self.endpoint, q=self.search, start=self.start+self.count, count=self.count)
             }
         if self.start > 0 and self.size > self.start+self.count:
-            response['links']['hl:prev'] = {
+            links['hl:prev'] = {
                 'href': url_for(self.endpoint, q=self.search, start=self.start-self.count, count=self.count)
             }
-
-        return response
+        return HalJsonRepresentation(response, links, {'results': pois }).as_dict()
