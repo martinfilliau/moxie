@@ -1,6 +1,6 @@
 from flask import url_for
 
-from moxie.core.representations import JsonRepresentation, HalJsonRepresentation
+from moxie.core.representations import JsonRepresentation, HalJsonRepresentation, get_nav_links
 from moxie.transport.services import TransportService
 
 
@@ -95,23 +95,5 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
         links['self'] = {
             'href': url_for(self.endpoint, q=self.search)
         }
-        links['curie'] = {
-            'name': 'hl',
-            'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
-            'templated': True,
-        }
-        links['hl:last'] = {
-            'href': url_for(self.endpoint, q=self.search, start=self.size-self.count, count=self.count)
-        }
-        links['hl:first'] = {
-            'href': url_for(self.endpoint, q=self.search, count=self.count)
-        }
-        if self.size > self.start+self.count:
-            links['hl:next'] = {
-                'href': url_for(self.endpoint, q=self.search, start=self.start+self.count, count=self.count)
-            }
-        if self.start > 0 and self.size > self.start+self.count:
-            links['hl:prev'] = {
-                'href': url_for(self.endpoint, q=self.search, start=self.start-self.count, count=self.count)
-            }
+        links.update(get_nav_links(self.endpoint, self.start, self.count, self.size, q=self.search))
         return HalJsonRepresentation(response, links, {'results': pois }).as_dict()
