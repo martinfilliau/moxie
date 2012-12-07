@@ -1,7 +1,7 @@
-from flask import request, current_app, url_for, abort, redirect
+from flask import request, current_app, url_for, abort, redirect, jsonify
 
-from moxie.core.views import ServiceView
-from moxie.places.representations import HalJsonPoisRepresentation, HalJsonPoiRepresentation
+from moxie.core.views import ServiceView, accepts
+from moxie.places.representations import HalJsonPoisRepresentation, HalJsonPoiRepresentation, JsonPoisRepresentation
 from .services import POIService
 
 
@@ -20,8 +20,16 @@ class Search(ServiceView):
             default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         poi_service = POIService.from_context()
-        r = poi_service.get_results(query, location)
-        return HalJsonPoisRepresentation(query, r, 0, 10, 10, request.url_rule.endpoint).as_dict()
+        self.search = query
+        return poi_service.get_results(query, location)
+
+    @accepts('application/json')
+    def as_json(self, response):
+        return jsonify(JsonPoisRepresentation(self.search, response).as_dict())
+
+    @accepts('application/hal+json')
+    def as_hal_json(self, response):
+        return jsonify(HalJsonPoisRepresentation(self.search, response, 0, 10, 10, request.url_rule.endpoint).as_dict())
 
 
 class PoiDetail(ServiceView):
