@@ -44,7 +44,7 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
         if transport_service.get_provider(self.poi):
             base['_links']['curie'] = {
                 'name': 'hl',
-                'href': 'http://moxie.rtfd.org/docs/api/relations/{rel}.html',
+                'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
                 'templated': True,
             }
             base['_links']['hl:rti'] = {
@@ -104,7 +104,7 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
         }
         response['_links']['curie'] = {
             'name': 'hl',
-            'href': 'http://moxie.rtfd.org/docs/api/relations/{rel}.html',
+            'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
             'templated': True,
         }
         response['_links']['hl:last'] = {
