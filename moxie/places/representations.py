@@ -20,20 +20,24 @@ class JsonPoiRepresentation(object):
 
 class HalJsonPoiRepresentation(JsonPoiRepresentation):
 
+    def __init__(self, poi, endpoint):
+        super(HalJsonPoiRepresentation, self).__init__(poi)
+        self.endpoint = endpoint
+
     def as_dict(self):
         base = super(HalJsonPoiRepresentation, self).as_dict()
         base['_links'] = {}
         base['_links']['self'] = {
-                'href': url_for('places.poidetail', ident=self.poi.id)
+                'href': url_for(self.endpoint, ident=self.poi.id)
         }
         if self.poi.parent:
             base['_links']['parent'] = {
-                'href': url_for('places.poidetail', ident=self.poi.parent)
+                'href': url_for(self.endpoint, ident=self.poi.parent)
             }
         if len(self.poi.children) > 0:
             children = []
             for child in self.poi.children:
-                children.append({'href': url_for('places.poidetail', ident=child)})
+                children.append({'href': url_for(self.endpoint, ident=child)})
             base['_links']['child'] = children
 
         transport_service = TransportService.from_context()
@@ -81,6 +85,10 @@ class JsonPoisRepresentation(object):
 
 class HalJsonPoisRepresentation(JsonPoisRepresentation):
 
+    def __init__(self, search, results, start, count, size, endpoint):
+        super(HalJsonPoisRepresentation, self).__init__(search, results, start, count, size)
+        self.endpoint = endpoint
+
     def as_dict(self):
         response = {
             'query': self.search,
@@ -88,11 +96,11 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
         }
         res = []
         for r in self.results:
-            res.append(HalJsonPoiRepresentation(r).as_dict())
+            res.append(HalJsonPoiRepresentation(r, 'places.poidetail').as_dict())
         response['_embedded'] = {'results': res }
         response['_links'] = {}
         response['_links']['self'] = {
-            'href': url_for('.search', q=self.search)
+            'href': url_for(self.endpoint, q=self.search)
         }
         response['_links']['curie'] = {
             'name': 'hl',
@@ -100,18 +108,18 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
             'templated': True,
         }
         response['_links']['hl:last'] = {
-            'href': url_for('.search', q=self.search, start=self.size-self.count, count=self.count)
+            'href': url_for(self.endpoint, q=self.search, start=self.size-self.count, count=self.count)
         }
         response['_links']['hl:first'] = {
-            'href': url_for('.search', q=self.search, count=self.count)
+            'href': url_for(self.endpoint, q=self.search, count=self.count)
         }
         if self.size > self.start+self.count:
             response['links']['hl:next'] = {
-                'href': url_for('.search', q=self.search, start=self.start+self.count, count=self.count)
+                'href': url_for(self.endpoint, q=self.search, start=self.start+self.count, count=self.count)
             }
         if self.start > 0 and self.size > self.start+self.count:
             response['links']['hl:prev'] = {
-                'href': url_for('.search', q=self.search, start=self.start-self.count, count=self.count)
+                'href': url_for(self.endpoint, q=self.search, start=self.start-self.count, count=self.count)
             }
 
         return response
