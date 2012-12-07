@@ -38,7 +38,12 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
 
         transport_service = TransportService.from_context()
         if transport_service.get_provider(self.poi):
-            base['_links']['rti'] = {
+            base['_links']['curie'] = {
+                'name': 'hl',
+                'href': 'http://moxie.rtfd.org/docs/api/relations/{rel}.html',
+                'templated': True,
+            }
+            base['_links']['hl:rti'] = {
                 'href': url_for('places.rti', ident=self.poi.id),
                 'title': 'Real-time information'
             }
@@ -89,18 +94,23 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
         response['_links']['self'] = {
             'href': url_for('.search', q=self.search)
         }
-        response['_links']['last'] = {
+        response['_links']['curie'] = {
+            'name': 'hl',
+            'href': 'http://moxie.rtfd.org/docs/api/relations/{rel}.html',
+            'templated': True,
+        }
+        response['_links']['hl:last'] = {
             'href': url_for('.search', q=self.search, start=self.size-self.count, count=self.count)
         }
-        response['_links']['first'] = {
+        response['_links']['hl:first'] = {
             'href': url_for('.search', q=self.search, count=self.count)
         }
         if self.size > self.start+self.count:
-            response['links']['next'] = {
+            response['links']['hl:next'] = {
                 'href': url_for('.search', q=self.search, start=self.start+self.count, count=self.count)
             }
         if self.start > 0 and self.size > self.start+self.count:
-            response['links']['prev'] = {
+            response['links']['hl:prev'] = {
                 'href': url_for('.search', q=self.search, start=self.start-self.count, count=self.count)
             }
 
