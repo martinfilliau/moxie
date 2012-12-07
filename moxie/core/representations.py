@@ -50,7 +50,7 @@ def get_nav_links(endpoint, start, count, size, **kwargs):
         nav['hl:next'] = {
             'href': url_for(endpoint, start=start+count, count=count, **kwargs)
         }
-    if start > 0 and size > start+count:
+    if start > 0 and size >= start+count:
         nav['hl:prev'] = {
             'href': url_for(endpoint, start=start-count, count=count, **kwargs)
         }
