@@ -73,7 +73,7 @@ class JsonPoisRepresentation(object):
         :return dict with the representation as JSON
         """
         return {'query': self.search,
-                'results': [representation(r) for r in self.results]}
+                'results': [representation(r).as_dict() for r in self.results]}
 
 
 class HalJsonPoisRepresentation(JsonPoisRepresentation):
