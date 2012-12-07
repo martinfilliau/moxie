@@ -22,14 +22,19 @@ class JsonPoiRepresentation(JsonRepresentation):
 class HalJsonPoiRepresentation(JsonPoiRepresentation):
 
     def __init__(self, poi, endpoint):
+        """HAL+JSON representation of a POI
+        :param poi: poi as a domain object
+        :param endpoint: endpoint (URL) to represent a POI
+        :return HalJsonRepresentation
+        """
         super(HalJsonPoiRepresentation, self).__init__(poi)
         self.endpoint = endpoint
 
     def as_dict(self):
         base = super(HalJsonPoiRepresentation, self).as_dict()
-        links = {}
-        links['self'] = {
-                'href': url_for(self.endpoint, ident=self.poi.id)
+        links = { 'self': {
+                    'href': url_for(self.endpoint, ident=self.poi.id)
+                }
         }
         if self.poi.parent:
             links['parent'] = {
@@ -54,19 +59,13 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
 
 class JsonPoisRepresentation(object):
 
-    def __init__(self, search, results, start, count, size):
+    def __init__(self, search, results):
         """Represents a list of search result as JSON
         :param search: search query
         :param results: list of search results
-        :param start: int as the first result of the page
-        :param count: int as the size of the page
-        :param size: int as total size of results
         """
         self.search = search
         self.results = results
-        self.start = start
-        self.count = count
-        self.size = size
 
     def as_dict(self, representation=JsonPoiRepresentation):
         """JSON representation of a list of POIs
@@ -80,7 +79,19 @@ class JsonPoisRepresentation(object):
 class HalJsonPoisRepresentation(JsonPoisRepresentation):
 
     def __init__(self, search, results, start, count, size, endpoint):
-        super(HalJsonPoisRepresentation, self).__init__(search, results, start, count, size)
+        """Represents a list of search result as HAL+JSON
+        :param search: search query
+        :param results: list of results
+        :param start: int as the first result of the page
+        :param count: int as the size of the page
+        :param size: int as total size of results
+        :param endpoint: endpoint (URL) to represent the search resource
+        :return HalJsonRepresentation
+        """
+        super(HalJsonPoisRepresentation, self).__init__(search, results)
+        self.start = start
+        self.count = count
+        self.size = size
         self.endpoint = endpoint
 
     def as_dict(self):
@@ -88,12 +99,10 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
             'query': self.search,
             'size': self.size,
         }
-
         pois = [HalJsonPoiRepresentation(r, 'places.poidetail').as_dict() for r in self.results]
-
-        links = {}
-        links['self'] = {
-            'href': url_for(self.endpoint, q=self.search)
+        links = {'self': {
+                    'href': url_for(self.endpoint, q=self.search)
+                }
         }
         links.update(get_nav_links(self.endpoint, self.start, self.count, self.size, q=self.search))
         return HalJsonRepresentation(response, links, {'results': pois }).as_dict()
