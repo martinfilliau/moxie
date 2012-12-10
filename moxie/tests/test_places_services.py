@@ -7,6 +7,9 @@ class POIServiceTestCase(unittest.TestCase):
 
     def test_get_results_by_id(self):
         with mock.patch('moxie.places.services.searcher') as mock_searcher:
-            poi_service = POIService()
-            results = poi_service.get_place_by_identifier('123')
-            mock_searcher.get_by_ids.assert_called_with(['123'])
+            with mock.patch('moxie.places.services.doc_to_poi') as mock_doc_to_poi:
+                poi_service = POIService()
+                mock_doc_to_poi.return_value = None
+                results = poi_service.get_place_by_identifier('123')
+
+                mock_searcher.get_by_ids.assert_called_with(['123'])

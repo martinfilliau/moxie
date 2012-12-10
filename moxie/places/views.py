@@ -1,10 +1,9 @@
-from flask import request, current_app, url_for, abort, redirect
+from flask import request, current_app, url_for, abort, redirect, jsonify
 
-from moxie.core.views import ServiceView
-
-from .importers.helpers import simplify_doc_for_render
+from moxie.core.views import ServiceView, accepts
+from moxie.core.representations import JSON, HAL_JSON
+from moxie.places.representations import HalJsonPoisRepresentation, HalJsonPoiRepresentation, JsonPoisRepresentation, JsonPoiRepresentation
 from .services import POIService
-from moxie.transport.services import TransportService
 
 
 class Search(ServiceView):
@@ -22,18 +21,16 @@ class Search(ServiceView):
             default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         poi_service = POIService.from_context()
-        transport_service = TransportService.from_context()
-        r = poi_service.get_results(query, location)
-        simplified_results = []
-        for doc in r.results:
-            if transport_service.get_provider(doc):
-                # Add a property hasRti if one provider is able to handle
-                # this document for real-time information
-                doc['hasRti'] = url_for('places.rti', ident=doc['id'])
-            simplified_results.append(simplify_doc_for_render(doc))
-        response['results'] = simplified_results
-        response['query'] = r.query
-        return response
+        self.search = query
+        return poi_service.get_results(query, location)
+
+    @accepts(JSON)
+    def as_json(self, response):
+        return JsonPoisRepresentation(self.search, response).as_json()
+
+    @accepts(HAL_JSON)
+    def as_hal_json(self, response):
+        return HalJsonPoisRepresentation(self.search, response, 0, 10, 10, request.url_rule.endpoint).as_json()
 
 
 class PoiDetail(ServiceView):
@@ -42,14 +39,20 @@ class PoiDetail(ServiceView):
         if ident.endswith('/'):
             ident = ident.split('/')[0]
         poi_service = POIService.from_context()
-        transport_service = TransportService.from_context()
         doc = poi_service.get_place_by_identifier(ident)
         if not doc:
             abort(404)
-        if doc['id'] != ident:
-            path = url_for('places.poidetail', ident=doc['id'])
+        if doc.id != ident:
+            # redirection to the main ID
+            path = url_for(request.url_rule.endpoint, ident=doc.id)
             return redirect(path, code=301)
         else:
-            if transport_service.get_provider(doc):
-                doc['hasRti'] = url_for('places.rti', ident=doc['id'])
-            return simplify_doc_for_render(doc)
+            return doc
+
+    @accepts(JSON)
+    def as_json(self, response):
+        return JsonPoiRepresentation(response).as_json()
+
+    @accepts(HAL_JSON)
+    def as_hal_json(self, response):
+        return HalJsonPoiRepresentation(response, request.url_rule.endpoint).as_json()

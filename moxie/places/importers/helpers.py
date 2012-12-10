@@ -200,39 +200,3 @@ def format_uk_telephone(value):
         value = "(01865 " + value[8] + ")" + value[9:]
 
     return value
-
-
-def simplify_doc_for_render(doc):
-    lon, lat = doc['location'].split(',')
-    poi = {
-        'id': doc['id'],
-        'name': doc['name'],
-        'lon': lon,
-        'lat': lat,
-    }
-    if '_dist_' in doc:
-        poi['distance'] = doc.get('_dist_')
-    if 'address' in doc:
-        poi['address'] = doc.get('address')
-    if 'phone' in doc:
-        poi['phone'] = doc.get('phone')
-    if 'website' in doc:
-        poi['website'] = doc.get('website')
-    if 'opening_hours' in doc:
-        poi['opening_hours'] = doc.get('opening_hours')
-    if 'collection_times' in doc:
-        poi['collection_times'] = doc.get('collection_times')
-    if 'type_name' in doc:
-        poi['type'] = doc.get('type_name')
-    poi['_links'] = { 'self': { 'href': url_for('places.poidetail', ident=doc['id']) } }
-    if 'hasRti' in doc:
-        poi['_links']['rti'] = { 'href': doc.get('hasRti'), 'title': 'Real-Time information' }
-    if 'parent_of' in doc:
-        children = []
-        for c in doc['parent_of']:
-            children.append({'href': url_for('places.poidetail', ident=c)})
-        poi['_links']['child'] = children
-    if 'child_of' in doc:
-        poi['_links']['parent'] = { 'href': url_for('places.poidetail', ident=doc['child_of'][0])}
-
-    return poi
