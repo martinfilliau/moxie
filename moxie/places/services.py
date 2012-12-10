@@ -1,5 +1,6 @@
 from moxie.core.service import Service
 from moxie.core.search import searcher
+from moxie.places.solr import doc_to_poi
 
 
 class POIService(Service):
@@ -18,7 +19,10 @@ class POIService(Service):
             if response.query_suggestion:
                 suggestion = response.query_suggestion
                 return self.get_results(suggestion, location)
-        return response
+        results = []
+        for r in response.results:
+            results.append(doc_to_poi(r))
+        return results
 
     def get_place_by_identifier(self, ident):
         """Get a place by its main identifier
@@ -29,12 +33,12 @@ class POIService(Service):
         response = searcher.get_by_ids([ident])
         # First do a GET request by its ID
         if response.results:
-            return response.results[0]
+            return doc_to_poi(response.results[0])
         else:
             # If no result, do a SEARCH request on IDs
             response = searcher.search_for_ids("identifiers", [ident])
             if response.results:
-                return response.results[0]
+                return doc_to_poi(response.results[0])
             else:
                 return None
 
@@ -45,6 +49,6 @@ class POIService(Service):
         """
         response = searcher.search_for_ids("identifiers", [ident])
         if response.results:
-            return response.results[0]
+            return doc_to_poi(response.results[0])
         else:
             return None
