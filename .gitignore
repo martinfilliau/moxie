@@ -1,6 +1,7 @@
 *.py[co]
 
-moxie/local_settings.yaml
+local_settings.yaml
+local_celeryconfig.yaml
 
 # Packages
 *.egg
