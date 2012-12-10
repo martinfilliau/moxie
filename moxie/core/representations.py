@@ -39,6 +39,7 @@ def get_nav_links(endpoint, start, count, size, **kwargs):
     :param kwargs: rest of arguments to use
     :return dict of navigation links
     """
+    start, count, size = int(start), int(count), int(size)
     nav = {'curie': {
         'name': 'hl',
         'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
