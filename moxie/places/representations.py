@@ -21,6 +21,11 @@ class JsonPoiRepresentation(JsonRepresentation):
             'distance': self.poi.distance,
             'type': self.poi.type,
             'type_name': self.poi.type_name,
+            'address': self.poi.address,
+            'phone': self.poi.phone,
+            'website': self.poi.website,
+            'opening_hours': self.poi.opening_hours,
+            'collection_times': self.poi.collection_times,
         }
 
 
