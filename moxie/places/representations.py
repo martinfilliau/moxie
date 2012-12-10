@@ -18,7 +18,9 @@ class JsonPoiRepresentation(JsonRepresentation):
             'name': self.poi.name,
             'lat': self.poi.lat,
             'lon': self.poi.lon,
-            'type': self.poi.type_name,
+            'distance': self.poi.distance,
+            'type': self.poi.type,
+            'type_name': self.poi.type_name,
         }
 
 
