@@ -1,4 +1,4 @@
-from flask import url_for
+from flask import url_for, jsonify
 
 from moxie.core.representations import JsonRepresentation, HalJsonRepresentation, get_nav_links
 from moxie.transport.services import TransportService
@@ -8,6 +8,9 @@ class JsonPoiRepresentation(JsonRepresentation):
 
     def __init__(self, poi):
         self.poi = poi
+
+    def as_json(self):
+        return jsonify(self.as_dict())
 
     def as_dict(self):
         return {
@@ -29,6 +32,9 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
         """
         super(HalJsonPoiRepresentation, self).__init__(poi)
         self.endpoint = endpoint
+
+    def as_json(self):
+        return jsonify(self.as_dict())
 
     def as_dict(self):
         base = super(HalJsonPoiRepresentation, self).as_dict()
@@ -67,6 +73,9 @@ class JsonPoisRepresentation(object):
         self.search = search
         self.results = results
 
+    def as_json(self):
+        return jsonify(self.as_dict())
+
     def as_dict(self, representation=JsonPoiRepresentation):
         """JSON representation of a list of POIs
         :param representation:
@@ -93,6 +102,9 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
         self.count = count
         self.size = size
         self.endpoint = endpoint
+
+    def as_json(self):
+        return jsonify(self.as_dict())
 
     def as_dict(self):
         response = {

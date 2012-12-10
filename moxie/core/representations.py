@@ -1,6 +1,11 @@
 from flask import url_for
 
 
+# Mimetypes
+JSON = "application/json"
+HAL_JSON = "application/hal+json"
+
+
 class Representation(object):
     pass
 
