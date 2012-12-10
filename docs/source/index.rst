@@ -13,6 +13,7 @@ HTTP API
     :glob:
 
     http_api/specification
+    http_api/relations
     http_api/*
 
 Internal API
