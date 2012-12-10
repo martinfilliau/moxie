@@ -48,15 +48,15 @@ class SearchService(Service):
         searcher = getattr(searcher, search_klass)
         return searcher(index_name, searcher_url)
 
-    def search(self, query):
+    def search(self, query, start=0, count=10):
         """Generic search query
         :param query: dict of k/v corresponding to parameters to search
         :return :py:data:`moxie.core.search.SearchResponse`
         """
-        return self._backend.search(query)
+        return self._backend.search(query, start=start, count=count)
 
-    def search_nearby(self, query, location):
-        return self._backend.search_nearby(query, location)
+    def search_nearby(self, query, location, start=0, count=10):
+        return self._backend.search_nearby(query, location, start=start, count=count)
 
     def get_by_ids(self, ids):
         return self._backend.get_by_ids(ids)
@@ -76,17 +76,19 @@ searcher = LocalProxy(SearchService.from_context)
 
 class SearchResponse(object):
 
-    def __init__(self, raw_response, query, results=None, query_suggestion=None, facets=None):
+    def __init__(self, raw_response, query, size, results=None, query_suggestion=None, facets=None):
         """
         Init a SearchResponse object
         :param raw_response: full response from the search server
         :param query: query has searched by the search server
+        :param size: total number of results for the given search
         :param results: list of documents
         :param query_suggestion: suggestion of a new query to make (generally a recommendation from a spellchecker)
         :param facets: facets for this search response
         """
         self._raw_response = raw_response
         self._query = query
+        self._size = size
         self._results = results
         self._query_suggestion = query_suggestion
         self._facets = facets
@@ -100,6 +102,12 @@ class SearchResponse(object):
         :rtype string
         """
         return self._query
+
+    @property
+    def size(self):
+        """Size of the search result
+        """
+        return self._size
 
     @property
     def results(self):

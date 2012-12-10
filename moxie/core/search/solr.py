@@ -28,7 +28,7 @@ class SolrSearch(object):
                 'form': 'application/x-www-form-urlencoded',
                 }
 
-    def search_nearby(self, query, location, location_field='location'):
+    def search_nearby(self, query, location, start=0, count=10, location_field='location'):
         lat, lon = location
         q = {'defType': 'edismax',
                 'spellcheck.collate': 'true',
@@ -39,10 +39,12 @@ class SolrSearch(object):
                 'sort': 'geodist() asc',
                 'fl': '*,_dist_:geodist()',
                 }
-        return self.search(q)
+        return self.search(q, start, count)
 
-    def search(self, query):
+    def search(self, query, start=0, count=10):
         l = []
+        query['start'] = str(start)
+        query['rows'] = str(count)
         for k, v in query.items():
             l.append(k + '=' + v)
         data = "&".join(l)
@@ -116,7 +118,7 @@ class SolrSearch(object):
         for id in identifiers:
             query.append('%s:%s' % (id_key, self.solr_escape(id)))
         query_string = {'q': " OR ".join(query)}
-        return self.search(query_string)
+        return self.search(query_string, start=0, count=100)
 
     def connection(self, method, params=None, data=None, headers=None):
         """Does a GET request if there is no data otherwise a POST
@@ -151,6 +153,10 @@ class SolrSearchResponse(SearchResponse):
         except:
             query = None
         try:
+            size = solr_response['response']['numFound']
+        except:
+            size = None
+        try:
             results = solr_response['response']['docs']
         except:
             results = None
@@ -159,4 +165,5 @@ class SolrSearchResponse(SearchResponse):
         except:
             suggestion = None
 
-        super(SolrSearchResponse, self).__init__(solr_response, query, results, suggestion)
+        super(SolrSearchResponse, self).__init__(solr_response, query, size,
+            results=results, query_suggestion=suggestion)

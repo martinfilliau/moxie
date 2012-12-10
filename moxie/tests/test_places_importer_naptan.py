@@ -74,7 +74,7 @@ class NaptanTestCase(unittest.TestCase):
     def setUp(self):
         self.naptan_file = 'moxie/tests/data/naptan.xml'
         self.mock_solr = Mock(spec=SearchService)
-        self.mock_solr.search_for_ids.return_value = SearchResponse({'response': {'docs': []}}, None, [])
+        self.mock_solr.search_for_ids.return_value = SearchResponse({'response': {'docs': []}}, 1, None, [])
         self.ctx = app.test_request_context()
         self.ctx.push()
 
