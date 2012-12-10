@@ -1,4 +1,4 @@
-from flask import request, current_app, url_for, abort, redirect, jsonify
+from flask import request, current_app, url_for, abort, redirect
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import JSON, HAL_JSON
@@ -15,6 +15,8 @@ class Search(ServiceView):
         if 'Geo-Position' in request.headers:
             response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
         query = request.args.get('q', '')
+        self.start = request.args.get('start', 0)
+        self.count = request.args.get('count', 10)
         if 'lat' in response and 'lon' in response:
             location = response['lat'], response['lon']
         else:
@@ -22,7 +24,9 @@ class Search(ServiceView):
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         poi_service = POIService.from_context()
         self.search = query
-        return poi_service.get_results(query, location)
+        results, size = poi_service.get_results(query, location, self.start, self.count)
+        self.size = size
+        return results
 
     @accepts(JSON)
     def as_json(self, response):
@@ -30,7 +34,7 @@ class Search(ServiceView):
 
     @accepts(HAL_JSON)
     def as_hal_json(self, response):
-        return HalJsonPoisRepresentation(self.search, response, 0, 10, 10, request.url_rule.endpoint).as_json()
+        return HalJsonPoisRepresentation(self.search, response, self.start, self.count, self.size, request.url_rule.endpoint).as_json()
 
 
 class PoiDetail(ServiceView):
