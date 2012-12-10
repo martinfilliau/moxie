@@ -5,8 +5,8 @@ Blueprints
 ----------
 Encapsulates an instance of an Application.
 
- * Domain
- * Representations
+ * :doc:`domain`
+ * :doc:`representation`
  * :doc:`services`
  * :doc:`view`
  * :doc:`provider`
