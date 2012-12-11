@@ -2,6 +2,7 @@ from flask import url_for, jsonify
 
 from moxie.core.representations import JsonRepresentation, HalJsonRepresentation, get_nav_links
 from moxie.transport.services import TransportService
+from moxie.core.service import NoConfiguredService
 
 
 class JsonPoiRepresentation(JsonRepresentation):
@@ -45,7 +46,7 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
 
     def as_dict(self):
         base = super(HalJsonPoiRepresentation, self).as_dict()
-        links = { 'self': {
+        links = {'self': {
                     'href': url_for(self.endpoint, ident=self.poi.id)
                 }
         }
@@ -56,8 +57,12 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
         if len(self.poi.children) > 0:
             links['child'] = [{'href': url_for(self.endpoint, ident=child)} for child in self.poi.children]
 
-        transport_service = TransportService.from_context()
-        if transport_service.get_provider(self.poi):
+        try:
+            transport_service = TransportService.from_context()
+        except NoConfiguredService:
+            # Transport service not configured so no RTI information
+            transport_service = None
+        if transport_service and transport_service.get_provider(self.poi):
             links['curie'] = {
                 'name': 'hl',
                 'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
