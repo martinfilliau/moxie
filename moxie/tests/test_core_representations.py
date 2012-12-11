@@ -42,3 +42,10 @@ class RepresentationsTestCase(unittest.TestCase):
             self.assertEqual(links2['hl:last']['href'], '/?count=10&start=20')
             self.assertFalse('hl:next' in links2)
             self.assertEqual(links2['curie']['name'], 'hl')
+
+            links3 = get_nav_links('a', 0, 10, 5)
+            self.assertEqual(links3['hl:first']['href'], '/?count=10')
+            self.assertEqual(links3['hl:last']['href'], '/?count=10')
+            self.assertFalse('hl:next' in links3)
+            self.assertFalse('hl:prev' in links3)
+            self.assertEqual(links3['curie']['name'], 'hl')
