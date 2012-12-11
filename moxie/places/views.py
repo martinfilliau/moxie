@@ -16,7 +16,7 @@ class Search(ServiceView):
             response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
         query = request.args.get('q', '')
         self.start = request.args.get('start', 0)
-        self.count = request.args.get('count', 10)
+        self.count = request.args.get('count', 35)
         if 'lat' in response and 'lon' in response:
             location = response['lat'], response['lon']
         else:

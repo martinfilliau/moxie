@@ -45,13 +45,20 @@ def get_nav_links(endpoint, start, count, size, **kwargs):
         'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
         'templated': True,
         },
-           'hl:last': {
-               'href': url_for(endpoint, start=size-count, count=count, **kwargs)
-           },
-           'hl:first': {
+    }
+
+    if size-count > 0:
+        nav['hl:last'] = {
+                   'href': url_for(endpoint, start=size-count, count=count, **kwargs)
+        }
+    else:
+        nav['hl:last'] = {
+            'href': url_for(endpoint, count=count, **kwargs)
+        }
+    nav['hl:first'] = {
                'href': url_for(endpoint, count=count, **kwargs)
            }
-    }
+
     if size > start+count:
         nav['hl:next'] = {
             'href': url_for(endpoint, start=start+count, count=count, **kwargs)
