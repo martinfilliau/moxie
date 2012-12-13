@@ -3,6 +3,7 @@ from flask import url_for, jsonify
 from moxie.core.representations import JsonRepresentation, HalJsonRepresentation, get_nav_links
 from moxie.transport.services import TransportService
 from moxie.core.service import NoConfiguredService
+from moxie.places.services import POIService
 
 
 class JsonPoiRepresentation(JsonRepresentation):
@@ -50,12 +51,24 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
                     'href': url_for(self.endpoint, ident=self.poi.id)
                 }
         }
+        poi_service = POIService.from_context()
         if self.poi.parent:
+            parent = poi_service.get_place_by_identifier(self.poi.parent)
             links['parent'] = {
-                'href': url_for(self.endpoint, ident=self.poi.parent)
+                'href': url_for(self.endpoint, ident=self.poi.parent),
             }
+            if parent and parent.name:
+                links['parent']['title'] = parent.name
+
         if len(self.poi.children) > 0:
-            links['child'] = [{'href': url_for(self.endpoint, ident=child)} for child in self.poi.children]
+            links['child'] = []
+            # TODO GET with multiple documents, to do at service level
+            for child in self.poi.children:
+                c = {'href': url_for(self.endpoint, ident=child)}
+                p = poi_service.get_place_by_identifier(child)
+                if p and p.name:
+                    c['title'] = p.name
+                links['child'].append(c)
 
         try:
             transport_service = TransportService.from_context()
