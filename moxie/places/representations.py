@@ -51,9 +51,15 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
                     'href': url_for(self.endpoint, ident=self.poi.id)
                 }
         }
-        poi_service = POIService.from_context()
+        try:
+            poi_service = POIService.from_context()
+        except NoConfiguredService:
+            poi_service = None
         if self.poi.parent:
-            parent = poi_service.get_place_by_identifier(self.poi.parent)
+            if poi_service:
+                parent = poi_service.get_place_by_identifier(self.poi.parent)
+            else:
+                parent = None
             links['parent'] = {
                 'href': url_for(self.endpoint, ident=self.poi.parent),
             }
@@ -65,7 +71,10 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
             # TODO GET with multiple documents, to do at service level
             for child in self.poi.children:
                 c = {'href': url_for(self.endpoint, ident=child)}
-                p = poi_service.get_place_by_identifier(child)
+                if poi_service:
+                    p = poi_service.get_place_by_identifier(child)
+                else:
+                    p = None
                 if p and p.name:
                     c['title'] = p.name
                 links['child'].append(c)
