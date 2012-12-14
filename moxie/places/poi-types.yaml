@@ -24,6 +24,21 @@ university:
         unit:
           name_singular: Unit
           name_plural: Units
+        room:
+          name_singular: Room
+          name_plural: Rooms
+        faculty:
+          name_singular: Faculty
+          name_plural: Faculties
+        space:
+          name_singular: Space
+          name_plural: Spaces
+        site:
+          name_singular: Site
+          name_plural: Sites
+        hall:
+          name_singular: Hall
+          name_plural: Halls
 amenities:
     name_singular: Amenity
     name_plural: Amenities
