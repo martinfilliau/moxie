@@ -19,7 +19,8 @@ blueprints:
 
 services:
     places:
-        POIService: {}
+        POIService:
+            nearby_excludes: ['/university/library/sub-library', '/university/room']
         TransportService:
             providers:
                 moxie.transport.providers.cloudamber.CloudAmberBusRtiProvider:

@@ -6,6 +6,12 @@ from moxie.places.solr import doc_to_poi
 class POIService(Service):
     default_search = '*'
 
+    def __init__(self, nearby_excludes=None):
+        """POI service
+        :param nearby_excludes: list of types to exclude in a nearby search
+        """
+        self.nearby_excludes = nearby_excludes or []
+
     def get_results(self, original_query, location, start, count):
         """Search POIs
         :param original_query: fts query
