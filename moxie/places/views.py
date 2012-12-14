@@ -15,7 +15,7 @@ class Search(ServiceView):
         response = dict()
         if 'Geo-Position' in request.headers:
             response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
-        query = request.args.get('q', '')
+        query = request.args.get('q', None)
         self.start = request.args.get('start', 0)
         self.count = request.args.get('count', 35)
         if 'lat' in response and 'lon' in response:
@@ -25,7 +25,10 @@ class Search(ServiceView):
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
         poi_service = POIService.from_context()
         self.search = query
-        results, size = poi_service.get_results(query, location, self.start, self.count)
+        if query:
+            results, size = poi_service.get_results(query, location, self.start, self.count)
+        else:
+            results, size = poi_service.get_nearby_results(location, self.start, self.count)
         self.size = size
         return results
 

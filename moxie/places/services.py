@@ -27,10 +27,33 @@ class POIService(Service):
             if response.query_suggestion:
                 suggestion = response.query_suggestion
                 return self.get_results(suggestion, location, start, count)
-        results = []
-        for r in response.results:
-            results.append(doc_to_poi(r))
-        return results, response.size
+        return [doc_to_poi(r) for r in response.results], response.size
+
+    def get_nearby_results(self, location, start, count, all_types=False):
+        """Get results around a location (nearby)
+        :param location: latitude,longitude
+        :param start: index of the first result of the page
+        :param count: number of results for the page
+        :param all_types: display all types or excludes some types defined in configuration
+        :return: list of domain objects (POIs) and total size of results
+        """
+        lat, lon = location
+        q = {'q': '*:*',
+             'sfield': 'location',
+             'pt': '%s,%s' % (lon, lat),
+             'sort': 'geodist() asc',
+             'fl': '*,_dist_:geodist()',
+             'facet': 'true',
+             'facet.field': 'type',
+             'facet.sort': 'index'
+             }
+        if not all_types:
+            q['fq'] = "-type:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
+        response = searcher.search(q, start, count)
+        if response.results:
+            return [doc_to_poi(r) for r in response.results], response.size
+        else:
+            return None, None
 
     def get_place_by_identifier(self, ident):
         """Get a place by its main identifier
