@@ -1,4 +1,5 @@
 from flask import request, current_app, url_for, abort, redirect
+from werkzeug.wrappers import BaseResponse
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import JSON, HAL_JSON
@@ -55,8 +56,14 @@ class PoiDetail(ServiceView):
 
     @accepts(JSON)
     def as_json(self, response):
-        return JsonPoiRepresentation(response).as_json()
+        if issubclass(type(response), BaseResponse):
+            return response
+        else:
+            return JsonPoiRepresentation(response).as_json()
 
     @accepts(HAL_JSON)
     def as_hal_json(self, response):
-        return HalJsonPoiRepresentation(response, request.url_rule.endpoint).as_json()
+        if issubclass(type(response), BaseResponse):
+            return response
+        else:
+            return HalJsonPoiRepresentation(response, request.url_rule.endpoint).as_json()
