@@ -59,7 +59,7 @@ class OxpointsImporter(object):
 
         oxpoints_id = datum['uri'].rsplit('/')[-1]
         oxpoints_type = datum['type'].rsplit('#')[-1]
-        name = datum.get('oxp_fullyQualifiedTitle', datum.get('dc_title', ''))
+        name = datum.get('dc_title', datum.get('oxp_fullyQualifiedTitle', ''))
 
         if not oxpoints_type in self.OXPOINTS_TYPES:
             return
