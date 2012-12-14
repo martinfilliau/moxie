@@ -30,6 +30,7 @@ AMENITIES = { 'atm': '/amenities/atm',
               'post_box': '/amenities/post-box',
               'post_office': '/amenities/post-office',
               'pub': '/amenities/food-drink/pub',    # TODO food=yes?
+              'punt_hire': '/leisure/punt',
               'recycling': '/amenities/recycling-facility',
               'restaurant': '/amenities/food-drink/restaurant',
               'swimming_pool': '/leisure/swimming-pool',
