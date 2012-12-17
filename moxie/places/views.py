@@ -15,7 +15,7 @@ class Search(ServiceView):
         response = dict()
         if 'Geo-Position' in request.headers:
             response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
-        query = request.args.get('q', None)
+        self.query = request.args.get('q', None)
         self.start = request.args.get('start', 0)
         self.count = request.args.get('count', 35)
         if 'lat' in response and 'lon' in response:
@@ -23,28 +23,27 @@ class Search(ServiceView):
         else:
             default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
+
         poi_service = POIService.from_context()
-        self.search = query
-        if query:
+        if self.query:
             # Try to match the query to identifiers, useful when querying for bus stop naptan number
             # TODO pass the location to have the distance from the point
-            unique_doc = poi_service.search_place_by_identifier('*:{id}'.format(id=query))
+            unique_doc = poi_service.search_place_by_identifier('*:{id}'.format(id=self.query))
             if unique_doc:
                 self.size = 1
                 return [unique_doc]
-            results, size = poi_service.get_results(query, location, self.start, self.count)
+            results, self.size = poi_service.get_results(self.query, location, self.start, self.count)
         else:
-            results, size = poi_service.get_nearby_results(location, self.start, self.count)
-        self.size = size
+            results, self.size = poi_service.get_nearby_results(location, self.start, self.count)
         return results
 
     @accepts(JSON)
     def as_json(self, response):
-        return JsonPoisRepresentation(self.search, response).as_json()
+        return JsonPoisRepresentation(self.query, response).as_json()
 
     @accepts(HAL_JSON)
     def as_hal_json(self, response):
-        return HalJsonPoisRepresentation(self.search, response, self.start, self.count, self.size, request.url_rule.endpoint).as_json()
+        return HalJsonPoisRepresentation(self.query, response, self.start, self.count, self.size, request.url_rule.endpoint).as_json()
 
 
 class PoiDetail(ServiceView):
