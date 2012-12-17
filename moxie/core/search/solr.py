@@ -28,7 +28,7 @@ class SolrSearch(object):
                 'form': 'application/x-www-form-urlencoded',
                 }
 
-    def search_nearby(self, query, location, start=0, count=10, location_field='location'):
+    def search_nearby(self, query, location, fq=None, start=0, count=10, location_field='location'):
         lat, lon = location
         q = {'defType': 'edismax',
                 'spellcheck.collate': 'true',
@@ -39,15 +39,16 @@ class SolrSearch(object):
                 'sort': 'geodist() asc',
                 'fl': '*,_dist_:geodist()',
                 }
-        return self.search(q, start, count)
+        return self.search(q, fq, start, count)
 
-    def search(self, query, start=0, count=10):
-        l = []
+    def search(self, query, fq=None, start=0, count=10):
         query['start'] = str(start)
         query['rows'] = str(count)
-        for k, v in query.items():
-            l.append(k + '=' + v)
-        data = "&".join(l)
+        if fq:
+            query['fq'] = fq
+            print "Search ", fq
+        parameters = ["{key}={value}".format(key=k, value=v) for k, v in query.items()]
+        data = "&".join(parameters)
         headers = {'Content-Type': self.content_types['form']}
         results = self.connection(self.methods['select'],
                 data=data, headers=headers)

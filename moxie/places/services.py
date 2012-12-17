@@ -12,7 +12,7 @@ class POIService(Service):
         """
         self.nearby_excludes = nearby_excludes or []
 
-    def get_results(self, original_query, location, start, count):
+    def get_results(self, original_query, location, start, count, type=None):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
@@ -21,7 +21,9 @@ class POIService(Service):
         :return list of domain objects (POIs) and total size of results
         """
         query = original_query or self.default_search
-        response = searcher.search_nearby(query, location, start, count)
+        if type:
+            type = 'type:"{type}"'.format(type=type)
+        response = searcher.search_nearby(query, location, fq=type, start=start, count=count)
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
             if response.query_suggestion:

@@ -16,6 +16,7 @@ class Search(ServiceView):
         if 'Geo-Position' in request.headers:
             response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
         self.query = request.args.get('q', None)
+        self.type = request.args.get('type', None)
         self.start = request.args.get('start', 0)
         self.count = request.args.get('count', 35)
         if 'lat' in response and 'lon' in response:
@@ -32,7 +33,7 @@ class Search(ServiceView):
             if unique_doc:
                 self.size = 1
                 return [unique_doc]
-            results, self.size = poi_service.get_results(self.query, location, self.start, self.count)
+            results, self.size = poi_service.get_results(self.query, location, self.start, self.count, type=self.type)
         else:
             results, self.size = poi_service.get_nearby_results(location, self.start, self.count)
         return results
