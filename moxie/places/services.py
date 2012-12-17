@@ -1,5 +1,6 @@
 from moxie.core.service import Service
 from moxie.core.search import searcher
+from moxie.places.importers.helpers import get_types_dict
 from moxie.places.solr import doc_to_poi
 
 
@@ -22,13 +23,15 @@ class POIService(Service):
         """
         query = original_query or self.default_search
         if type:
-            type = 'type:"{type}"'.format(type=type)
+            type = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
         response = searcher.search_nearby(query, location, fq=type, start=start, count=count)
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
             if response.query_suggestion:
                 suggestion = response.query_suggestion
-                return self.get_results(suggestion, location, start, count)
+                return self.get_results(suggestion, location, start, count, type=type)
+            else:
+                return [], 0
         return [doc_to_poi(r) for r in response.results], response.size
 
     def get_nearby_results(self, location, start, count, all_types=False):
