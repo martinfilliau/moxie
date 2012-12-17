@@ -52,9 +52,10 @@ class POIService(Service):
              'facet.field': 'type',
              'facet.sort': 'index'
              }
+        fq = None
         if not all_types and len(self.nearby_excludes) > 0:
-            q['fq'] = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
-        response = searcher.search(q, start, count)
+            fq = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
+        response = searcher.search(q, fq=fq, start=start, count=count)
         if response.results:
             return [doc_to_poi(r) for r in response.results], response.size
         else:

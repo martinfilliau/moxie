@@ -46,7 +46,6 @@ class SolrSearch(object):
         query['rows'] = str(count)
         if fq:
             query['fq'] = fq
-            print "Search ", fq
         parameters = ["{key}={value}".format(key=k, value=v) for k, v in query.items()]
         data = "&".join(parameters)
         headers = {'Content-Type': self.content_types['form']}
