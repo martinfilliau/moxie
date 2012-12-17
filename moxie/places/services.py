@@ -49,7 +49,7 @@ class POIService(Service):
              'facet.field': 'type',
              'facet.sort': 'index'
              }
-        if not all_types:
+        if not all_types and len(self.nearby_excludes) > 0:
             q['fq'] = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
         response = searcher.search(q, start, count)
         if response.results:
