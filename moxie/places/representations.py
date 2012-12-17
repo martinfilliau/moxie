@@ -152,3 +152,47 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
         }
         links.update(get_nav_links(self.endpoint, self.start, self.count, self.size, q=self.search))
         return HalJsonRepresentation(response, links, {'results': pois }).as_dict()
+
+
+class JsonTypesRepresentation(JsonRepresentation):
+
+    def __init__(self, types):
+        self.types = types
+
+    def as_json(self):
+        return jsonify(self.as_dict())
+
+    def as_dict(self):
+        types = []
+        for k, v in self.types.iteritems():
+            values = {'type': k, 'type_name': v['name_singular']}
+            if 'types' in v:
+                values['types'] = JsonTypesRepresentation(v['types']).as_dict()
+            types.append(values)
+        return {'types': types }
+
+
+class HalJsonTypesRepresentation(JsonTypesRepresentation):
+
+    def __init__(self, types, endpoint):
+        super(HalJsonTypesRepresentation, self).__init__(types)
+        self.endpoint = endpoint
+
+    def as_json(self):
+        return jsonify(self.as_dict())
+
+    def as_dict(self):
+        base = super(HalJsonTypesRepresentation, self).as_dict()
+        links = {'self': {
+                    'href': url_for(self.endpoint),
+                },
+                 'curie': {
+                    'name': 'hl',
+                    'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
+                    'templated': True,
+                },
+                'hl:search': {
+                    'href': url_for('places.search') + "?type={type}"
+                }
+        }
+        return HalJsonRepresentation(base, links).as_dict()

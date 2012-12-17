@@ -88,3 +88,9 @@ class POIService(Service):
             return doc_to_poi(response.results[0])
         else:
             return None
+
+    def get_types(self):
+        """Get types of POI
+        :return dict of types
+        """
+        return get_types_dict()

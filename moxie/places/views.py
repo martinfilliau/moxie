@@ -3,7 +3,7 @@ from werkzeug.wrappers import BaseResponse
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import JSON, HAL_JSON
-from moxie.places.representations import HalJsonPoisRepresentation, HalJsonPoiRepresentation, JsonPoisRepresentation, JsonPoiRepresentation
+from moxie.places.representations import HalJsonPoisRepresentation, HalJsonPoiRepresentation, JsonPoisRepresentation, JsonPoiRepresentation, JsonTypesRepresentation, HalJsonTypesRepresentation
 from .services import POIService
 
 
@@ -76,3 +76,18 @@ class PoiDetail(ServiceView):
             return response
         else:
             return HalJsonPoiRepresentation(response, request.url_rule.endpoint).as_json()
+
+
+class Types(ServiceView):
+
+    def handle_request(self):
+        poi_service = POIService.from_context()
+        return poi_service.get_types()
+
+    @accepts(JSON)
+    def as_json(self, types):
+        return JsonTypesRepresentation(types).as_json()
+
+    @accepts(HAL_JSON)
+    def as_hal_json(self, types):
+        return HalJsonTypesRepresentation(types, request.url_rule.endpoint).as_json()
