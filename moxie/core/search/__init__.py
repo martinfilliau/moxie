@@ -121,7 +121,7 @@ class SearchResponse(object):
     def facets(self):
         """Facets of the query
         :rtype list of facets"""
-        return self.facets
+        return self._facets
 
     @property
     def query_suggestion(self):
