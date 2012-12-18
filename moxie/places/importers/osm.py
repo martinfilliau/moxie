@@ -127,10 +127,8 @@ class OSMHandler(handler.ContentHandler):
                 else:
                     return
 
-                name = self.tags.get('name', self.tags.get('operator', None))
-                if name is None:
-                    name = u"↝ %f, %f" % location
-                result['name'] = name
+                # if the element doesn't have a name, it will be an empty string
+                result['name'] = self.tags.get('name', self.tags.get('operator', ''))
 
                 address = "{0} {1} {2} {3}".format(self.tags.get("addr:housename", ""), self.tags.get("addr:housenumber", ""),
                         self.tags.get("addr:street", ""), self.tags.get("addr:postcode", ""))
