@@ -19,6 +19,7 @@ class POIService(Service):
         :param location: latitude,longitude
         :param start: index of the first result of the page
         :param count: number of results for the page
+        :param type: (optional) type from the hierarchy of types to look for
         :return list of domain objects (POIs) and total size of results
         """
         query = original_query or self.default_search

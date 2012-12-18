@@ -2,7 +2,7 @@ import yaml
 import logging
 import os
 
-from flask import url_for, _app_ctx_stack
+from flask import _app_ctx_stack
 from werkzeug.local import LocalProxy
 
 logger = logging.getLogger(__name__)

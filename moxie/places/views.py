@@ -3,11 +3,14 @@ from werkzeug.wrappers import BaseResponse
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import JSON, HAL_JSON
-from moxie.places.representations import HalJsonPoisRepresentation, HalJsonPoiRepresentation, JsonPoisRepresentation, JsonPoiRepresentation, JsonTypesRepresentation, HalJsonTypesRepresentation
+from moxie.places.representations import (HalJsonPoisRepresentation, HalJsonPoiRepresentation, JsonPoisRepresentation,
+                                          JsonPoiRepresentation, JsonTypesRepresentation, HalJsonTypesRepresentation)
 from .services import POIService
 
 
 class Search(ServiceView):
+    """Search query for full-text search and context-aware search (geo-position)
+    """
     methods = ['GET', 'OPTIONS']
     cors_allow_headers = 'geo-position'
 
@@ -51,6 +54,8 @@ class Search(ServiceView):
 
 
 class PoiDetail(ServiceView):
+    """Details of one POI
+    """
 
     def handle_request(self, ident):
         if ident.endswith('/'):
@@ -60,7 +65,7 @@ class PoiDetail(ServiceView):
         if not doc:
             abort(404)
         if doc.id != ident:
-            # redirection to the main ID
+            # redirection to the same URL but with the main ID of the doc
             path = url_for(request.url_rule.endpoint, ident=doc.id)
             return redirect(path, code=301)
         else:
@@ -69,6 +74,7 @@ class PoiDetail(ServiceView):
     @accepts(JSON)
     def as_json(self, response):
         if issubclass(type(response), BaseResponse):
+            # to handle 301 redirections and 404
             return response
         else:
             return JsonPoiRepresentation(response).as_json()
@@ -76,12 +82,15 @@ class PoiDetail(ServiceView):
     @accepts(HAL_JSON)
     def as_hal_json(self, response):
         if issubclass(type(response), BaseResponse):
+            # to handle 301 redirections and 404
             return response
         else:
             return HalJsonPoiRepresentation(response, request.url_rule.endpoint).as_json()
 
 
 class Types(ServiceView):
+    """Display list of all types from the configuration.
+    """
 
     def handle_request(self):
         poi_service = POIService.from_context()
