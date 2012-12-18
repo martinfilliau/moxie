@@ -1,3 +1,5 @@
+from itertools import izip
+
 from moxie.core.service import Service
 from moxie.core.search import searcher
 from moxie.places.importers.helpers import get_types_dict
@@ -20,20 +22,42 @@ class POIService(Service):
         :param start: index of the first result of the page
         :param count: number of results for the page
         :param type: (optional) type from the hierarchy of types to look for
-        :return list of domain objects (POIs) and total size of results
+        :return list of domain objects (POIs) and total size of results, and facets on type
         """
         query = original_query or self.default_search
+        lat, lon = location
+        q = {'defType': 'edismax',
+             'spellcheck.collate': 'true',
+             'pf': query,
+             'q': query,
+             'sfield': 'location',
+             'pt': '%s,%s' % (lon, lat),
+             'sort': 'geodist() asc',
+             'fl': '*,_dist_:geodist()',
+             'facet': 'true',
+             'facet.field': 'type',
+             'facet.sort': 'index',
+             'facet.mincount': '1',
+             }
         if type:
+            q['facet.prefix'] = type
             type = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
-        response = searcher.search_nearby(query, location, fq=type, start=start, count=count)
+        response = searcher.search(q, fq=type, start=start, count=count)
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
             if response.query_suggestion:
                 suggestion = response.query_suggestion
                 return self.get_results(suggestion, location, start, count, type=type)
             else:
-                return [], 0
-        return [doc_to_poi(r) for r in response.results], response.size
+                return [], 0, None
+        # TODO at some points we'll have to think about the difference between get_results and get_nearby_results
+        if response.facets:
+            facets_values = response.facets['facet_fields']['type']
+            i = iter(facets_values)
+            facets = dict(izip(i, i))
+        else:
+            facets = None
+        return [doc_to_poi(r) for r in response.results], response.size, facets
 
     def get_nearby_results(self, location, start, count, all_types=False):
         """Get results around a location (nearby)
@@ -41,7 +65,7 @@ class POIService(Service):
         :param start: index of the first result of the page
         :param count: number of results for the page
         :param all_types: display all types or excludes some types defined in configuration
-        :return: list of domain objects (POIs) and total size of results
+        :return: list of domain objects (POIs) and total size of results, and facets on type
         """
         lat, lon = location
         q = {'q': '*:*',
@@ -51,16 +75,23 @@ class POIService(Service):
              'fl': '*,_dist_:geodist()',
              'facet': 'true',
              'facet.field': 'type',
-             'facet.sort': 'index'
+             'facet.sort': 'index',
+             'facet.mincount': '1',
              }
         fq = None
         if not all_types and len(self.nearby_excludes) > 0:
             fq = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
         response = searcher.search(q, fq=fq, start=start, count=count)
         if response.results:
-            return [doc_to_poi(r) for r in response.results], response.size
+            if response.facets:
+                facets_values = response.facets['facet_fields']['type']
+                i = iter(facets_values)
+                facets = dict(izip(i, i))
+            else:
+                facets = None
+            return [doc_to_poi(r) for r in response.results], response.size, facets
         else:
-            return None, None
+            return None, None, None
 
     def get_place_by_identifier(self, ident):
         """Get a place by its main identifier

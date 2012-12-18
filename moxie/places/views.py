@@ -37,11 +37,12 @@ class Search(ServiceView):
                 unique_doc = poi_service.search_place_by_identifier('*:{id}'.format(id=self.query))
                 if unique_doc:
                     self.size = 1
+                    self.facets = None
                     return [unique_doc]
-            results, self.size = poi_service.get_results(self.query, location, self.start, self.count, type=self.type)
+            results, self.size, self.facets = poi_service.get_results(self.query, location, self.start, self.count, type=self.type)
         else:
             # no search query, return results nearby the given location
-            results, self.size = poi_service.get_nearby_results(location, self.start, self.count)
+            results, self.size, self.facets = poi_service.get_nearby_results(location, self.start, self.count)
         return results
 
     @accepts(JSON)
@@ -50,7 +51,8 @@ class Search(ServiceView):
 
     @accepts(HAL_JSON)
     def as_hal_json(self, response):
-        return HalJsonPoisRepresentation(self.query, response, self.start, self.count, self.size, request.url_rule.endpoint).as_json()
+        return HalJsonPoisRepresentation(self.query, response, self.start, self.count, self.size,
+            request.url_rule.endpoint, types=self.facets).as_json()
 
 
 class PoiDetail(ServiceView):

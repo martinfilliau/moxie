@@ -1,6 +1,7 @@
 from flask import url_for, jsonify
 
 from moxie.core.representations import JsonRepresentation, HalJsonRepresentation, get_nav_links
+from moxie.places.importers.helpers import find_type_name
 from moxie.transport.services import TransportService
 from moxie.core.service import NoConfiguredService
 from moxie.places.services import POIService
@@ -121,7 +122,7 @@ class JsonPoisRepresentation(object):
 
 class HalJsonPoisRepresentation(JsonPoisRepresentation):
 
-    def __init__(self, search, results, start, count, size, endpoint):
+    def __init__(self, search, results, start, count, size, endpoint, types=None):
         """Represents a list of search result as HAL+JSON
         :param search: search query
         :param results: list of results
@@ -136,6 +137,7 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
         self.count = count
         self.size = size
         self.endpoint = endpoint
+        self.types = types
 
     def as_json(self):
         return jsonify(self.as_dict())
@@ -151,6 +153,12 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
                 }
         }
         links.update(get_nav_links(self.endpoint, self.start, self.count, self.size, q=self.search))
+        if self.types:
+            # add faceting links for types
+            links['hl:types'] = [{ 'href': url_for(self.endpoint, q=self.search, type=facet),
+                                'name': facet,
+                                'title': find_type_name(facet)}
+                                    for facet in self.types]
         return HalJsonRepresentation(response, links, {'results': pois }).as_dict()
 
 
