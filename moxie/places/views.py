@@ -26,15 +26,18 @@ class Search(ServiceView):
             location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
 
         poi_service = POIService.from_context()
+        # if there is an actual search query
         if self.query:
-            # Try to match the query to identifiers, useful when querying for bus stop naptan number
+            # Try to match the query to identifiers if it's a one word query, useful when querying for bus stop naptan number
             # TODO pass the location to have the distance from the point
-            unique_doc = poi_service.search_place_by_identifier('*:{id}'.format(id=self.query))
-            if unique_doc:
-                self.size = 1
-                return [unique_doc]
+            if ' ' not in self.query:
+                unique_doc = poi_service.search_place_by_identifier('*:{id}'.format(id=self.query))
+                if unique_doc:
+                    self.size = 1
+                    return [unique_doc]
             results, self.size = poi_service.get_results(self.query, location, self.start, self.count, type=self.type)
         else:
+            # no search query, return results nearby the given location
             results, self.size = poi_service.get_nearby_results(location, self.start, self.count)
         return results
 
