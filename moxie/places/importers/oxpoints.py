@@ -61,16 +61,14 @@ class OxpointsImporter(object):
         oxpoints_type = datum['type'].rsplit('#')[-1]
         name = datum.get('dc_title', datum.get('oxp_fullyQualifiedTitle', ''))
 
-        if not oxpoints_type in self.OXPOINTS_TYPES:
-            return
-
-        if not name:
+        # Do not index items without name or not in the list of types defined
+        if not oxpoints_type in self.OXPOINTS_TYPES or not name:
             return
 
         doc = dict()
         doc['name'] = name
         doc['id'] = 'oxpoints:{0}'.format(oxpoints_id)
-        doc['type'] = self.OXPOINTS_TYPES.get(oxpoints_type, '/other')
+        doc['type'] = self.OXPOINTS_TYPES[oxpoints_type]
 
         if 'geo_lat' in datum and 'geo_long' in datum:
             doc['location'] = "%s,%s" % (datum.pop('geo_long'), datum.pop('geo_lat'))
