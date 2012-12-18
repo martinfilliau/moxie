@@ -29,6 +29,8 @@ class SolrSearch(object):
                 }
 
     def search_nearby(self, query, location, fq=None, start=0, count=10, location_field='location'):
+        # TODO this method is not called anymore. But it should be refactored to handle more
+        # logic from Solr, but being more flexible at the same time
         lat, lon = location
         q = {'defType': 'edismax',
                 'spellcheck.collate': 'true',
