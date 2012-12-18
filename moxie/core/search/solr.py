@@ -164,6 +164,12 @@ class SolrSearchResponse(SearchResponse):
             suggestion = solr_response['spellcheck']['suggestions'][-1]
         except:
             suggestion = None
+        try:
+            # WARNING: differents types of facets: counts, query, ranges, this has to be
+            # handled in your code for now
+            facets = solr_response['facet_counts']
+        except:
+            facets = None
 
         super(SolrSearchResponse, self).__init__(solr_response, query, size,
-            results=results, query_suggestion=suggestion)
+            results=results, query_suggestion=suggestion, facets=facets)
