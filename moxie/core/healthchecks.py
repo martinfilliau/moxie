@@ -15,6 +15,7 @@ def check_services():
     ctx = _app_ctx_stack.top
     services = ctx.app.config.get('HEALTHCHECKS', [])
     result = []
+    response_code = 200
     for service, parameters in services.iteritems():
         module_name, _, klass_name = service.rpartition('.')
         module = importlib.import_module(module_name)
@@ -24,8 +25,10 @@ def check_services():
         except Exception as e:
             ok = False
             text = e
+        if not ok:
+            response_code = 500
         result.append('* {service} [{parameters}]: {text}'.format(service=service,
             parameters=str(parameters), text=text))
-    response = make_response('\n'.join(result))
+    response = make_response('\n'.join(result), response_code)
     response.headers['Content-Type'] = "text/plain"
     return response
