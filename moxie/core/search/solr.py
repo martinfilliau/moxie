@@ -146,11 +146,13 @@ class SolrSearch(object):
 
     def healthcheck(self):
         try:
-            result = self.connection(self.methods['healthcheck'])
-            return result.ok, result.json['status']
+            response = requests.get('{url}{core}/{method}'.format(url=self.server_url,
+                core=self.core, method=self.methods['healthcheck']), timeout=2,
+                config={'danger_mode': True})
+            return response.ok, response.json['status']
         except Exception as e:
+            return False, e
             logger.error('Error while checking health of Solr', exc_info=True)
-            return False, e.message
 
     @staticmethod
     def solr_escape(string):
