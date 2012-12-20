@@ -49,5 +49,18 @@ class KVService(Service):
 
     def setex(self, key, expiry, value):
         return self._backend.setex(key, expiry, value)
+        
+    def healthcheck(self):
+        """Healthcheck query to the backend
+        """
+        # TODO this query (ping) is specific to Redis, it should be made generic at some points
+        try:
+            result = self._backend.ping()
+            if result:
+                return True, "OK"
+            else:
+                return False, "FAILED TO PING"
+        except Exception as e:
+            return False, e
 
 kv_store = LocalProxy(KVService.from_context)
