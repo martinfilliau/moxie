@@ -16,6 +16,7 @@ def check_services():
         response_code = 500
     response = make_response('\n'.join(result), response_code)
     response.headers['Content-Type'] = "text/plain"
+    response.headers['Cache-Control'] = "must-revalidate,no-cache,no-store"
     return response
 
 
