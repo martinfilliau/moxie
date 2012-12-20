@@ -27,17 +27,21 @@ def run_healthchecks(services):
         return False, ["No healthchecks configured!"]
     ok = True
     result = []
-    for service, parameters in services.iteritems():
-        module_name, _, klass_name = service.rpartition('.')
-        module = importlib.import_module(module_name)
-        klass = getattr(module, klass_name)
+    for name, service in services.iteritems():
         try:
-            success, text = klass(**parameters).healthcheck()
+            # The first element of the dictionary (service) is the class name
+            module_name, _, klass_name = service.iterkeys().next().rpartition('.')
+            module = importlib.import_module(module_name)
+            klass = getattr(module, klass_name)
+            # Init the class with arguments as the values of the first element of the
+            # dictionary and invoke the healthcheck method
+            success, text = klass(**service.itervalues().next()).healthcheck()
         except Exception as e:
             success = False
             text = e
         if not success:
             ok = False
-        result.append('* {service} [{parameters}]: {text}'.format(service=service,
-            parameters=str(parameters), text=text))
+            result.append('* !! {service}: {text}'.format(service=name, text=text))
+        else:
+            result.append('* {service}: {text}'.format(service=name, text=text))
     return ok, result
