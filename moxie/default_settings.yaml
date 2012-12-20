@@ -26,3 +26,9 @@ services:
             backend_uri: 'solr+http://localhost:8080/solr/places'
         KVService:
             backend_uri: 'redis://localhost:6379/0'
+
+healthchecks:
+    moxie.core.search.SearchService:
+            backend_uri: 'solr+http://localhost:8080/solr/places'
+    moxie.core.kv.KVService:
+            backend_uri: 'redis://localhost:6379/0'
