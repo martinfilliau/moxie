@@ -7,7 +7,7 @@ from moxie.places.solr import doc_to_poi
 
 
 class POIService(Service):
-    default_search = '*'
+    default_search = '*:*'
 
     def __init__(self, nearby_excludes=None):
         """POI service
@@ -15,13 +15,15 @@ class POIService(Service):
         """
         self.nearby_excludes = nearby_excludes or []
 
-    def get_results(self, original_query, location, start, count, type=None):
+    def get_results(self, original_query, location, start, count, type=None,
+            all_types=False):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
         :param start: index of the first result of the page
         :param count: number of results for the page
         :param type: (optional) type from the hierarchy of types to look for
+        :param all_types: display all types or excludes some types defined in configuration
         :return list of domain objects (POIs) and total size of results, and facets on type
         """
         query = original_query or self.default_search
@@ -41,16 +43,18 @@ class POIService(Service):
              }
         if type:
             q['facet.prefix'] = type
-            type = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
-        response = searcher.search(q, fq=type, start=start, count=count)
+            filter_query = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
+        elif not all_types:
+            filter_query = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
+        response = searcher.search(q, fq=filter_query, start=start, count=count)
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
             if response.query_suggestion:
                 suggestion = response.query_suggestion
-                return self.get_results(suggestion, location, start, count, type=type)
+                return self.get_results(suggestion, location, start, count,
+                        type=type, all_types=all_types)
             else:
                 return [], 0, None
-        # TODO at some points we'll have to think about the difference between get_results and get_nearby_results
         if response.facets:
             facets_values = response.facets['facet_fields']['type']
             i = iter(facets_values)
@@ -58,40 +62,6 @@ class POIService(Service):
         else:
             facets = None
         return [doc_to_poi(r) for r in response.results], response.size, facets
-
-    def get_nearby_results(self, location, start, count, all_types=False):
-        """Get results around a location (nearby)
-        :param location: latitude,longitude
-        :param start: index of the first result of the page
-        :param count: number of results for the page
-        :param all_types: display all types or excludes some types defined in configuration
-        :return: list of domain objects (POIs) and total size of results, and facets on type
-        """
-        lat, lon = location
-        q = {'q': '*:*',
-             'sfield': 'location',
-             'pt': '%s,%s' % (lon, lat),
-             'sort': 'geodist() asc',
-             'fl': '*,_dist_:geodist()',
-             'facet': 'true',
-             'facet.field': 'type',
-             'facet.sort': 'index',
-             'facet.mincount': '1',
-             }
-        fq = None
-        if not all_types and len(self.nearby_excludes) > 0:
-            fq = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
-        response = searcher.search(q, fq=fq, start=start, count=count)
-        if response.results:
-            if response.facets:
-                facets_values = response.facets['facet_fields']['type']
-                i = iter(facets_values)
-                facets = dict(izip(i, i))
-            else:
-                facets = None
-            return [doc_to_poi(r) for r in response.results], response.size, facets
-        else:
-            return None, None, None
 
     def get_place_by_identifier(self, ident):
         """Get a place by its main identifier
