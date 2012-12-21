@@ -17,6 +17,14 @@ class RepresentationsTestCase(unittest.TestCase):
         self.assertFalse('_embedded' in representation.as_dict())
         self.assertDictContainsSubset(values, representation.as_dict())
 
+    def test_hal_json_helper_representation(self):
+        representation = HalJsonRepresentation({'a':'b'})
+        representation.add_link('self', '/a/b')
+        representation.add_link('list', '/list', templated="true")
+        self.assertDictContainsSubset({'_links': {'self': {'href': '/a/b'},
+            'list': {'href': '/list', 'templated': 'true'}}},
+            representation.as_dict())
+
     def test_hal_json_representation_embed(self):
         links = {'self': {'href': 'ahdhd'}}
         values = {'c': 'd'}

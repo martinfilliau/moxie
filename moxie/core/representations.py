@@ -17,8 +17,8 @@ class JsonRepresentation(Representation):
 class HalJsonRepresentation(JsonRepresentation):
     content_type = "application/hal+json"
 
-    def __init__(self, values, links, embed=None):
-        self.links = links
+    def __init__(self, values, links=None, embed=None):
+        self.links = links or {}
         self.embed = embed or []
         self.values = values
 
@@ -28,6 +28,15 @@ class HalJsonRepresentation(JsonRepresentation):
         if self.embed:
             representation['_embedded'] = self.embed
         return representation
+        
+    def add_link(self, target, href, **kwargs):
+        """Add a link in _links
+        :param target: target of the link (e.g. "self")
+        :param href: link
+        """
+        self.links[target] = {'href': href}
+        if kwargs:
+            self.links[target].update(kwargs)
 
 
 def get_nav_links(endpoint, start, count, size, **kwargs):
