@@ -1,4 +1,4 @@
-from flask import url_for
+from flask import url_for, jsonify
 
 
 # Mimetypes
@@ -18,16 +18,30 @@ class HalJsonRepresentation(JsonRepresentation):
     content_type = "application/hal+json"
 
     def __init__(self, values, links=None, embed=None):
+        """HAL representation of a content with links and embedded documents.
+        :param values: main values of the document
+        :param links: _links of the document
+        :param embed: _embedded documents
+        """
         self.links = links or {}
         self.embed = embed or []
         self.values = values
 
     def as_dict(self):
+        """Get a representation as a dict
+        :return dict
+        """
         representation = self.values
         representation['_links'] = self.links
         if self.embed:
             representation['_embedded'] = self.embed
         return representation
+
+    def as_json(self):
+        """Get a representation as JSON
+        :return json string
+        """
+        return jsonify(self.as_dict())
         
     def add_link(self, target, href, **kwargs):
         """Add a link in _links
@@ -37,6 +51,18 @@ class HalJsonRepresentation(JsonRepresentation):
         self.links[target] = {'href': href}
         if kwargs:
             self.links[target].update(kwargs)
+            
+    def update_link(self, target, href, **kwargs):
+        """Update a link in _links (when it is a list of many links in a target)
+        :param target: target of the link (e.g. "child")
+        :param href: link
+        """
+        if not target in self.links:
+            self.links[target] = []
+        link = {'href': href}
+        if kwargs:
+            link.update(kwargs)
+        self.links[target].append(link)
 
 
 def get_nav_links(endpoint, start, count, size, **kwargs):

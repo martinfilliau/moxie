@@ -48,10 +48,9 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
 
     def as_dict(self):
         base = super(HalJsonPoiRepresentation, self).as_dict()
-        links = {'self': {
-                    'href': url_for(self.endpoint, ident=self.poi.id)
-                }
-        }
+        representation = HalJsonRepresentation(base)
+        representation.add_link('self', url_for(self.endpoint, ident=self.poi.id))
+        
         try:
             poi_service = POIService.from_context()
         except NoConfiguredService:
@@ -61,24 +60,24 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
                 parent = poi_service.get_place_by_identifier(self.poi.parent)
             else:
                 parent = None
-            links['parent'] = {
-                'href': url_for(self.endpoint, ident=self.poi.parent),
-            }
             if parent and parent.name:
-                links['parent']['title'] = parent.name
+                representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent),
+                    title=parent.name)
+            else:
+                representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent))
 
         if len(self.poi.children) > 0:
-            links['child'] = []
             # TODO GET with multiple documents, to do at service level
             for child in self.poi.children:
-                c = {'href': url_for(self.endpoint, ident=child)}
                 if poi_service:
                     p = poi_service.get_place_by_identifier(child)
                 else:
                     p = None
                 if p and p.name:
-                    c['title'] = p.name
-                links['child'].append(c)
+                    representation.update_link('child', url_for(self.endpoint, ident=child), 
+                        title=p.name)
+                else:
+                    representation.update_link('child', url_for(self.endpoint, ident=child))
 
         try:
             transport_service = TransportService.from_context()
@@ -86,16 +85,11 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
             # Transport service not configured so no RTI information
             transport_service = None
         if transport_service and transport_service.get_provider(self.poi):
-            links['curie'] = {
-                'name': 'hl',
-                'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
-                'templated': True,
-            }
-            links['hl:rti'] = {
-                'href': url_for('places.rti', ident=self.poi.id),
-                'title': 'Real-time information'
-            }
-        return HalJsonRepresentation(base, links).as_dict()
+            representation.add_link('curie', 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
+                name='hl', templated=True)
+            representation.add_link('hl:rti', url_for('places.rti', ident=self.poi.id),
+                title="Real-time information")
+        return representation.as_dict()
 
 
 class JsonPoisRepresentation(object):
