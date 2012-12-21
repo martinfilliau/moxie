@@ -136,23 +136,19 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
         return jsonify(self.as_dict())
 
     def as_dict(self):
-        response = {
+        representation = HalJsonRepresentation({
             'query': self.search,
             'size': self.size,
-        }
-        pois = [HalJsonPoiRepresentation(r, 'places.poidetail').as_dict() for r in self.results]
-        links = {'self': {
-                    'href': url_for(self.endpoint, q=self.search)
-                }
-        }
-        links.update(get_nav_links(self.endpoint, self.start, self.count, self.size, q=self.search))
+        })
+        representation.add_link('self', url_for(self.endpoint, q=self.search))
+        representation.add_links(get_nav_links(self.endpoint, self.start, self.count, self.size, q=self.search))
+        representation.add_embed([HalJsonPoiRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
         if self.types:
             # add faceting links for types
-            links['hl:types'] = [{ 'href': url_for(self.endpoint, q=self.search, type=facet),
-                                'name': facet,
-                                'title': find_type_name(facet)}
-                                    for facet in self.types]
-        return HalJsonRepresentation(response, links, {'results': pois }).as_dict()
+            for facet in self.types:
+                representation.update_link('hl:types', url_for(self.endpoint, q=self.search, type=facet),
+                    name=facet, title=find_type_name(facet))
+        return representation.as_dict()
 
 
 class JsonTypesRepresentation(JsonRepresentation):

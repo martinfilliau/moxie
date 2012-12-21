@@ -56,6 +56,12 @@ class HalJsonRepresentation(JsonRepresentation):
         if kwargs:
             self.links[target].update(kwargs)
             
+    def add_links(self, links):
+        """Add a list of links to the representation
+        :param links: list of links
+        """
+        self.links.update(links)
+            
     def update_link(self, target, href, **kwargs):
         """Update a link in _links (when it is a list of many links in a target)
         :param target: target of the link (e.g. "child")
@@ -69,8 +75,17 @@ class HalJsonRepresentation(JsonRepresentation):
         self.links[target].append(link)
         
     def add_curie(self, name, href):
-        """Add a curie"""
+        """Add a curie
+        :param name: name of the curie
+        :param href: url of the curie
+        """
         self.add_link('curie', href, name=name, templated='true')
+        
+    def add_embed(self, docs):
+        """Add embedded documents
+        :param docs: list of docs
+        """
+        self.embed.extend(docs)
 
 
 def get_nav_links(endpoint, start, count, size, **kwargs):
