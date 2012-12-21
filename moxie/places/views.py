@@ -15,34 +15,29 @@ class Search(ServiceView):
     cors_allow_headers = 'geo-position'
 
     def handle_request(self):
-        response = dict()
         if 'Geo-Position' in request.headers:
-            response['lat'], response['lon'] = request.headers['Geo-Position'].split(';')
-        self.query = request.args.get('q', None)
+            location = request.headers['Geo-Position'].split(';')
+        else:
+            default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
+            location = (request.args.get('lat', default_lat),
+                    request.args.get('lon', default_lon))
+        self.query = request.args.get('q', '')
         self.type = request.args.get('type', None)
         self.start = request.args.get('start', 0)
         self.count = request.args.get('count', 35)
-        if 'lat' in response and 'lon' in response:
-            location = response['lat'], response['lon']
-        else:
-            default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
-            location = request.args.get('lat', default_lat), request.args.get('lon', default_lon)
-
         poi_service = POIService.from_context()
-        # if there is an actual search query
-        if self.query:
-            # Try to match the query to identifiers if it's a one word query, useful when querying for bus stop naptan number
-            # TODO pass the location to have the distance from the point
-            if ' ' not in self.query:
-                unique_doc = poi_service.search_place_by_identifier('*:{id}'.format(id=self.query))
-                if unique_doc:
-                    self.size = 1
-                    self.facets = None
-                    return [unique_doc]
-            results, self.size, self.facets = poi_service.get_results(self.query, location, self.start, self.count, type=self.type)
-        else:
-            # no search query, return results nearby the given location
-            results, self.size, self.facets = poi_service.get_nearby_results(location, self.start, self.count)
+        # Try to match the query to identifiers if it's a one word query,
+        # useful when querying for bus stop naptan number
+        # TODO pass the location to have the distance from the point
+        if ' ' not in self.query:
+            unique_doc = poi_service.search_place_by_identifier(
+                    '*:{id}'.format(id=self.query))
+            if unique_doc:
+                self.size = 1
+                self.facets = None
+                return [unique_doc]
+        results, self.size, self.facets = poi_service.get_results(self.query,
+                location, self.start, self.count, type=self.type)
         return results
 
     @accepts(JSON)
