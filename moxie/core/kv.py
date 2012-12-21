@@ -55,8 +55,8 @@ class KVService(Service):
         """
         # TODO this query (ping) is specific to Redis, it should be made generic at some points
         try:
-            result = self._backend.ping()
-            if result:
+            # Does a PING command to Redis, response should be PONG (returns True with py-redis)
+            if self._backend.ping():
                 return True, "OK"
             else:
                 return False, "FAILED TO PING"
