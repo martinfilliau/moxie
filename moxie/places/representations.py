@@ -85,8 +85,7 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
             # Transport service not configured so no RTI information
             transport_service = None
         if transport_service and transport_service.get_provider(self.poi):
-            representation.add_link('curie', 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
-                name='hl', templated=True)
+            representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}')
             representation.add_link('hl:rti', url_for('places.rti', ident=self.poi.id),
                 title="Real-time information")
         return representation.as_dict()

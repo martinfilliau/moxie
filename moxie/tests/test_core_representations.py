@@ -23,10 +23,12 @@ class RepresentationsTestCase(unittest.TestCase):
         representation.add_link('list', '/list', templated="true")
         representation.update_link('child', '/child/1')
         representation.update_link('child', '/child/2')
-        self.assertDictContainsSubset({'_links': 
-            {'self': {'href': '/a/b'},
+        representation.add_curie('cu', 'http://curie.com')
+        self.assertDictContainsSubset({'_links': {
+            'self': {'href': '/a/b'},
             'list': {'href': '/list', 'templated': 'true'},
-            'child': [{'href': '/child/1'}, {'href': '/child/2'}]}},
+            'child': [{'href': '/child/1'}, {'href': '/child/2'}],
+            'curie': {'href': 'http://curie.com', 'name': 'cu', 'templated': 'true'}}},
             representation.as_dict())
 
     def test_hal_json_representation_embed(self):

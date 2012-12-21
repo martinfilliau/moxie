@@ -27,6 +27,8 @@ class HalJsonRepresentation(JsonRepresentation):
         self.embed = embed or []
         self.values = values
 
+    # Representations of this object
+
     def as_dict(self):
         """Get a representation as a dict
         :return dict
@@ -42,6 +44,8 @@ class HalJsonRepresentation(JsonRepresentation):
         :return json string
         """
         return jsonify(self.as_dict())
+        
+    # Helpers methods
         
     def add_link(self, target, href, **kwargs):
         """Add a link in _links
@@ -63,6 +67,10 @@ class HalJsonRepresentation(JsonRepresentation):
         if kwargs:
             link.update(kwargs)
         self.links[target].append(link)
+        
+    def add_curie(self, name, href):
+        """Add a curie"""
+        self.add_link('curie', href, name=name, templated='true')
 
 
 def get_nav_links(endpoint, start, count, size, **kwargs):
