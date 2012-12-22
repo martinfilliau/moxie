@@ -180,16 +180,8 @@ class HalJsonTypesRepresentation(JsonTypesRepresentation):
 
     def as_dict(self):
         base = super(HalJsonTypesRepresentation, self).as_dict()
-        links = {'self': {
-                    'href': url_for(self.endpoint),
-                },
-                 'curie': {
-                    'name': 'hl',
-                    'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
-                    'templated': True,
-                },
-                'hl:search': {
-                    'href': url_for('places.search') + "?type={type}"
-                }
-        }
-        return HalJsonRepresentation(base, links).as_dict()
+        representation = HalJsonRepresentation(base)
+        representation.add_link('self', url_for(self.endpoint))
+        representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}')
+        representation.add_link('hl:search', url_for('places.search') + "?type={type}")
+        return representation.as_dict()
