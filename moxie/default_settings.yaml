@@ -13,9 +13,6 @@ blueprints:
     places:
         url_prefix: /places
         factory: moxie.places.create_blueprint
-    oxford_dates:
-        url_prefix: /oxford_dates
-        factory: moxie.oxford_dates.create_blueprint
 
 services:
     places:
@@ -29,5 +26,3 @@ services:
             backend_uri: 'solr+http://localhost:8080/solr/places'
         KVService:
             backend_uri: 'redis://localhost:6379/0'
-    oxford_dates:
-        OxfordDatesService: {}
