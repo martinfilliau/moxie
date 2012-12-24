@@ -1,6 +1,8 @@
 Relations
 =========
 
+List of relations (rel) used in our HAL representations.
+
 first
 -----
 
@@ -25,3 +27,13 @@ rti
 ----
 
 Real-Time information on an entity.
+
+parent
+------
+
+Parent document of an entity.
+
+child
+-----
+
+List of child documents to an entity.
