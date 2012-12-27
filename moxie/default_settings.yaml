@@ -8,6 +8,8 @@ flask:
     OSM_IMPORT_URL: 'http://download.geofabrik.de/openstreetmap/europe/great_britain/england/oxfordshire.osm.bz2'
     OXPOINTS_IMPORT_URL: 'http://oxpoints.oucs.ox.ac.uk/all.json'
     NAPTAN_IMPORT_URL: 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
+    # Cache
+    CACHE_TYPE: 'redis'
 
 blueprints:
     places:
