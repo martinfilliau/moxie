@@ -8,7 +8,7 @@ from .services import TransportService
 class RTI(ServiceView):
     methods = ['GET', 'OPTIONS']
 
-    @cache.memoize(timeout=10)
+    @cache.cached(timeout=10)
     def handle_request(self, ident):
         transport_service = TransportService.from_context()
         services, messages = transport_service.get_rti(ident)
