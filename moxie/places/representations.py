@@ -48,10 +48,9 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
 
     def as_dict(self):
         base = super(HalJsonPoiRepresentation, self).as_dict()
-        links = {'self': {
-                    'href': url_for(self.endpoint, ident=self.poi.id)
-                }
-        }
+        representation = HalJsonRepresentation(base)
+        representation.add_link('self', url_for(self.endpoint, ident=self.poi.id))
+        
         try:
             poi_service = POIService.from_context()
         except NoConfiguredService:
@@ -61,24 +60,24 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
                 parent = poi_service.get_place_by_identifier(self.poi.parent)
             else:
                 parent = None
-            links['parent'] = {
-                'href': url_for(self.endpoint, ident=self.poi.parent),
-            }
             if parent and parent.name:
-                links['parent']['title'] = parent.name
+                representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent),
+                    title=parent.name)
+            else:
+                representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent))
 
         if len(self.poi.children) > 0:
-            links['child'] = []
             # TODO GET with multiple documents, to do at service level
             for child in self.poi.children:
-                c = {'href': url_for(self.endpoint, ident=child)}
                 if poi_service:
                     p = poi_service.get_place_by_identifier(child)
                 else:
                     p = None
                 if p and p.name:
-                    c['title'] = p.name
-                links['child'].append(c)
+                    representation.update_link('child', url_for(self.endpoint, ident=child), 
+                        title=p.name)
+                else:
+                    representation.update_link('child', url_for(self.endpoint, ident=child))
 
         try:
             transport_service = TransportService.from_context()
@@ -86,16 +85,10 @@ class HalJsonPoiRepresentation(JsonPoiRepresentation):
             # Transport service not configured so no RTI information
             transport_service = None
         if transport_service and transport_service.get_provider(self.poi):
-            links['curie'] = {
-                'name': 'hl',
-                'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
-                'templated': True,
-            }
-            links['hl:rti'] = {
-                'href': url_for('places.rti', ident=self.poi.id),
-                'title': 'Real-time information'
-            }
-        return HalJsonRepresentation(base, links).as_dict()
+            representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}')
+            representation.add_link('hl:rti', url_for('places.rti', ident=self.poi.id),
+                title="Real-time information")
+        return representation.as_dict()
 
 
 class JsonPoisRepresentation(object):
@@ -143,23 +136,19 @@ class HalJsonPoisRepresentation(JsonPoisRepresentation):
         return jsonify(self.as_dict())
 
     def as_dict(self):
-        response = {
+        representation = HalJsonRepresentation({
             'query': self.search,
             'size': self.size,
-        }
-        pois = [HalJsonPoiRepresentation(r, 'places.poidetail').as_dict() for r in self.results]
-        links = {'self': {
-                    'href': url_for(self.endpoint, q=self.search)
-                }
-        }
-        links.update(get_nav_links(self.endpoint, self.start, self.count, self.size, q=self.search))
+        })
+        representation.add_link('self', url_for(self.endpoint, q=self.search))
+        representation.add_links(get_nav_links(self.endpoint, self.start, self.count, self.size, q=self.search))
+        representation.add_embed([HalJsonPoiRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
         if self.types:
             # add faceting links for types
-            links['hl:types'] = [{ 'href': url_for(self.endpoint, q=self.search, type=facet),
-                                'name': facet,
-                                'title': find_type_name(facet)}
-                                    for facet in self.types]
-        return HalJsonRepresentation(response, links, {'results': pois }).as_dict()
+            for facet in self.types:
+                representation.update_link('hl:types', url_for(self.endpoint, q=self.search, type=facet),
+                    name=facet, title=find_type_name(facet))
+        return representation.as_dict()
 
 
 class JsonTypesRepresentation(JsonRepresentation):
@@ -191,16 +180,8 @@ class HalJsonTypesRepresentation(JsonTypesRepresentation):
 
     def as_dict(self):
         base = super(HalJsonTypesRepresentation, self).as_dict()
-        links = {'self': {
-                    'href': url_for(self.endpoint),
-                },
-                 'curie': {
-                    'name': 'hl',
-                    'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
-                    'templated': True,
-                },
-                'hl:search': {
-                    'href': url_for('places.search') + "?type={type}"
-                }
-        }
-        return HalJsonRepresentation(base, links).as_dict()
+        representation = HalJsonRepresentation(base)
+        representation.add_link('self', url_for(self.endpoint))
+        representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}')
+        representation.add_link('hl:search', url_for('places.search') + "?type={type}")
+        return representation.as_dict()

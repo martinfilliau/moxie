@@ -1,4 +1,4 @@
-from flask import url_for
+from flask import url_for, jsonify
 
 
 # Mimetypes
@@ -17,17 +17,75 @@ class JsonRepresentation(Representation):
 class HalJsonRepresentation(JsonRepresentation):
     content_type = "application/hal+json"
 
-    def __init__(self, values, links, embed=None):
-        self.links = links
+    def __init__(self, values, links=None, embed=None):
+        """HAL representation of a content with links and embedded documents.
+        :param values: main values of the document
+        :param links: _links of the document
+        :param embed: _embedded documents
+        """
+        self.links = links or {}
         self.embed = embed or []
         self.values = values
 
+    # Representations of this object
+
     def as_dict(self):
+        """Get a representation as a dict
+        :return dict
+        """
         representation = self.values
         representation['_links'] = self.links
         if self.embed:
             representation['_embedded'] = self.embed
         return representation
+
+    def as_json(self):
+        """Get a representation as JSON
+        :return json string
+        """
+        return jsonify(self.as_dict())
+        
+    # Helpers methods
+        
+    def add_link(self, target, href, **kwargs):
+        """Add a link in _links
+        :param target: target of the link (e.g. "self")
+        :param href: link
+        """
+        self.links[target] = {'href': href}
+        if kwargs:
+            self.links[target].update(kwargs)
+            
+    def add_links(self, links):
+        """Add a list of links to the representation
+        :param links: list of links
+        """
+        self.links.update(links)
+            
+    def update_link(self, target, href, **kwargs):
+        """Update a link in _links (when it is a list of many links in a target)
+        :param target: target of the link (e.g. "child")
+        :param href: link
+        """
+        if not target in self.links:
+            self.links[target] = []
+        link = {'href': href}
+        if kwargs:
+            link.update(kwargs)
+        self.links[target].append(link)
+        
+    def add_curie(self, name, href):
+        """Add a curie
+        :param name: name of the curie
+        :param href: url of the curie
+        """
+        self.add_link('curie', href, name=name, templated='true')
+        
+    def add_embed(self, docs):
+        """Add embedded documents
+        :param docs: list of docs
+        """
+        self.embed.extend(docs)
 
 
 def get_nav_links(endpoint, start, count, size, **kwargs):
