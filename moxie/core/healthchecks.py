@@ -5,7 +5,7 @@ from flask import _app_ctx_stack, make_response
 
 logger = logging.getLogger(__name__)
 
-        
+
 def check_services():
     ctx = _app_ctx_stack.top
     services = ctx.app.config.get('HEALTHCHECKS', [])
@@ -23,7 +23,8 @@ def check_services():
 def run_healthchecks(services):
     """Run healthchecks by calling the method healthcheck() on every service.
     :param services: list of services to check
-    :return True if everything is OK else False, string describing healthcheks"""
+    :return True if everything is OK else False, string describing healthcheks
+    """
     if not services:
         return False, ["No healthchecks configured!"]
     ok = True
