@@ -3,8 +3,8 @@ from werkzeug.wrappers import BaseResponse
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import JSON, HAL_JSON
-from moxie.places.representations import (HalJsonPoisRepresentation, HalJsonPoiRepresentation, JsonPoisRepresentation,
-                                          JsonPoiRepresentation, JsonTypesRepresentation, HalJsonTypesRepresentation)
+from moxie.places.representations import (HALPOIsRepresentation, HALPOIRepresentation, POIsRepresentation,
+                                          POIRepresentation, TypesRepresentation, HALTypesRepresentation)
 from .services import POIService
 
 
@@ -42,11 +42,11 @@ class Search(ServiceView):
 
     @accepts(JSON)
     def as_json(self, response):
-        return JsonPoisRepresentation(self.query, response).as_json()
+        return POIsRepresentation(self.query, response).as_json()
 
     @accepts(HAL_JSON)
     def as_hal_json(self, response):
-        return HalJsonPoisRepresentation(self.query, response, self.start, self.count, self.size,
+        return HALPOIsRepresentation(self.query, response, self.start, self.count, self.size,
             request.url_rule.endpoint, types=self.facets).as_json()
 
 
@@ -74,7 +74,7 @@ class PoiDetail(ServiceView):
             # to handle 301 redirections and 404
             return response
         else:
-            return JsonPoiRepresentation(response).as_json()
+            return POIRepresentation(response).as_json()
 
     @accepts(HAL_JSON)
     def as_hal_json(self, response):
@@ -82,7 +82,7 @@ class PoiDetail(ServiceView):
             # to handle 301 redirections and 404
             return response
         else:
-            return HalJsonPoiRepresentation(response, request.url_rule.endpoint).as_json()
+            return HALPOIRepresentation(response, request.url_rule.endpoint).as_json()
 
 
 class Types(ServiceView):
@@ -95,8 +95,8 @@ class Types(ServiceView):
 
     @accepts(JSON)
     def as_json(self, types):
-        return JsonTypesRepresentation(types).as_json()
+        return TypesRepresentation(types).as_json()
 
     @accepts(HAL_JSON)
     def as_hal_json(self, types):
-        return HalJsonTypesRepresentation(types, request.url_rule.endpoint).as_json()
+        return HALTypesRepresentation(types, request.url_rule.endpoint).as_json()

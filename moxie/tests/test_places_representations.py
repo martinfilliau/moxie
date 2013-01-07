@@ -4,7 +4,7 @@ import mock
 from flask import Blueprint
 
 from moxie import create_app
-from moxie.places.representations import HalJsonPoiRepresentation
+from moxie.places.representations import HALPOIRepresentation
 from moxie.places.domain import POI
 from moxie.core.service import Service
 
@@ -32,20 +32,20 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
 
     def test_as_dict_no_transport_service(self):
         with self.app.blueprint_context('foobar'):
-            poi = HalJsonPoiRepresentation(self.test_poi, 'places.poidetail')
+            poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
             poi = poi.as_dict()
             self.assertFalse('hl:rti' in poi['_links'])
 
     def test_as_dict_with_transport_service(self):
         with mock.patch('moxie.places.representations.TransportService', new=MockTransportServiceNeverProvide):
             with self.app.blueprint_context('foobar'):
-                poi = HalJsonPoiRepresentation(self.test_poi, 'places.poidetail')
+                poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
                 poi = poi.as_dict()
                 self.assertFalse('hl:rti' in poi['_links'])
 
     def test_as_dict_with_transport_service_provided(self):
         with mock.patch('moxie.places.representations.TransportService', new=MockTransportServiceAlwaysProvide):
             with self.app.blueprint_context('foobar'):
-                poi = HalJsonPoiRepresentation(self.test_poi, 'places.poidetail')
+                poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
                 poi = poi.as_dict()
                 self.assertTrue('hl:rti' in poi['_links'])
