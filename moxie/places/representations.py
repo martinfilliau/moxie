@@ -91,7 +91,7 @@ class HALPOIRepresentation(POIRepresentation):
         return representation.as_dict()
 
 
-class POISRepresentation(object):
+class POIsRepresentation(object):
 
     def __init__(self, search, results):
         """Represents a list of search result as JSON
@@ -113,7 +113,7 @@ class POISRepresentation(object):
                 'results': [representation(r).as_dict() for r in self.results]}
 
 
-class HALPOISRepresentation(POISRepresentation):
+class HALPOIsRepresentation(POIsRepresentation):
 
     def __init__(self, search, results, start, count, size, endpoint, types=None):
         """Represents a list of search result as HAL+JSON
@@ -124,7 +124,7 @@ class HALPOISRepresentation(POISRepresentation):
         :param size: int as total size of results
         :param endpoint: endpoint (URL) to represent the search resource
         """
-        super(HALPOISRepresentation, self).__init__(search, results)
+        super(HALPOIsRepresentation, self).__init__(search, results)
         self.start = start
         self.count = count
         self.size = size
