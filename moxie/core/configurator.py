@@ -37,6 +37,11 @@ class Configurator(object):
         registered_services = self.app.config.get('SERVICES', {})
         registered_services.update(services)
         self.app.config['SERVICES'] = registered_services
+        
+    def register_healthchecks(self, healthchecks):
+        registered_healthchecks = self.app.config.get('HEALTHCHECKS', {})
+        registered_healthchecks.update(healthchecks)
+        self.app.config['HEALTHCHECKS'] = registered_healthchecks
 
     def from_yaml(self, yaml_path, silent=False):
         """Read in the file and parse (safely) as YAML.
@@ -52,6 +57,7 @@ class Configurator(object):
         self.update_flask_config(conf.get('flask', {}))
         self.register_blueprints(conf.get('blueprints', {}))
         self.register_services(conf.get('services', {}))
+        self.register_healthchecks(conf.get('healthchecks', {}))
 
     def from_envvar(self, envvar, silent=False):
         """Lifted from `Flask.config`"""

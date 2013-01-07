@@ -22,11 +22,16 @@ class SolrSearch(object):
             'select': 'select/',
             'get': 'get',
             'suggest': 'suggest',
+            'healthcheck': 'admin/ping',
         }
         self.content_types = {
                 'json': 'application/json',
                 'form': 'application/x-www-form-urlencoded',
                 }
+
+    def __repr__(self):
+        return '<{name} {url}{core}>'.format(name=__name__,
+            url=self.server_url, core=self.core)
 
     def search_nearby(self, query, location, fq=None, start=0, count=10, location_field='location'):
         # TODO this method is not called anymore. But it should be refactored to handle more
@@ -138,6 +143,16 @@ class SolrSearch(object):
         else:
             return requests.get(url, headers=headers,
                     params=params, timeout=self.DEFAULT_TIMEOUT)
+
+    def healthcheck(self):
+        try:
+            response = requests.get('{url}{core}/{method}'.format(url=self.server_url,
+                core=self.core, method=self.methods['healthcheck']), timeout=2,
+                config={'danger_mode': True})
+            return response.ok, response.json['status']
+        except Exception as e:
+            return False, e
+            logger.error('Error while checking health of Solr', exc_info=True)
 
     @staticmethod
     def solr_escape(string):
