@@ -1,9 +1,14 @@
+import logging
+
 from itertools import izip
 
 from moxie.core.service import Service
 from moxie.core.search import searcher
 from moxie.places.importers.helpers import get_types_dict
 from moxie.places.solr import doc_to_poi
+
+
+logger = logging.getLogger(__name__)
 
 
 class POIService(Service):
@@ -46,7 +51,9 @@ class POIService(Service):
             filter_query = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
         elif not all_types:
             filter_query = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
+        logger.debug("Search query: %s" % q)
         response = searcher.search(q, fq=filter_query, start=start, count=count)
+        logger.debug("Number of results: %s" % len(response.results))
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
             if response.query_suggestion:
