@@ -12,7 +12,10 @@ parser.add_argument('--port', type=int, dest='port', help='Port which the dev se
 
 args = parser.parse_args()
 
-logging.basicConfig(level=logging.getLevelName(args.log_level))
+# %(module)s	%(funcName)s
+FORMAT = '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+
+logging.basicConfig(level=logging.getLevelName(args.log_level), format=FORMAT)
 
 if args.profiler:
     action_profile = profiler.make_action(create_app)
