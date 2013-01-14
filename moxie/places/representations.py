@@ -163,9 +163,9 @@ class TypesRepresentation(Representation):
         for k, v in self.types.iteritems():
             values = {'type': k, 'type_name': v['name_singular']}
             if 'types' in v:
-                values['types'] = TypesRepresentation(v['types']).as_dict()
+                values.update(TypesRepresentation(v['types']).as_dict())
             types.append(values)
-        return {'types': types }
+        return {'types': types}
 
 
 class HALTypesRepresentation(TypesRepresentation):
