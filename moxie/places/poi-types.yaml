@@ -116,9 +116,6 @@ amenities:
               convenience:
                 name_singular: Convenience store
                 name_plural: Convenience stores
-              hairdresser:
-                name_singular: Hairdresser
-                name_plural: Hairdressers
               book:
                 name_singular: Book shop
                 name_plural: Book shops

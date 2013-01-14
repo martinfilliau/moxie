@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 SHOPS = { 'supermarket': '/amenities/shop/supermarket',
           'bicycle': '/amenities/shop/bicycle',
           'convenience': '/amenities/shop/convenience',
-          'hairdresser': '/amenities/shop/hairdresser',
+          #'hairdresser': '/amenities/shop/hairdresser',    Disabled due to poor quality of data (TRELLO#144).
           'book': '/amenities/shop/book',
           }
 
