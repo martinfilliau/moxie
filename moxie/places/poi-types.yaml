@@ -50,8 +50,8 @@ amenities:
           name_singular: Bank
           name_plural: Banks
         health:
-          name_singular: Place relating to health
-          name_plural: Places relating to health
+          name_singular: Health
+          name_plural: Health
           types:
             pharmacy:
               name_singular: Pharmacy
