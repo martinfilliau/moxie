@@ -27,8 +27,8 @@ AMENITIES = { 'atm': '/amenities/atm',
               'library': '/amenities/public-library', # TODO is it?
               'parking': '/transport/car-park',
               'pharmacy': '/amenities/health/pharmacy',
-              'post_box': '/amenities/post-box',
-              'post_office': '/amenities/post-office',
+              'post_box': '/amenities/post/post-box',
+              'post_office': '/amenities/post/post-office',
               'pub': '/amenities/food-drink/pub',    # TODO food=yes?
               'punt_hire': '/leisure/punt',
               'recycling': '/amenities/recycling-facility',

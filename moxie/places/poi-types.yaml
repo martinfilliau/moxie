@@ -87,12 +87,16 @@ amenities:
             fast-food:
               name_singular: Fast food
               name_plural: Fast foods
-        post-office:
-            name_singular: Post office
-            name_plural: Post offices
-        post-box:
-            name_singular: Post box
-            name_plural: Post boxes
+        post:
+            name_singular: Post
+            name_plural: Post
+            types:
+              post-office:
+                name_singular: Post office
+                name_plural: Post offices
+              post-box:
+                name_singular: Post box
+                name_plural: Post boxes
         public-library:
             name_singular: Public library
             name_plural: Public libraries
