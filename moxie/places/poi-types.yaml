@@ -101,8 +101,8 @@ amenities:
             name_singular: Public library
             name_plural: Public libraries
         recycling-facility:
-            name_singular: Recycling facility
-            name_plural: Recycling facilities
+            name_singular: Recycling
+            name_plural: Recycling
         shop:
             name_singular: Shop
             name_plural: Shops
