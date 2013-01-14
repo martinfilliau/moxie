@@ -21,3 +21,8 @@ CORS
 ----
 
 We use CORS (Cross-origin resource sharing). JSONP is not available (causes problem e.g. no custom header).
+
+Pagination
+----------
+
+Standard parameters are available for pagination: start and count.
