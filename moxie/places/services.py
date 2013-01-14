@@ -48,13 +48,15 @@ class POIService(Service):
              'facet.mincount': '1',
              }
         if type:
+            # filter on one specific type
             q['facet.prefix'] = type
             filter_query = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
-        elif not all_types:
+        elif not all_types and len(self.nearby_excludes) > 0:
+            # exclude some types based on configuration
             filter_query = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
-        logger.debug("Search query: %s" % q)
+
         response = searcher.search(q, fq=filter_query, start=start, count=count)
-        logger.debug("Number of results: %s" % len(response.results))
+
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
             if response.query_suggestion:
