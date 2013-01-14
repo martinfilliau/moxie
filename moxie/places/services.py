@@ -47,6 +47,7 @@ class POIService(Service):
              'facet.sort': 'index',
              'facet.mincount': '1',
              }
+        filter_query = None
         if type:
             # filter on one specific type
             q['facet.prefix'] = type

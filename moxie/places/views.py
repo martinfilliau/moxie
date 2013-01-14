@@ -25,6 +25,9 @@ class Search(ServiceView):
         self.type = request.args.get('type', None)
         self.start = request.args.get('start', 0)
         self.count = request.args.get('count', 35)
+        all_types = False
+        if self.query:
+            all_types = True
         poi_service = POIService.from_context()
         # Try to match the query to identifiers if it's a one word query,
         # useful when querying for bus stop naptan number
@@ -37,7 +40,7 @@ class Search(ServiceView):
                 self.facets = None
                 return [unique_doc]
         results, self.size, self.facets = poi_service.get_results(self.query,
-                location, self.start, self.count, type=self.type)
+                location, self.start, self.count, type=self.type, all_types=all_types)
         return results
 
     @accepts(JSON)
