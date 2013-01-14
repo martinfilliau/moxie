@@ -39,7 +39,8 @@ class POIService(Service):
              'q': query,
              'sfield': 'location',
              'pt': '%s,%s' % (lon, lat),
-             'sort': 'geodist() asc',
+             'boost': 'recip(geodist(),2,200,20)',  # boost by geodist (linear function: 200/2*x+20)
+             'sort': 'score desc',                  # sort by score
              'fl': '*,_dist_:geodist()',
              'facet': 'true',
              'facet.field': 'type',
