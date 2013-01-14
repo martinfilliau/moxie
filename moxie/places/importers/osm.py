@@ -7,9 +7,9 @@ from moxie.places.importers.helpers import prepare_document, format_uk_telephone
 logger = logging.getLogger(__name__)
 
 
-SHOPS = { 'supermarket': '/amenities/shop/supermarket',
+SHOPS = { 'supermarket': '/amenities/supermarket',
           'bicycle': '/amenities/shop/bicycle',
-          'convenience': '/amenities/shop/convenience',
+          'convenience': '/amenities/supermarket/convenience',
           #'hairdresser': '/amenities/shop/hairdresser',    Disabled due to poor quality of data (TRELLO#144).
           'book': '/amenities/shop/book',
           }

@@ -103,19 +103,20 @@ amenities:
         recycling-facility:
             name_singular: Recycling
             name_plural: Recycling
+        supermarket:
+            name_singular: Supermarket
+            name_plural: Supermarkets
+            types:
+              convenience:
+                name_singular: Convenience store
+                name_plural: Convenience stores
         shop:
-            name_singular: Shop
-            name_plural: Shops
+            name_singular: Other shop
+            name_plural: Other shops
             types:
               bicycle:
                 name_singular: Bicycle shop
                 name_plural: Bicycle shops
-              supermarket:
-                name_singular: Supermarket
-                name_plural: Supermarkets
-              convenience:
-                name_singular: Convenience store
-                name_plural: Convenience stores
               book:
                 name_singular: Book shop
                 name_plural: Book shops
