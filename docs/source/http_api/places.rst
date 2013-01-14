@@ -37,6 +37,7 @@ Endpoint to search and retrieve information about places.
     :statuscode 200: resource found
     :statuscode 301: redirection to the resource by its main ID
     :statuscode 404: no resource found
+    :statuscode 503: Service not available
 
 .. http:get:: /places/search
 
@@ -71,5 +72,18 @@ Endpoint to search and retrieve information about places.
 
     :query q: what to search for
     :type q: string
+    :query type: filter by a specific type
+    :type type: string
+    :query start: first result to retrieve
+    :type start: int
+    :query count: number of results to retrieve
+    :type count: int
 
     :statuscode 200: query found
+    :statuscode 503: Service not available
+
+.. http:get:: /places/types
+
+    Display a list of types.
+
+    :statuscode 200: display a list of types
