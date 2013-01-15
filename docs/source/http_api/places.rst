@@ -42,6 +42,7 @@ Endpoint to search and retrieve information about places.
 .. http:get:: /places/search
 
     Search for places using full-text search on name, tags and type of place.
+    Also searches in identifiers (e.g. searching "69326473" will return the bus stop corresponding to this Naptan ID).
     Note that the result might be using a different search as spellchecking is done (e.g. searching for "Wolverkote" will return results with "Wolvercote").
 
     **Example request**:
