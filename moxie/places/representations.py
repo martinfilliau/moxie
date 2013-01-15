@@ -16,7 +16,7 @@ class POIRepresentation(Representation):
         return jsonify(self.as_dict())
 
     def as_dict(self):
-        return {
+        values = {
             'id': self.poi.id,
             'name': self.poi.name,
             'lat': self.poi.lat,
@@ -30,6 +30,9 @@ class POIRepresentation(Representation):
             'opening_hours': self.poi.opening_hours,
             'collection_times': self.poi.collection_times,
         }
+        if self.poi.alternative_names:
+            values['alternative_names'] = self.poi.alternative_names
+        return values
 
 
 class HALPOIRepresentation(POIRepresentation):

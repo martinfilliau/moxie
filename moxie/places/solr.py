@@ -20,4 +20,6 @@ def doc_to_poi(doc):
         poi.children = doc['parent_of']
     if 'child_of' in doc:
         poi.parent = doc['child_of'][0]
+    if 'alternative_names' in doc:
+        poi.alternative_names = doc['alternative_names']
     return poi
