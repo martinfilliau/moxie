@@ -68,7 +68,7 @@ class POIService(Service):
             if response.query_suggestion:
                 suggestion = response.query_suggestion
                 return self.get_results(suggestion, location, start, count,
-                        type=type, all_types=all_types)
+                        type=type, types_exact=types_exact, all_types=all_types)
             else:
                 return [], 0, None
         if response.facets:
