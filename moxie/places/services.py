@@ -86,11 +86,8 @@ class POIService(Service):
             return doc_to_poi(response.results[0])
         else:
             # If no result, do a SEARCH request on IDs
-            response = searcher.search_for_ids("identifiers", [ident])
-            if response.results:
-                return doc_to_poi(response.results[0])
-            else:
-                return None
+            return self.search_place_by_identifier(ident)
+
 
     def search_place_by_identifier(self, ident):
         """Search for a place by its identifiers
