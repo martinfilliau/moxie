@@ -55,7 +55,7 @@ class Search(ServiceView):
     @accepts(HAL_JSON)
     def as_hal_json(self, response):
         return HALPOIsRepresentation(self.query, response, self.start, self.count, self.size,
-            request.url_rule.endpoint, types=self.facets).as_json()
+            request.url_rule.endpoint, types=self.facets, type=self.type, type_exact=self.types_exact).as_json()
 
 
 class PoiDetail(ServiceView):

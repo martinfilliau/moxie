@@ -121,7 +121,7 @@ class POIsRepresentation(object):
 
 class HALPOIsRepresentation(POIsRepresentation):
 
-    def __init__(self, search, results, start, count, size, endpoint, types=None):
+    def __init__(self, search, results, start, count, size, endpoint, types=None, type=None, type_exact=None):
         """Represents a list of search result as HAL+JSON
         :param search: search query
         :param results: list of results
@@ -129,6 +129,9 @@ class HALPOIsRepresentation(POIsRepresentation):
         :param count: int as the size of the page
         :param size: int as total size of results
         :param endpoint: endpoint (URL) to represent the search resource
+        :param types: (optional) types of the POIs, used for faceting
+        :param type: (optional) type of the POIs (if search has been restricted to this type)
+        :param type_exact: (optional) exact types of the POIs (if search has been restricted to this exact type)
         """
         super(HALPOIsRepresentation, self).__init__(search, results, size)
         self.start = start
@@ -136,6 +139,8 @@ class HALPOIsRepresentation(POIsRepresentation):
         self.size = size
         self.endpoint = endpoint
         self.types = types
+        self.type = type
+        self.type_exact = type_exact
 
     def as_json(self):
         return jsonify(self.as_dict())
@@ -145,8 +150,10 @@ class HALPOIsRepresentation(POIsRepresentation):
             'query': self.search,
             'size': self.size,
         })
-        representation.add_link('self', url_for(self.endpoint, q=self.search))
-        representation.add_links(get_nav_links(self.endpoint, self.start, self.count, self.size, q=self.search))
+        representation.add_link('self', url_for(self.endpoint, q=self.search, type=self.type, type_exact=self.type_exact,
+            start=self.start, count=self.count))
+        representation.add_links(get_nav_links(self.endpoint, self.start, self.count, self.size,
+            q=self.search, type=self.type, type_exact=self.type_exact))
         representation.add_embed([HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
         if self.types:
             # add faceting links for types
