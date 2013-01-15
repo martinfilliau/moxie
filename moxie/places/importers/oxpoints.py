@@ -91,6 +91,15 @@ class OxpointsImporter(object):
 
         doc['identifiers'] = ids
 
+        # Adding alternative names (alt, hidden) to the full-text search
+        alternative_names = set()
+        if 'skos_altLabel' in datum:
+            alternative_names.update(datum.get('skos_altLabel'))
+        if 'skos_hiddenLabel' in datum:
+            alternative_names.update(datum.get('skos_hiddenLabel'))
+        if alternative_names:
+            doc['alternative_names'] = list(alternative_names)
+
         """
         Address properties:
         "vCard_postal-code":"OX2 6JF",
@@ -135,12 +144,13 @@ class OxpointsImporter(object):
 
 
 def main():
+    #logging.basicConfig(level=logging.DEBUG)
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('oxpointsfile', type=argparse.FileType('r'))
     ns = parser.parse_args()
     from moxie.core.search.solr import SolrSearch
-    solr = SolrSearch('collection1')
+    solr = SolrSearch('places', 'http://33.33.33.10:8080/solr/')
     importer = OxpointsImporter(solr, 10, ns.oxpointsfile)
     importer.import_data()
 
