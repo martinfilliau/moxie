@@ -21,13 +21,14 @@ class POIService(Service):
         self.nearby_excludes = nearby_excludes or []
 
     def get_results(self, original_query, location, start, count, type=None,
-            all_types=False):
+            types_exact=[], all_types=False):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
         :param start: index of the first result of the page
         :param count: number of results for the page
         :param type: (optional) type from the hierarchy of types to look for
+        :param types_exact (optional) exact types to search for (cannot be used in combination of type atm)
         :param all_types: (optional) display all types or excludes some types defined in configuration
         :return list of domain objects (POIs), total size of results and facets on type
         """
@@ -48,10 +49,14 @@ class POIService(Service):
              'facet.mincount': '1',
              }
         filter_query = None
+        # TODO make a better filter query to handle having type and types_exact at the same time
         if type:
-            # filter on one specific type
+            # filter on one specific type (and its subtypes)
             q['facet.prefix'] = type
             filter_query = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
+        elif types_exact:
+            # filter by a list of specific types (exact match)
+            filter_query = 'type_exact:({types})'.format(types=" OR ".join('"{type}"'.format(type=t) for t in types_exact))
         elif not all_types and len(self.nearby_excludes) > 0:
             # exclude some types based on configuration
             filter_query = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))

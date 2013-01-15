@@ -23,11 +23,16 @@ class Search(ServiceView):
                     request.args.get('lon', default_lon))
         self.query = request.args.get('q', '')
         self.type = request.args.get('type', None)
+        self.types_exact = request.args.getlist('type_exact')
         self.start = request.args.get('start', 0)
         self.count = request.args.get('count', 35)
         all_types = False
         if self.query:
             all_types = True
+        if self.type and self.types_exact:
+            # Bad request, you cannot have both type and types exact at the moment
+            return abort(400)
+
         poi_service = POIService.from_context()
         # Try to match the query to identifiers if it's a one word query,
         # useful when querying for bus stop naptan number
@@ -39,8 +44,8 @@ class Search(ServiceView):
                 self.size = 1
                 self.facets = None
                 return [unique_doc]
-        results, self.size, self.facets = poi_service.get_results(self.query,
-                location, self.start, self.count, type=self.type, all_types=all_types)
+        results, self.size, self.facets = poi_service.get_results(self.query, location,
+            self.start, self.count, type=self.type, types_exact=self.types_exact, all_types=all_types)
         return results
 
     @accepts(JSON)
