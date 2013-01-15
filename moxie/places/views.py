@@ -50,7 +50,7 @@ class Search(ServiceView):
 
     @accepts(JSON)
     def as_json(self, response):
-        return POIsRepresentation(self.query, response).as_json()
+        return POIsRepresentation(self.query, response, self.size).as_json()
 
     @accepts(HAL_JSON)
     def as_hal_json(self, response):
