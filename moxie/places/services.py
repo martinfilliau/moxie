@@ -92,7 +92,7 @@ class POIService(Service):
     def search_place_by_identifier(self, ident):
         """Search for a place by its identifiers
         :param ident: identifier to lookup
-        :retur POI or None if no result
+        :return POI or None if no result
         """
         response = searcher.search_for_ids("identifiers", [ident])
         if response.results:
