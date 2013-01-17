@@ -1,5 +1,6 @@
 import urlparse
 import importlib
+from moxie.core.exceptions import ServiceUnavailable
 
 from moxie.core.service import Service
 from werkzeug.local import LocalProxy
@@ -152,5 +153,6 @@ class SearchResponse(object):
         return self._raw_response
 
 
-class SearchServerException(Exception):
-    pass
+class SearchServerException(ServiceUnavailable):
+
+    message = "Search service not available"

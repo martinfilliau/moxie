@@ -1,7 +1,6 @@
 import logging
 import requests
 from requests.exceptions import RequestException
-from flask import abort
 import json
 
 from moxie.core.search import SearchResponse, SearchServerException
@@ -155,9 +154,7 @@ class SolrSearch(object):
                         'url': url,
                         'params': params,
                         'headers': headers}})
-            # It doesn't seem ideal to raise an HTTPException at that (service) level
-            # TODO: Should we have an intermediate ServiceException?
-            abort(503)
+            raise SearchServerException("Search service not available")
 
     def healthcheck(self):
         try:
