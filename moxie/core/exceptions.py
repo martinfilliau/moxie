@@ -1,5 +1,5 @@
 from werkzeug.exceptions import default_exceptions, HTTPException
-from flask import make_response, abort as flask_abort, request, jsonify
+from flask import make_response, request
 from flask.exceptions import JSONHTTPException
 
 
