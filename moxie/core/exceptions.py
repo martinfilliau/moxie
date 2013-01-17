@@ -32,3 +32,14 @@ def abort(status_code, body=None, headers={}):
 
     error_cls = type(class_name, tuple(bases), attributes)
     return make_response(error_cls(body), status_code, headers)
+
+
+class ApplicationException(Exception):
+
+    http_code = 500
+    message = "An error has occured"
+
+class ServiceUnavailable(ApplicationException):
+
+    http_code = 503
+    message = "Service not available"
