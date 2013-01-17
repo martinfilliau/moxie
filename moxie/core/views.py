@@ -95,6 +95,10 @@ class ServiceView(View):
                 response = make_response(service_response(self, response))
             except ApplicationException as ae:
                 return abort(ae.http_code, ae.message)
+            except:
+                if current_app.debug:
+                    raise
+                return abort(500)
             return self._cors_headers(response)
         else:
             return self.default_response()
