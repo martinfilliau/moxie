@@ -8,6 +8,8 @@ flask:
     OSM_IMPORT_URL: 'http://download.geofabrik.de/openstreetmap/europe/great_britain/england/oxfordshire.osm.bz2'
     OXPOINTS_IMPORT_URL: 'http://oxpoints.oucs.ox.ac.uk/all.json'
     NAPTAN_IMPORT_URL: 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
+    # Cache
+    CACHE_TYPE: 'redis'
 
 blueprints:
     places:
@@ -25,4 +27,12 @@ services:
         SearchService:
             backend_uri: 'solr+http://localhost:8080/solr/places'
         KVService:
+            backend_uri: 'redis://localhost:6379/0'
+
+healthchecks:
+    Places search:
+        moxie.core.search.SearchService:
+            backend_uri: 'solr+http://localhost:8080/solr/places'
+    KV service:
+        moxie.core.kv.KVService:
             backend_uri: 'redis://localhost:6379/0'

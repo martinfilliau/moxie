@@ -1,9 +1,14 @@
+import logging
+
 from itertools import izip
 
 from moxie.core.service import Service
 from moxie.core.search import searcher
 from moxie.places.importers.helpers import get_types_dict
 from moxie.places.solr import doc_to_poi
+
+
+logger = logging.getLogger(__name__)
 
 
 class POIService(Service):
@@ -16,15 +21,16 @@ class POIService(Service):
         self.nearby_excludes = nearby_excludes or []
 
     def get_results(self, original_query, location, start, count, type=None,
-            all_types=False):
+            types_exact=[], all_types=False):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
         :param start: index of the first result of the page
         :param count: number of results for the page
         :param type: (optional) type from the hierarchy of types to look for
-        :param all_types: display all types or excludes some types defined in configuration
-        :return list of domain objects (POIs) and total size of results, and facets on type
+        :param types_exact (optional) exact types to search for (cannot be used in combination of type atm)
+        :param all_types: (optional) display all types or excludes some types defined in configuration
+        :return list of domain objects (POIs), total size of results and facets on type
         """
         query = original_query or self.default_search
         lat, lon = location
@@ -34,25 +40,35 @@ class POIService(Service):
              'q': query,
              'sfield': 'location',
              'pt': '%s,%s' % (lon, lat),
-             'sort': 'geodist() asc',
+             'boost': 'recip(geodist(),2,200,20)',  # boost by geodist (linear function: 200/2*x+20)
+             'sort': 'score desc',                  # sort by score
              'fl': '*,_dist_:geodist()',
              'facet': 'true',
              'facet.field': 'type',
              'facet.sort': 'index',
              'facet.mincount': '1',
              }
+        filter_query = None
+        # TODO make a better filter query to handle having type and types_exact at the same time
         if type:
+            # filter on one specific type (and its subtypes)
             q['facet.prefix'] = type
             filter_query = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
-        elif not all_types:
+        elif types_exact:
+            # filter by a list of specific types (exact match)
+            filter_query = 'type_exact:({types})'.format(types=" OR ".join('"{type}"'.format(type=t) for t in types_exact))
+        elif not all_types and len(self.nearby_excludes) > 0:
+            # exclude some types based on configuration
             filter_query = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
+
         response = searcher.search(q, fq=filter_query, start=start, count=count)
+
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
             if response.query_suggestion:
                 suggestion = response.query_suggestion
                 return self.get_results(suggestion, location, start, count,
-                        type=type, all_types=all_types)
+                        type=type, types_exact=types_exact, all_types=all_types)
             else:
                 return [], 0, None
         if response.facets:
@@ -75,16 +91,13 @@ class POIService(Service):
             return doc_to_poi(response.results[0])
         else:
             # If no result, do a SEARCH request on IDs
-            response = searcher.search_for_ids("identifiers", [ident])
-            if response.results:
-                return doc_to_poi(response.results[0])
-            else:
-                return None
+            return self.search_place_by_identifier(ident)
+
 
     def search_place_by_identifier(self, ident):
         """Search for a place by its identifiers
         :param ident: identifier to lookup
-        :retur POI or None if no result
+        :return POI or None if no result
         """
         response = searcher.search_for_ids("identifiers", [ident])
         if response.results:

@@ -1,7 +1,7 @@
 class POI(object):
 
     def __init__(self, id, name, lat, lon, type, type_name=None, identifiers=None, distance=0, address="", phone="",
-                 website="", opening_hours="", collection_times="", parent=None, children=None):
+                 website="", opening_hours="", collection_times="", parent=None, children=None, alternative_names=None):
         self.id = id
         self.name = name
         self.lat = lat
@@ -17,3 +17,4 @@ class POI(object):
         self.collection_times = collection_times
         self.parent = parent
         self.children = children or []
+        self.alternative_names = alternative_names

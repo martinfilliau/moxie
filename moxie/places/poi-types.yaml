@@ -50,8 +50,8 @@ amenities:
           name_singular: Bank
           name_plural: Banks
         health:
-          name_singular: Place relating to health
-          name_plural: Places relating to health
+          name_singular: Health
+          name_plural: Health
           types:
             pharmacy:
               name_singular: Pharmacy
@@ -87,34 +87,36 @@ amenities:
             fast-food:
               name_singular: Fast food
               name_plural: Fast foods
-        post-office:
-            name_singular: Post office
-            name_plural: Post offices
-        post-box:
-            name_singular: Post box
-            name_plural: Post boxes
+        post:
+            name_singular: Post
+            name_plural: Post
+            types:
+              post-office:
+                name_singular: Post office
+                name_plural: Post offices
+              post-box:
+                name_singular: Post box
+                name_plural: Post boxes
         public-library:
             name_singular: Public library
             name_plural: Public libraries
         recycling-facility:
-            name_singular: Recycling facility
-            name_plural: Recycling facilities
+            name_singular: Recycling
+            name_plural: Recycling
+        supermarket:
+            name_singular: Supermarket
+            name_plural: Supermarkets
+            types:
+              convenience:
+                name_singular: Convenience store
+                name_plural: Convenience stores
         shop:
-            name_singular: Shop
-            name_plural: Shops
+            name_singular: Other shop
+            name_plural: Other shops
             types:
               bicycle:
                 name_singular: Bicycle shop
                 name_plural: Bicycle shops
-              supermarket:
-                name_singular: Supermarket
-                name_plural: Supermarkets
-              convenience:
-                name_singular: Convenience store
-                name_plural: Convenience stores
-              hairdresser:
-                name_singular: Hairdresser
-                name_plural: Hairdressers
               book:
                 name_singular: Book shop
                 name_plural: Book shops

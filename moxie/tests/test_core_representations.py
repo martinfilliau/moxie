@@ -1,7 +1,7 @@
 import unittest
 
 import flask
-from moxie.core.representations import HalJsonRepresentation, get_nav_links
+from moxie.core.representations import HALRepresentation, get_nav_links
 
 
 app = flask.Flask(__name__)
@@ -12,19 +12,19 @@ class RepresentationsTestCase(unittest.TestCase):
     def test_hal_json_representation(self):
         links = {'self': {'href': 'abc'}}
         values = {'a': 'b'}
-        representation = HalJsonRepresentation(values, links)
+        representation = HALRepresentation(values, links)
         self.assertTrue('_links' in representation.as_dict())
         self.assertFalse('_embedded' in representation.as_dict())
         self.assertDictContainsSubset(values, representation.as_dict())
 
     def test_hal_json_helper_representation(self):
-        representation = HalJsonRepresentation({'a':'b'})
+        representation = HALRepresentation({'a':'b'})
         representation.add_link('self', '/a/b')
         representation.add_link('list', '/list', templated="true")
         representation.update_link('child', '/child/1')
         representation.update_link('child', '/child/2')
         representation.add_curie('cu', 'http://curie.com')
-        representation.add_embed([HalJsonRepresentation({'embed': 'yes'}, 
+        representation.add_embed([HALRepresentation({'embed': 'yes'},
             links={'self':{'href':'a'}}).as_dict()])
         self.assertDictContainsSubset({'_links': {
             'self': {'href': '/a/b'},
@@ -41,7 +41,7 @@ class RepresentationsTestCase(unittest.TestCase):
         links = {'self': {'href': 'ahdhd'}}
         values = {'c': 'd'}
         embed = {'s': 'g'}
-        representation = HalJsonRepresentation(values, links, embed)
+        representation = HALRepresentation(values, links, embed)
         self.assertTrue('_links' in representation.as_dict())
         self.assertTrue('_embedded' in representation.as_dict())
         self.assertDictContainsSubset(values, representation.as_dict())

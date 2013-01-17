@@ -19,6 +19,9 @@ class SearchService(Service):
     def __init__(self, backend_uri):
         self._backend = self._get_backend(backend_uri)
 
+    def __repr__(self):
+        return '<{path} backend:{backend}>'.format(path=__name__, backend=self._backend.__repr__())
+
     @staticmethod
     def _get_backend(backend_uri):
         """Parse the URI and imports the appropriate Search implementation
@@ -69,6 +72,9 @@ class SearchService(Service):
 
     def commit(self):
         return self._backend.commit()
+        
+    def healthcheck(self):
+        return self._backend.healthcheck()
 
 
 searcher = LocalProxy(SearchService.from_context)

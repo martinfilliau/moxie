@@ -10,12 +10,7 @@ class Representation(object):
     pass
 
 
-class JsonRepresentation(Representation):
-    content_type = "application/json"
-
-
-class HalJsonRepresentation(JsonRepresentation):
-    content_type = "application/hal+json"
+class HALRepresentation(Representation):
 
     def __init__(self, values, links=None, embed=None):
         """HAL representation of a content with links and embedded documents.
