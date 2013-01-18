@@ -25,6 +25,14 @@ Internal API
     api/overview
     api/*
 
+Developer
+----------
+
+.. toctree::
+    :glob:
+
+    developer/*
+
 Indices and tables
 ==================
 
