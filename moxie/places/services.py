@@ -1,4 +1,5 @@
 import logging
+import urllib
 
 from itertools import izip
 
@@ -33,6 +34,7 @@ class POIService(Service):
         :return list of domain objects (POIs), total size of results and facets on type
         """
         query = original_query or self.default_search
+        query = urllib.quote_plus(query)
         lat, lon = location
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
