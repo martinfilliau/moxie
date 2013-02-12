@@ -10,7 +10,7 @@ Configuration
 
 Your configuration file can have a `healthchecks` section that has a dictionary of services to check. See following example.
 
-.. code-block::
+.. code-block:: yaml
 
     healthchecks:
         Places index:
@@ -33,7 +33,7 @@ This method shouldn't take any argument, and should return a tuple with:
 
 The code below is an example from a check to the search server Apache Solr.
 
-.. code-block::
+.. code-block:: python
 
     def healthcheck(self):
         try:
