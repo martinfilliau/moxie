@@ -68,7 +68,7 @@ class ServiceView(View):
         elif current_app.debug or origin in allow_origins:
             h['Access-Control-Allow-Origin'] = origin
         else:
-            abort(400)
+            return abort(400)
         if preflight:
             h['Access-Control-Allow-Methods'] = response.headers['allow']
             h['Access-Control-Max-Age'] = str(self.cors_max_age)
