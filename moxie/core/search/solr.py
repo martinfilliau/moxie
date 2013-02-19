@@ -1,5 +1,6 @@
 import logging
 import requests
+from requests.exceptions import RequestException
 import json
 
 from moxie.core.search import SearchResponse, SearchServerException
@@ -137,12 +138,23 @@ class SolrSearch(object):
         params['wt'] = self.return_type
         url = '{0}{1}/{2}'.format(self.server_url, self.core, method)
         logger.debug(data)
-        if data:
-            return requests.post(url, data, headers=headers,
-                    params=params, timeout=self.DEFAULT_TIMEOUT)
-        else:
-            return requests.get(url, headers=headers,
-                    params=params, timeout=self.DEFAULT_TIMEOUT)
+        try:
+            if data:
+                return requests.post(url, data, headers=headers,
+                    params=params, timeout=self.DEFAULT_TIMEOUT,
+                    config={'danger_mode': True})
+            else:
+                return requests.get(url, headers=headers,
+                    params=params, timeout=self.DEFAULT_TIMEOUT,
+                    config={'danger_mode': True})
+        except RequestException as re:
+            logger.error('Error in request to Solr', exc_info=True,
+                extra={
+                    'data': {
+                        'url': url,
+                        'params': params,
+                        'headers': headers}})
+            raise SearchServerException("Search service not available")
 
     def healthcheck(self):
         try:

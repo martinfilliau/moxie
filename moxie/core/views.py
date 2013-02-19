@@ -1,7 +1,9 @@
 from flask.views import View
-from flask import request, jsonify, make_response, current_app, abort
+from flask import request, jsonify, make_response, current_app
 from werkzeug.exceptions import NotAcceptable
 from werkzeug.wrappers import BaseResponse
+
+from moxie.core.exceptions import ApplicationException, abort
 
 
 def accepts(*accept_values):
@@ -66,7 +68,7 @@ class ServiceView(View):
         elif current_app.debug or origin in allow_origins:
             h['Access-Control-Allow-Origin'] = origin
         else:
-            abort(400)
+            return abort(400)
         if preflight:
             h['Access-Control-Allow-Methods'] = response.headers['allow']
             h['Access-Control-Max-Age'] = str(self.cors_max_age)
@@ -88,8 +90,15 @@ class ServiceView(View):
                 self.service_responses.keys())
         if best_match:
             service_response = self.service_responses[best_match]
-            response = self.handle_request(*args, **kwargs)
-            response = make_response(service_response(self, response))
+            try:
+                response = self.handle_request(*args, **kwargs)
+                response = make_response(service_response(self, response))
+            except ApplicationException as ae:
+                return abort(ae.http_code, ae.message)
+            except:
+                if current_app.debug:
+                    raise
+                return abort(500)
             return self._cors_headers(response)
         else:
             return self.default_response()
