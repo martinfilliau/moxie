@@ -108,8 +108,6 @@ def deploy_front(version):
         run('compass compile')
         run('r.js -o app/moxie.build.js')
         sed("index-prod.html", "\{\{build\}\}", git_hash)
-        # Temporary fix to remove index.html (used for PhoneGap Build)
-        run('rm index.html')
         if env.environment in ['staging', 'production']:
             run('ln -s %s %s' % ('index-prod.html', 'index.html'))
         else:
