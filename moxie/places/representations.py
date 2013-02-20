@@ -37,14 +37,16 @@ class POIRepresentation(Representation):
 
 class HALPOIRepresentation(POIRepresentation):
 
-    def __init__(self, poi, endpoint):
+    def __init__(self, poi, endpoint, add_parent_children_links=True):
         """HAL+JSON representation of a POI
         :param poi: poi as a domain object
         :param endpoint: endpoint (URL) to represent a POI
+        :param add_parent_children_links: (optional) add title (name of POI) to parent and children POIs
         :return HALRepresentation
         """
         super(HALPOIRepresentation, self).__init__(poi)
         self.endpoint = endpoint
+        self.add_parent_children_links = add_parent_children_links
 
     def as_json(self):
         return jsonify(self.as_dict())
@@ -59,7 +61,7 @@ class HALPOIRepresentation(POIRepresentation):
         except NoConfiguredService:
             poi_service = None
         if self.poi.parent:
-            if poi_service:
+            if poi_service and self.add_parent_children_links:
                 parent = poi_service.get_place_by_identifier(self.poi.parent)
             else:
                 parent = None
@@ -72,7 +74,7 @@ class HALPOIRepresentation(POIRepresentation):
         if len(self.poi.children) > 0:
             # TODO GET with multiple documents, to do at service level
             for child in self.poi.children:
-                if poi_service:
+                if poi_service and self.add_parent_children_links:
                     p = poi_service.get_place_by_identifier(child)
                 else:
                     p = None
