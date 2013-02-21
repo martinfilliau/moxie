@@ -17,3 +17,9 @@ Display request handlers used per core:
 .. code-block:: none
 
     cat /var/log/jetty/solr-0.log | grep path | awk '{print $2 $4}' | sort | uniq -c
+
+Display search queries (parameter "q") which are not search for "identifiers", and not browsing (q="*:*"):
+
+.. code-block:: none
+
+	cat /var/log/jetty/solr-0.log | grep "places" | grep "path=/select" | grep "q=" | awk '{print substr($5,index($5,"q=")+2)}' | grep -v "identifiers" | grep -v "*:*"
