@@ -1,4 +1,5 @@
 from os import path
+import logging
 
 from werkzeug.exceptions import default_exceptions
 try:
@@ -28,7 +29,8 @@ def create_app():
         sentry = Sentry(dsn=app.config['SENTRY_DSN'])
         # capture uncaught exceptions within Flask
         sentry.init_app(app)
-        handler = SentryHandler(app.config['SENTRY_DSN'])
+        handler = SentryHandler(app.config['SENTRY_DSN'],
+                                level=logging.getLevelName(app.config.get('SENTRY_LEVEL', 'WARNING')))
         setup_logging(handler)
 
     # Custom exceptions handler
