@@ -53,8 +53,15 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         try:
             response = requests.get(self.get_url(naptan_code), timeout=self.timeout, config={'danger_mode': True})
         except RequestException as re:
+            logger.error('Error in request to Cloudamber', exc_info=True,
+                         extra={
+                             'data': {
+                                 'url': self.url,
+                                 'naptan': naptan_code}
+                         })
             raise ServiceUnavailable()
-        return self.parse_html(response.text)
+        else:
+            return self.parse_html(response.text)
 
     def parse_html(self, content):
         """
