@@ -21,7 +21,9 @@ def create_app():
     configurator.from_yaml(cfg_path)
     configurator.from_envvar('MOXIE_SETTINGS', silent=True)
     if raven_available and 'SENTRY_DSN' in app.config:
-        sentry = Sentry(app)
+        sentry = Sentry(dsn=app.config['SENTRY_DSN'])
+        # capture uncaught exceptions within Flask
+        sentry.init_app(app)
     # Custom exceptions handler
     for code in default_exceptions.iterkeys():
         app.error_handler_spec[None][code] = exception_handler
