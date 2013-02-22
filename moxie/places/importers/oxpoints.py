@@ -72,8 +72,6 @@ class OxpointsImporter(object):
 
         if 'geo_lat' in datum and 'geo_long' in datum:
             doc['location'] = "%s,%s" % (datum.pop('geo_long'), datum.pop('geo_lat'))
-        else:
-            return
 
         ids = list()
         ids.append(doc['id'])
