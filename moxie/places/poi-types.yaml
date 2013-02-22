@@ -1,6 +1,6 @@
 university:
     name_singular: University
-    name_plural: Universities
+    name_plural: University
     types:
         building:
           name_singular: Building
@@ -122,7 +122,7 @@ amenities:
                 name_plural: Book shops
 transport:
     name_singular: Transport
-    name_plural: Transports
+    name_plural: Transport
     types:
         bus-stop:
           name_singular: Bus stop
