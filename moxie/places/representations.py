@@ -19,8 +19,6 @@ class POIRepresentation(Representation):
         values = {
             'id': self.poi.id,
             'name': self.poi.name,
-            'lat': self.poi.lat,
-            'lon': self.poi.lon,
             'distance': self.poi.distance,
             'type': self.poi.type,
             'type_name': self.poi.type_name,
@@ -30,6 +28,9 @@ class POIRepresentation(Representation):
             'opening_hours': self.poi.opening_hours,
             'collection_times': self.poi.collection_times,
         }
+        if self.poi.lat and self.poi.lon:
+            values['lon'] = self.poi.lon
+            values['lat'] = self.poi.lat
         if self.poi.alternative_names:
             values['alternative_names'] = self.poi.alternative_names
         return values
