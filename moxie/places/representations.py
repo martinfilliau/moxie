@@ -22,12 +22,17 @@ class POIRepresentation(Representation):
             'distance': self.poi.distance,
             'type': self.poi.type,
             'type_name': self.poi.type_name,
-            'address': self.poi.address,
-            'phone': self.poi.phone,
-            'website': self.poi.website,
-            'opening_hours': self.poi.opening_hours,
-            'collection_times': self.poi.collection_times,
         }
+        if self.poi.collection_times:
+            values['collection_times'] = self.poi.collection_times
+        if self.poi.opening_hours:
+            values['opening_hours'] = self.poi.opening_hours
+        if self.poi.website:
+            values['website'] = self.poi.website
+        if self.poi.phone:
+            values['phone'] = self.poi.phone
+        if self.poi.address:
+            values['address'] = self.poi.address
         if self.poi.lat and self.poi.lon:
             values['lon'] = self.poi.lon
             values['lat'] = self.poi.lat
