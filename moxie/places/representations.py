@@ -67,7 +67,7 @@ class HALPOIRepresentation(POIRepresentation):
                 parent = None
             if parent and parent.name:
                 representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent),
-                    title=parent.name)
+                    title=parent.name, type=parent.type, type_name=parent.type_name)
             else:
                 representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent))
 
@@ -80,7 +80,7 @@ class HALPOIRepresentation(POIRepresentation):
                     p = None
                 if p and p.name:
                     representation.update_link('child', url_for(self.endpoint, ident=child), 
-                        title=p.name)
+                        title=p.name, type=p.type, type_name=p.type_name)
                 else:
                     representation.update_link('child', url_for(self.endpoint, ident=child))
 
