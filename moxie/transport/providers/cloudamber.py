@@ -4,6 +4,8 @@ import requests
 from lxml import etree
 from itertools import chain
 from . import TransportRTIProvider
+from requests.exceptions import RequestException
+from moxie.core.exceptions import ServiceUnavailable
 
 logger = logging.getLogger(__name__)
 
@@ -13,12 +15,14 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
     Parses an HTML page from a CloudAmber instance
     """
 
-    def __init__(self, url):
+    def __init__(self, url, timeout=2):
         """
         Init
-        @param url: URL of CloudAmber instance
+        :param url: URL of CloudAmber instance
+        :param timeout: (optional) timeout when trying to reach URL
         """
         self.url = url
+        self.timeout = timeout
 
     def handles(self, doc):
         for ident in doc.identifiers:
@@ -46,12 +50,11 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         @param naptan_code: SMS code to search for
         @return: dictionary of services
         """
-        response = requests.get(self.get_url(naptan_code))
-        if response.ok:
-            return self.parse_html(response.text)
-        else:
-            return None, None
-
+        try:
+            response = requests.get(self.get_url(naptan_code), timeout=self.timeout, config={'danger_mode': True})
+        except RequestException as re:
+            raise ServiceUnavailable()
+        return self.parse_html(response.text)
 
     def parse_html(self, content):
         """
