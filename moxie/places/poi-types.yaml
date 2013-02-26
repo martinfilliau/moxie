@@ -1,6 +1,7 @@
 university:
     name_singular: University
     name_plural: University
+    description: Libraries, Colleges, Departments...
     types:
         building:
           name_singular: Building
@@ -42,6 +43,7 @@ university:
 amenities:
     name_singular: Amenity
     name_plural: Amenities
+    description: ATMs, restaurants, post offices...
     types:
         atm:
           name_singular: ATM
@@ -52,6 +54,7 @@ amenities:
         health:
           name_singular: Health
           name_plural: Health
+          description: Dentists, doctors, pharmacies...
           types:
             pharmacy:
               name_singular: Pharmacy
@@ -123,6 +126,7 @@ amenities:
 transport:
     name_singular: Transport
     name_plural: Transport
+    description: Buses, car parks, taxi ranks...
     types:
         bus-stop:
           name_singular: Bus stop

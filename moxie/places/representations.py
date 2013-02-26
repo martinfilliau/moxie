@@ -184,6 +184,8 @@ class TypesRepresentation(Representation):
         for k, v in self.types.iteritems():
             values = {'type': k, 'type_name': v['name_singular'],
                     'type_name_plural': v['name_plural']}
+            if 'description' in v:
+                values['description'] = v['description']
             if 'types' in v:
                 values.update(TypesRepresentation(v['types']).as_dict())
             types.append(values)
