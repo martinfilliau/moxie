@@ -53,7 +53,7 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         try:
             response = requests.get(self.get_url(naptan_code), timeout=self.timeout, config={'danger_mode': True})
         except RequestException as re:
-            logger.error('Error in request to Cloudamber', exc_info=True,
+            logger.warning('Error in request to Cloudamber', exc_info=True,
                          extra={
                              'data': {
                                  'url': self.url,
