@@ -43,7 +43,7 @@ university:
 amenities:
     name_singular: Amenity
     name_plural: Amenities
-    description: ATMs, restaurants, post offices...
+    description: ATMs, Restaurants, Post boxes, Recycling, Health...
     types:
         atm:
           name_singular: ATM
@@ -54,7 +54,7 @@ amenities:
         health:
           name_singular: Health
           name_plural: Health
-          description: Dentists, doctors, pharmacies...
+          description: Dentists, Doctors, Pharmacies...
           types:
             pharmacy:
               name_singular: Pharmacy
@@ -71,6 +71,7 @@ amenities:
         food-drink:
           name_singular: Food and drink
           name_plural: Food and drinks
+          description: Pubs, Cafés, Ice cream...
           types:
             pub:
               name_singular: Pub
@@ -159,6 +160,7 @@ transport:
 leisure:
     name_singular: Leisure
     name_plural: Leisure
+    description: Cinemas, Theatres, Punt hire, Parks...
     types:
       cinema:
         name_singular: Cinema
