@@ -1,6 +1,7 @@
 import logging
 import requests
 from lxml import etree
+from requests.exceptions import RequestException
 
 
 logger = logging.getLogger(__name__)
@@ -10,19 +11,25 @@ class OxfordParkAndRideProvider(object):
     """Provider for Oxfordshire Park and Ride website
     """
 
-    _VOYAGER_URL = "http://voyager.oxfordshire.gov.uk/Carpark.aspx"
+    def __init__(self, url="http://voyager.oxfordshire.gov.uk/Carpark.aspx", timeout="4"):
+        self.url = url
+        self.timeout = timeout
 
     def get_data(self):
         """
         Requests the URL and parses the page
         :return dictionary of park and rides availability information
         """
-        response = requests.get(self._VOYAGER_URL, timeout=4)
-        if response.ok:
-            return self.parse_html(response.text)
+        try:
+            response = requests.get(self.url, timeout=self.timeout, config={'danger_mode': True})
+        except RequestException as re:
+            logger.warning('Error in request to Park & Ride info', exc_info=True,
+                           extra={
+                               'data': {
+                                   'url': self.url}
+                           })
         else:
-            logger.warning("Could reach {url}".format(url=self._VOYAGER_URL), extra=
-                {'response_code': response.status_code})
+            return self.parse_html(response.text)
 
     def parse_html(self, html):
         """Parses the HTML of the page
