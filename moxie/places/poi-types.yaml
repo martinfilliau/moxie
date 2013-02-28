@@ -117,6 +117,7 @@ amenities:
         shop:
             name_singular: Other shop
             name_plural: Other shops
+            description: Bicycle shops & Book shops
             types:
               bicycle:
                 name_singular: Bicycle shop
