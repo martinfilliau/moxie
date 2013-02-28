@@ -66,29 +66,37 @@ class HALPOIRepresentation(POIRepresentation):
             poi_service = POIService.from_context()
         except NoConfiguredService:
             poi_service = None
-        if self.poi.parent:
-            if poi_service and self.add_parent_children_links:
-                parent = poi_service.get_place_by_identifier(self.poi.parent)
-            else:
-                parent = None
-            if parent and parent.name:
-                representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent),
-                    title=parent.name, type=parent.type, type_name=parent.type_name)
-            else:
-                representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent))
-
-        if len(self.poi.children) > 0:
-            # TODO GET with multiple documents, to do at service level
-            for child in self.poi.children:
-                if poi_service and self.add_parent_children_links:
-                    p = poi_service.get_place_by_identifier(child)
-                else:
-                    p = None
-                if p and p.name:
-                    representation.update_link('child', url_for(self.endpoint, ident=child), 
-                        title=p.name, type=p.type, type_name=p.type_name)
-                else:
-                    representation.update_link('child', url_for(self.endpoint, ident=child))
+        if poi_service and self.add_parent_children_links:
+            # Merging all IDs (parent and children) into one list to
+            # do only one query to the service
+            pois_ids = list()
+            if self.poi.parent:
+                pois_ids.append(self.poi.parent)
+            if self.poi.children:
+                pois_ids.extend(self.poi.children)
+            if pois_ids:
+                pois = poi_service.get_places_by_identifiers(pois_ids)
+                if self.poi.parent:
+                    for poi in pois:
+                        if poi.id == self.poi.parent:
+                            parent = poi
+                            break
+                    if parent and parent.name:
+                        representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent),
+                            title=parent.name, type=parent.type, type_name=parent.type_name)
+                    else:
+                        representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent))
+                if self.poi.children:
+                    for child in self.poi.children:
+                        for poi in pois:
+                            if poi.id == child:
+                                p = poi
+                                break
+                        if p and p.name:
+                            representation.update_link('child', url_for(self.endpoint, ident=child),
+                                title=p.name, type=p.type, type_name=p.type_name)
+                        else:
+                            representation.update_link('child', url_for(self.endpoint, ident=child))
 
         try:
             transport_service = TransportService.from_context()

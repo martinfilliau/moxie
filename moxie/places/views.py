@@ -38,8 +38,7 @@ class Search(ServiceView):
         # useful when querying for bus stop naptan number
         # TODO pass the location to have the distance from the point
         if ' ' not in self.query:
-            unique_doc = poi_service.search_place_by_identifier(
-                    '*:{id}'.format(id=self.query))
+            unique_doc = poi_service.search_places_by_identifiers(['*:{id}'.format(id=self.query)])
             if unique_doc:
                 self.size = 1
                 self.facets = None
@@ -66,9 +65,10 @@ class PoiDetail(ServiceView):
         if ident.endswith('/'):
             ident = ident.split('/')[0]
         poi_service = POIService.from_context()
-        doc = poi_service.get_place_by_identifier(ident)
-        if not doc:
+        docs = poi_service.get_places_by_identifiers([ident])
+        if not docs:
             abort(404)
+        doc = docs[0]
         if doc.id != ident:
             # redirection to the same URL but with the main ID of the doc
             path = url_for(request.url_rule.endpoint, ident=doc.id)

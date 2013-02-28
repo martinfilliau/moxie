@@ -10,6 +10,6 @@ class POIServiceTestCase(unittest.TestCase):
             with mock.patch('moxie.places.services.doc_to_poi') as mock_doc_to_poi:
                 poi_service = POIService()
                 mock_doc_to_poi.return_value = None
-                results = poi_service.get_place_by_identifier('123')
+                results = poi_service.get_places_by_identifiers(['123'])
 
                 mock_searcher.get_by_ids.assert_called_with(['123'])
