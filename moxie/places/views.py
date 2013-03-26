@@ -65,10 +65,9 @@ class PoiDetail(ServiceView):
         if ident.endswith('/'):
             ident = ident.split('/')[0]
         poi_service = POIService.from_context()
-        docs = poi_service.get_places_by_identifiers([ident])
-        if not docs:
+        doc = poi_service.get_place_by_identifier(ident)
+        if not doc:
             abort(404)
-        doc = docs[0]
         if doc.id != ident:
             # redirection to the same URL but with the main ID of the doc
             path = url_for(request.url_rule.endpoint, ident=doc.id)

@@ -81,6 +81,17 @@ class POIService(Service):
             facets = None
         return [doc_to_poi(r) for r in response.results], response.size, facets
 
+    def get_place_by_identifier(self, ident):
+        """Get place by identifier
+        :param ident: identifier to lookup
+        :return one POI or None if no result
+        """
+        results = self.get_places_by_identifiers([ident])
+        if results:
+            return results[0]
+        else:
+            return None
+
     def get_places_by_identifiers(self, idents):
         """Get places by identifiers
         Search in all identifiers if not found.
@@ -94,6 +105,17 @@ class POIService(Service):
         else:
             # If no result, do a SEARCH request on IDs
             return self.search_places_by_identifiers(idents)
+
+    def search_place_by_identifier(self, ident):
+        """Search for a place by an identifier
+        :param ident: identifier to lookup
+        :return a POI or None if no result
+        """
+        results = self.search_place_by_identifier([ident])
+        if results:
+            return results[0]
+        else:
+            return None
 
     def search_places_by_identifiers(self, idents):
         """Search for a place by its identifiers
