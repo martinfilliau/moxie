@@ -38,8 +38,7 @@ class Search(ServiceView):
         # useful when querying for bus stop naptan number
         # TODO pass the location to have the distance from the point
         if ' ' not in self.query:
-            unique_doc = poi_service.search_place_by_identifier(
-                    '*:{id}'.format(id=self.query))
+            unique_doc = poi_service.search_places_by_identifiers(['*:{id}'.format(id=self.query)])
             if unique_doc:
                 self.size = 1
                 self.facets = None

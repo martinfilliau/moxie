@@ -66,29 +66,35 @@ class HALPOIRepresentation(POIRepresentation):
             poi_service = POIService.from_context()
         except NoConfiguredService:
             poi_service = None
-        if self.poi.parent:
-            if poi_service and self.add_parent_children_links:
-                parent = poi_service.get_place_by_identifier(self.poi.parent)
-            else:
-                parent = None
-            if parent and parent.name:
-                representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent),
-                    title=parent.name, type=parent.type, type_name=parent.type_name)
-            else:
-                representation.add_link('parent', url_for(self.endpoint, ident=self.poi.parent))
+        if poi_service and self.add_parent_children_links:
+            # Merging all IDs (parent and children) into one set to
+            # do only one query to the service
+            pois_ids = set(self.poi.children)
+            if self.poi.parent:
+                pois_ids.add(self.poi.parent)
+            if pois_ids:
+                pois_objects = poi_service.get_places_by_identifiers(pois_ids)
+                # ease lookup by having a dict with ID as key
+                pois = dict((poi.id, poi) for poi in pois_objects)
 
-        if len(self.poi.children) > 0:
-            # TODO GET with multiple documents, to do at service level
-            for child in self.poi.children:
-                if poi_service and self.add_parent_children_links:
-                    p = poi_service.get_place_by_identifier(child)
-                else:
-                    p = None
-                if p and p.name:
-                    representation.update_link('child', url_for(self.endpoint, ident=child), 
-                        title=p.name, type=p.type, type_name=p.type_name)
-                else:
-                    representation.update_link('child', url_for(self.endpoint, ident=child))
+                def add_link(relation, identifier):
+                    """Add a link w/ or w/o title depending if we found a POI
+                    :param relation: link rel (parent or child)
+                    :param identifier: ID of the POI for lookup
+                    """
+                    poi = pois[identifier]
+                    if poi and poi.name:
+                        representation.add_link(relation, url_for(self.endpoint, ident=identifier),
+                            title=poi.name, type=poi.type, type_name=poi.type_name)
+                    else:
+                        representation.add_link(relation, url_for(self.endpoint, ident=identifier))
+
+                if self.poi.parent:
+                    add_link('parent', self.poi.parent)
+
+                if self.poi.children:
+                    for child in self.poi.children:
+                        add_link('child', child)
 
         try:
             transport_service = TransportService.from_context()
