@@ -82,28 +82,49 @@ class POIService(Service):
         return [doc_to_poi(r) for r in response.results], response.size, facets
 
     def get_place_by_identifier(self, ident):
-        """Get a place by its main identifier
-        Search in all identifiers if not found.
+        """Get place by identifier
         :param ident: identifier to lookup
-        :return POI or None if no result
+        :return one POI or None if no result
         """
-        response = searcher.get_by_ids([ident])
-        # First do a GET request by its ID
+        results = self.get_places_by_identifiers([ident])
+        if results:
+            return results[0]
+        else:
+            return None
+
+    def get_places_by_identifiers(self, idents):
+        """Get places by identifiers
+        Search in all identifiers if not found.
+        :param idents: identifiers to lookup
+        :return list of POI or None if no result
+        """
+        response = searcher.get_by_ids(idents)
+        # First do a GET request by IDs
         if response.results:
-            return doc_to_poi(response.results[0])
+            return [doc_to_poi(result) for result in response.results]
         else:
             # If no result, do a SEARCH request on IDs
-            return self.search_place_by_identifier(ident)
-
+            return self.search_places_by_identifiers(idents)
 
     def search_place_by_identifier(self, ident):
+        """Search for a place by an identifier
+        :param ident: identifier to lookup
+        :return a POI or None if no result
+        """
+        results = self.search_places_by_identifiers([ident])
+        if results:
+            return results[0]
+        else:
+            return None
+
+    def search_places_by_identifiers(self, idents):
         """Search for a place by its identifiers
         :param ident: identifier to lookup
         :return POI or None if no result
         """
-        response = searcher.search_for_ids("identifiers", [ident])
+        response = searcher.search_for_ids("identifiers", idents)
         if response.results:
-            return doc_to_poi(response.results[0])
+            return [doc_to_poi(result) for result in response.results]
         else:
             return None
 
