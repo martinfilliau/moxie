@@ -111,7 +111,7 @@ class POIService(Service):
         :param ident: identifier to lookup
         :return a POI or None if no result
         """
-        results = self.search_place_by_identifier([ident])
+        results = self.search_places_by_identifiers([ident])
         if results:
             return results[0]
         else:
