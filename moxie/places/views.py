@@ -47,11 +47,7 @@ class Search(ServiceView):
             self.start, self.count, type=self.type, types_exact=self.types_exact, all_types=all_types)
         return results
 
-    @accepts(JSON)
-    def as_json(self, response):
-        return POIsRepresentation(self.query, response, self.size).as_json()
-
-    @accepts(HAL_JSON)
+    @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
         return HALPOIsRepresentation(self.query, response, self.start, self.count, self.size,
             request.url_rule.endpoint, types=self.facets, type=self.type, type_exact=self.types_exact).as_json()
@@ -75,15 +71,7 @@ class PoiDetail(ServiceView):
         else:
             return doc
 
-    @accepts(JSON)
-    def as_json(self, response):
-        if issubclass(type(response), BaseResponse):
-            # to handle 301 redirections and 404
-            return response
-        else:
-            return POIRepresentation(response).as_json()
-
-    @accepts(HAL_JSON)
+    @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
         if issubclass(type(response), BaseResponse):
             # to handle 301 redirections and 404
@@ -100,10 +88,6 @@ class Types(ServiceView):
         poi_service = POIService.from_context()
         return poi_service.get_types()
 
-    @accepts(JSON)
-    def as_json(self, types):
-        return TypesRepresentation(types).as_json()
-
-    @accepts(HAL_JSON)
+    @accepts(HAL_JSON, JSON)
     def as_hal_json(self, types):
         return HALTypesRepresentation(types, request.url_rule.endpoint).as_json()
