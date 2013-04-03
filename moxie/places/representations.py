@@ -83,7 +83,7 @@ class HALPOIRepresentation(POIRepresentation):
                     :param method: method to apply (add_link or update if it should be an array)
                     :param identifier: ID of the POI for lookup
                     """
-                    poi = pois[identifier]
+                    poi = pois.get(identifier, None)
                     if poi and poi.name:
                         method(relation, url_for(self.endpoint, ident=identifier),
                             title=poi.name, type=poi.type, type_name=poi.type_name)
