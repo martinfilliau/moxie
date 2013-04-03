@@ -77,24 +77,25 @@ class HALPOIRepresentation(POIRepresentation):
                 # ease lookup by having a dict with ID as key
                 pois = dict((poi.id, poi) for poi in pois_objects)
 
-                def add_link(relation, identifier):
+                def add_link(relation, method, identifier):
                     """Add a link w/ or w/o title depending if we found a POI
                     :param relation: link rel (parent or child)
+                    :param method: method to apply (add_link or update if it should be an array)
                     :param identifier: ID of the POI for lookup
                     """
                     poi = pois[identifier]
                     if poi and poi.name:
-                        representation.add_link(relation, url_for(self.endpoint, ident=identifier),
+                        method(relation, url_for(self.endpoint, ident=identifier),
                             title=poi.name, type=poi.type, type_name=poi.type_name)
                     else:
-                        representation.add_link(relation, url_for(self.endpoint, ident=identifier))
+                        method(relation, url_for(self.endpoint, ident=identifier))
 
                 if self.poi.parent:
-                    add_link('parent', self.poi.parent)
+                    add_link('parent', representation.add_link, self.poi.parent)
 
                 if self.poi.children:
                     for child in self.poi.children:
-                        add_link('child', child)
+                        add_link('child', representation.update_link, child)
 
         try:
             transport_service = TransportService.from_context()
