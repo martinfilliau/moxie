@@ -15,6 +15,7 @@ from moxie.core.cache import cache
 from moxie.core.app import Moxie
 from moxie.core.exceptions import exception_handler
 from moxie.core.healthchecks import check_services
+from moxie.core.browser import get_blueprints
 
 
 def create_app():
@@ -39,4 +40,5 @@ def create_app():
     cache.init_app(app)
     # Static URL Route for API Health checks
     app.add_url_rule('/_health', view_func=check_services)
+    app.add_url_rule('/', view_func=get_blueprints)
     return app
