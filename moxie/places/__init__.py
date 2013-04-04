@@ -27,11 +27,13 @@ def create_blueprint(blueprint_name):
 
 
 def get_routes():
+    path = 'places'     # TODO should be passed as argument?
     representation = HALRepresentation({})
-    representation.add_link('search', url_for('places.search'))
-    representation.add_link('types', url_for('places.types'))
-    representation.add_link('detail', '/places/{id}', templated=True)   # TODO cannot use url_for because templating
-    representation.add_link('rti', '/places/{id}/rti', templated=True)
+    representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/places.html#{rel}')
+    representation.add_link('hl:search', '/{bp}/search?q={{q}}'.format(bp=path), templated=True)
+    representation.add_link('hl:types', url_for('{bp}.types'.format(bp=path)))
+    representation.add_link('hl:detail', '/{bp}/{{id}}'.format(bp=path), templated=True)
+    representation.add_link('hl:rti', '/{bp}/{{id}}/rti'.format(bp=path), templated=True)
     response = make_response(representation.as_json(), 200)
     response.headers['Content-Type'] = "application/json"
     return response
