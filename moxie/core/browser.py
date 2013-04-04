@@ -14,6 +14,7 @@ class RootView(ServiceView):
         ctx = _app_ctx_stack.top
         services = ctx.app.blueprints.keys()
         representation = HALRepresentation({})
+        representation.add_link('self', '/')
         representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/services.html#{rel}')
         for service in services:
             representation.add_link('hl:{app}'.format(app=service), '/{blueprint}'.format(blueprint=service))
@@ -24,5 +25,5 @@ class RootView(ServiceView):
         return representation.as_json()
 
     @accepts("text/html")
-    def as_hal_json(self, response):
+    def as_html(self, response):
         return redirect('/browser')
