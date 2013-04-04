@@ -13,6 +13,7 @@ class RootView(ServiceView):
     def handle_request(self):
         ctx = _app_ctx_stack.top
         services = ctx.app.blueprints.keys()
+        self.browser_url = ctx.app.config.get('HAL_BROWSER_REDIRECT', None)
         representation = HALRepresentation({})
         representation.add_link('self', '/')
         representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/services.html#{rel}')
@@ -25,5 +26,8 @@ class RootView(ServiceView):
         return representation.as_json()
 
     @accepts("text/html")
-    def as_html(self, response):
-        return redirect('/browser')
+    def as_html(self, representation):
+        if self.browser_url:
+            return redirect(self.browser_url)
+        else:
+            return self.as_json(representation)

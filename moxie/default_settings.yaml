@@ -10,6 +10,7 @@ flask:
     NAPTAN_IMPORT_URL: 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
     # Cache
     CACHE_TYPE: 'redis'
+    HAL_BROWSER_REDIRECT: '/browser'
 
 blueprints:
     places:
