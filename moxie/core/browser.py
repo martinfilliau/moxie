@@ -18,7 +18,7 @@ class RootView(ServiceView):
         representation.add_link('self', '/')
         representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/services.html#{rel}')
         for service in services:
-            representation.add_link('hl:{app}'.format(app=service), '/{blueprint}'.format(blueprint=service))
+            representation.add_link('hl:{app}'.format(app=service), '/{blueprint}/'.format(blueprint=service))
         return representation
 
     @accepts(JSON, HAL_JSON)
