@@ -42,7 +42,7 @@ class Search(ServiceView):
             if unique_doc:
                 self.size = 1
                 self.facets = None
-                return [unique_doc]
+                return unique_doc
         results, self.size, self.facets = poi_service.get_results(self.query, location,
             self.start, self.count, type=self.type, types_exact=self.types_exact, all_types=all_types)
         return results
