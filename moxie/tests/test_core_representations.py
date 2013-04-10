@@ -24,7 +24,7 @@ class RepresentationsTestCase(unittest.TestCase):
         representation.update_link('child', '/child/1')
         representation.update_link('child', '/child/2')
         representation.add_curie('cu', 'http://curie.com')
-        representation.add_embed([HALRepresentation({'embed': 'yes'},
+        representation.add_embed('rel', [HALRepresentation({'embed': 'yes'},
             links={'self':{'href':'a'}}).as_dict()])
         self.assertDictContainsSubset({'_links': {
             'self': {'href': '/a/b'},
@@ -33,8 +33,8 @@ class RepresentationsTestCase(unittest.TestCase):
             'curie': {'href': 'http://curie.com', 'name': 'cu', 'templated': 'true'}}},
             representation.as_dict())
         self.assertDictContainsSubset(
-            {'_embedded': [{'embed': 'yes', 
-            '_links': {'self': {'href': 'a'}}}]},
+            {'_embedded': {'rel': [{'embed': 'yes',
+            '_links': {'self': {'href': 'a'}}}]}},
             representation.as_dict())
 
     def test_hal_json_representation_embed(self):
@@ -45,6 +45,17 @@ class RepresentationsTestCase(unittest.TestCase):
         self.assertTrue('_links' in representation.as_dict())
         self.assertTrue('_embedded' in representation.as_dict())
         self.assertDictContainsSubset(values, representation.as_dict())
+
+    def test_hal_json_embedded(self):
+        representation = HALRepresentation({'key': 'value'})
+        representation.add_embed('a', {'1': 'oo'})
+        representation.add_embed('a', {'2': 'oo'})
+        representation.add_embed('a', {'3': 'oo'})
+        representation.add_embed('b', [{'a': 'oo'}, {'b': 'oo'}])
+        representation.add_embed('b', {'c': 'oo'})
+        self.assertDictContainsSubset({'_embedded': {'a': [{'1': 'oo'}, {'2': 'oo'}, {'3': 'oo'}],
+                                                        'b': [{'a': 'oo'}, {'b': 'oo'}, {'c': 'oo'}]}},
+                                      representation.as_dict())
 
     def test_nav_links(self):
         app.add_url_rule('/', endpoint='a')

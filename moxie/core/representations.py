@@ -19,7 +19,7 @@ class HALRepresentation(Representation):
         :param embed: _embedded documents
         """
         self.links = links or {}
-        self.embed = embed or []
+        self.embed = embed or {}
         self.values = values
 
     # Representations of this object
@@ -76,11 +76,22 @@ class HALRepresentation(Representation):
         """
         self.add_link('curie', href, name=name, templated='true')
         
-    def add_embed(self, docs):
+    def add_embed(self, rel, value):
         """Add embedded documents
-        :param docs: list of docs
+        :param rel: link relation type
+        :param value: resource or list of resources
         """
-        self.embed.extend(docs)
+        if not rel in self.embed:
+            self.embed[rel] = value
+        else:
+            if isinstance(self.embed[rel], list):
+                if isinstance(value, list):
+                    self.embed[rel].extend(value)
+                else:
+                    self.embed[rel].append(value)
+            else:
+                # add to existing in a list
+                self.embed[rel] = [self.embed[rel], value]
 
 
 def get_nav_links(endpoint, start, count, size, **kwargs):

@@ -172,7 +172,7 @@ class HALPOIsRepresentation(POIsRepresentation):
             start=self.start, count=self.count))
         representation.add_links(get_nav_links(self.endpoint, self.start, self.count, self.size,
             q=self.search, type=self.type, type_exact=self.type_exact))
-        representation.add_embed([HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
+        representation.add_embed('pois', [HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
         if self.types:
             # add faceting links for types
             for facet in self.types:
