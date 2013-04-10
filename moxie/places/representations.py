@@ -75,7 +75,10 @@ class HALPOIRepresentation(POIRepresentation):
             if pois_ids:
                 pois_objects = poi_service.get_places_by_identifiers(pois_ids)
                 # ease lookup by having a dict with ID as key
-                pois = dict((poi.id, poi) for poi in pois_objects)
+                if pois_objects:
+                    pois = dict((poi.id, poi) for poi in pois_objects)
+                else:
+                    pois = {}
 
                 def add_link(relation, method, identifier):
                     """Add a link w/ or w/o title depending if we found a POI
