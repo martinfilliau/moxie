@@ -30,7 +30,7 @@ def dev():
     Configuration for Vagrant VMs (provisioned w/ Puppet)
     """
     env.environment = 'dev'
-    env.hosts = ['33.33.33.10']
+    env.hosts = ['127.0.0.1:2222']
     env.user = 'moxie'
     env.remote_install_dir_api = '/srv/moxie/precise32.oucs.ox.ac.uk'
     env.remote_git_checkout_api = '/srv/moxie/source-moxie'
@@ -117,6 +117,16 @@ def deploy_front(version):
         env.remote_git_checkout_front, versioned_path))
     run('rm -f %s' % env.remote_install_dir_front)
     run('ln -s %s %s' % (versioned_path, env.remote_install_dir_front))
+
+
+@task
+def delete_index(core):
+    """Delete all documents from a Solr index 
+    """
+    if not core:
+        utils.abort('You must specify the core')
+    run("curl http://localhost:8080/solr/{core}/update --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'".format(core=core))
+    run("curl http://localhost:8080/solr/{core}/update --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'".format(core=core))
 
 
 """
