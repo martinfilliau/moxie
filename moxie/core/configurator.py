@@ -22,22 +22,23 @@ class Configurator(object):
                 'factory': 'moxie_courses.create_blueprint'},
             }
 
-        The *factory* represents a function which given a name will
-        return a `Flask.blueprint`. This method will import the factory
-        and call it with the blueprint key.
+        Here the *factory* should point to a `callable` which reflects
+        the following function signature.
+
+        .. py:function:: create_blueprint(name, conf) -> Flask.blueprint
         """
         for name, conf in blueprints.items():
             module, _, func = conf.pop('factory').rpartition('.')
             module = importlib.import_module(module)
             factory = getattr(module, func)
-            bp = factory(name)
-            self.app.register_blueprint(bp, **conf)
+            bp = factory(name, conf)
+            self.app.register_blueprint(bp)
 
     def register_services(self, services):
         registered_services = self.app.config.get('SERVICES', {})
         registered_services.update(services)
         self.app.config['SERVICES'] = registered_services
-        
+
     def register_healthchecks(self, healthchecks):
         registered_healthchecks = self.app.config.get('HEALTHCHECKS', {})
         registered_healthchecks.update(healthchecks)
