@@ -37,3 +37,8 @@ child
 -----
 
 List of child documents to an entity.
+
+poi
+----
+
+Point of Interest attached to an entity.
