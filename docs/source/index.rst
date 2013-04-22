@@ -12,8 +12,8 @@ HTTP API
 .. toctree::
     :glob:
 
+    http_api/relations/overview
     http_api/specification
-    http_api/relations
     http_api/*
 
 Internal API
