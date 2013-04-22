@@ -7,17 +7,31 @@ Welcome to Moxie API's documentation!
 =====================================
 
 HTTP API
------------------
+------------------
+
+Specification
+
+.. toctree::
+    :maxdepth: 1
+
+    http_api/specification
+
+Endpoints
 
 .. toctree::
     :glob:
 
+    http_api/endpoints/*
+
+List of standard relations describing links between resources.
+
+.. toctree::
+    :maxdepth: 1
+
     http_api/relations/overview
-    http_api/specification
-    http_api/*
 
 Internal API
------------------
+------------
 
 .. toctree::
     :glob:
