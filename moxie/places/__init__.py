@@ -5,6 +5,8 @@ from moxie.transport.views import RTI
 from moxie.core.representations import HALRepresentation
 from .views import Search, PoiDetail, Types
 
+PLACES_CURIE = 'http://moxie.readthedocs.org/en/latest/http_api/places.html#{rel}'
+
 
 def create_blueprint(blueprint_name, conf):
     places_blueprint = Blueprint(blueprint_name, __name__, **conf)
@@ -29,7 +31,7 @@ def create_blueprint(blueprint_name, conf):
 def get_routes():
     path = request.path
     representation = HALRepresentation({})
-    representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/places.html#{rel}')
+    representation.add_curie('hl', PLACES_CURIE)
     representation.add_link('self', '{bp}'.format(bp=path))
     representation.add_link('hl:search', '{bp}search?q={{q}}'.format(bp=path),
                             templated=True, title='Search')

@@ -7,6 +7,8 @@ from moxie.core.representations import HALRepresentation, JSON, HAL_JSON
 
 logger = logging.getLogger(__name__)
 
+APPS_CURIE = 'http://moxie.readthedocs.org/en/latest/apps/{rel}.html'
+
 
 class RootView(ServiceView):
 
@@ -16,9 +18,9 @@ class RootView(ServiceView):
         self.browser_url = ctx.app.config.get('HAL_BROWSER_REDIRECT', None)
         representation = HALRepresentation({})
         representation.add_link('self', '/')
-        representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/services.html#{rel}')
+        representation.add_curie('app', APPS_CURIE)
         for service, conf in services.iteritems():
-            representation.add_link('hl:{app}'.format(app=service), '{prefix}/'.format(prefix=conf.url_prefix))
+            representation.add_link('app:{app}'.format(app=service), '{prefix}/'.format(prefix=conf.url_prefix))
         return representation
 
     @accepts(JSON, HAL_JSON)
