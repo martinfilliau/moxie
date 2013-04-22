@@ -23,3 +23,20 @@ class KeyValueServiceTestCase(unittest.TestCase):
     def test_nonexistant_kv_service(self):
         with self.assertRaises(NotImplementedError):
             KVService('mykvstore://localhost/one')
+
+    def test_proxy_attr(self):
+        """All attr access should be pased through to the _backend on the
+        KVService, this applies also when calling methods.
+
+        See docs on KVService.__getattr__ for more info
+        """
+        kv = KVService('foobar://foo.bar/collection')
+        m1 = kv.nonexistantattr
+        m2 = MockKV().nonexistantattr
+        self.assertEqual(m1, m2)
+
+    def test_proxy_method(self):
+        kv = KVService('foobar://foo.bar/collection')
+        m1 = kv.nonexistantmethod()
+        m2 = MockKV().nonexistantmethod()
+        self.assertEqual(m1, m2)

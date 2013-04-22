@@ -20,6 +20,18 @@ class KVService(Service):
     def __init__(self, backend_uri):
         self._backend = self._get_backend(backend_uri)
 
+    def __getattr__(self, name):
+        """The KV Service proxies all calls through to the underlying backend.
+        Since we only have one :py:data:`moxie.core.kv.SUPPORTED_KV_STORES` for
+        the time being it doesn't make sense to restrict the functionality.
+
+        .. note::
+            In future we may need to consider this API if we want to have other
+            supported backends. This might involve implementing a compatibility
+            layer.
+        """
+        return getattr(self._backend, name)
+
     @staticmethod
     def _get_backend(kv_uri):
         """Following the same pattern found in
@@ -41,22 +53,13 @@ class KVService(Service):
         else:
             raise NotImplementedError("Moxie could not find an implementation for %s." % kv_uri.scheme)
 
-    def get(self, key):
-        return self._backend.get(key)
-
-    def set(self, key, value):
-        return self._backend.set(key, value)
-
-    def setex(self, key, expiry, value):
-        return self._backend.setex(key, expiry, value)
-        
     def healthcheck(self):
         """Healthcheck query to the backend
         """
         # TODO this query (ping) is specific to Redis, it should be made generic at some points
         try:
             # Does a PING command to Redis, response should be PONG (returns True with py-redis)
-            if self._backend.ping():
+            if self.ping():
                 return True, "OK"
             else:
                 return False, "FAILED TO PING"
