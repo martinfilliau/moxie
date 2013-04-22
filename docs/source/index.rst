@@ -47,6 +47,16 @@ Developer
 
     developer/*
 
+List of apps available
+----------------------
+
+.. toctree::
+    :glob:
+    :maxdepth: 1
+
+    apps/overview
+    apps/*
+
 Indices and tables
 ==================
 
