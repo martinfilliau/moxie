@@ -1,6 +1,6 @@
 from flask import url_for, jsonify
 
-from moxie.core.representations import Representation, HALRepresentation, get_nav_links
+from moxie.core.representations import Representation, HALRepresentation, get_nav_links, RELATIONS_CURIE
 from moxie.places.importers.helpers import find_type_name
 from moxie.transport.services import TransportService
 from moxie.core.service import NoConfiguredService
@@ -106,7 +106,7 @@ class HALPOIRepresentation(POIRepresentation):
             # Transport service not configured so no RTI information
             transport_service = None
         if transport_service and transport_service.get_provider(self.poi):
-            representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}')
+            representation.add_curie('hl', RELATIONS_CURIE)
             representation.add_link('hl:rti', url_for('places.rti', ident=self.poi.id),
                 title="Real-time information")
         return representation.as_dict()
@@ -215,6 +215,6 @@ class HALTypesRepresentation(TypesRepresentation):
         base = super(HALTypesRepresentation, self).as_dict()
         representation = HALRepresentation(base)
         representation.add_link('self', url_for(self.endpoint))
-        representation.add_curie('hl', 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}')
+        representation.add_curie('hl', RELATIONS_CURIE)
         representation.add_link('hl:search', url_for('places.search') + "?type={type}")
         return representation.as_dict()

@@ -5,6 +5,8 @@ from flask import url_for, jsonify
 JSON = "application/json"
 HAL_JSON = "application/hal+json"
 
+RELATIONS_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/relations/{rel}.html"
+
 
 class Representation(object):
     pass
@@ -106,7 +108,7 @@ def get_nav_links(endpoint, start, count, size, **kwargs):
     start, count, size = int(start), int(count), int(size)
     nav = {'curie': {
         'name': 'hl',
-        'href': 'http://moxie.readthedocs.org/en/latest/http_api/relations.html#{rel}',
+        'href': RELATIONS_CURIE,
         'templated': True,
         },
     }
