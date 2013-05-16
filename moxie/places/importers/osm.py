@@ -7,11 +7,18 @@ from moxie.places.importers.helpers import prepare_document, format_uk_telephone
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_SHOP = '/amenities/shop'
+
 SHOPS = {'supermarket': '/amenities/supermarket',
+         'department_store': '/amenities/supermarket',      # TODO supermarket? or just shop?
          'bicycle': '/amenities/shop/bicycle',
          'convenience': '/amenities/supermarket/convenience',
          #'hairdresser': '/amenities/shop/hairdresser',    Disabled due to poor quality of data (TRELLO#144).
          'book': '/amenities/shop/book',
+         'mall': DEFAULT_SHOP,
+         'deli': DEFAULT_SHOP,
+         'doityourself': DEFAULT_SHOP,
+         'newsagent': DEFAULT_SHOP
          }
 
 AMENITIES = {'atm': '/amenities/atm',
