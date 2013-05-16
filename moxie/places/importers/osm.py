@@ -7,37 +7,38 @@ from moxie.places.importers.helpers import prepare_document, format_uk_telephone
 logger = logging.getLogger(__name__)
 
 
-SHOPS = { 'supermarket': '/amenities/supermarket',
-          'bicycle': '/amenities/shop/bicycle',
-          'convenience': '/amenities/supermarket/convenience',
-          #'hairdresser': '/amenities/shop/hairdresser',    Disabled due to poor quality of data (TRELLO#144).
-          'book': '/amenities/shop/book',
-          }
+SHOPS = {'supermarket': '/amenities/supermarket',
+         'bicycle': '/amenities/shop/bicycle',
+         'convenience': '/amenities/supermarket/convenience',
+         #'hairdresser': '/amenities/shop/hairdresser',    Disabled due to poor quality of data (TRELLO#144).
+         'book': '/amenities/shop/book',
+         }
 
-AMENITIES = { 'atm': '/amenities/atm',
-              'bank': '/amenities/bank',            # TODO atm=yes?
-              'bar': '/amenities/food-drink/bar',
-              'bicycle_parking': '/transport/bicycle-parking',
-              'cafe': '/amenities/food-drink/cafe',  # TODO food=yes?
-              'cinema': '/leisure/cinema',
-              'dentist': '/amenities/health/dentist',
-              'doctors': '/amenities/health/doctor',
-              'fast_food': '/amenities/food-drink/fast-food',
-              'hospital': '/amenities/health/hospital',
-              'library': '/amenities/public-library', # TODO is it?
-              'parking': '/transport/car-park',
-              'pharmacy': '/amenities/health/pharmacy',
-              'post_box': '/amenities/post/post-box',
-              'post_office': '/amenities/post/post-office',
-              'pub': '/amenities/food-drink/pub',    # TODO food=yes?
-              'punt_hire': '/leisure/punt',
-              'recycling': '/amenities/recycling-facility',
-              'restaurant': '/amenities/food-drink/restaurant',
-              'swimming_pool': '/leisure/swimming-pool',
-              'taxi': '/transport/taxi-rank',
-              'theatre': '/leisure/theatre',
-              'waste_basket': '/amenities/recycling-facility',
-              }
+AMENITIES = {'atm': '/amenities/atm',
+             'bank': '/amenities/bank',            # TODO atm=yes?
+             'bar': '/amenities/food-drink/bar',
+             'bicycle_parking': '/transport/bicycle-parking',
+             'cafe': '/amenities/food-drink/cafe',  # TODO food=yes?
+             'cinema': '/leisure/cinema',
+             'dentist': '/amenities/health/dentist',
+             'doctors': '/amenities/health/doctor',
+             'fast_food': '/amenities/food-drink/fast-food',
+             'hospital': '/amenities/health/hospital',
+             'library': '/amenities/public-library', # TODO is it?
+             'parking': '/transport/car-park',
+             'pharmacy': '/amenities/health/pharmacy',
+             'post_box': '/amenities/post/post-box',
+             'post_office': '/amenities/post/post-office',
+             'pub': '/amenities/food-drink/pub',    # TODO food=yes?
+             'punt_hire': '/leisure/punt',
+             'recycling': '/amenities/recycling-facility',
+             'restaurant': '/amenities/food-drink/restaurant',
+             'swimming_pool': '/leisure/swimming-pool',
+             'taxi': '/transport/taxi-rank',
+             'theatre': '/leisure/theatre',
+             'waste_basket': '/amenities/recycling-facility',
+             }
+
 
 class OSMHandler(handler.ContentHandler):
 
@@ -177,7 +178,6 @@ def main():
     # Parse in 8k chunks
     osm = ns.osmfile
     buffer = osm.read(8192)
-    # bunzip = bz2.BZ2Decompressor()
     while buffer:
         parser.feed(buffer)
         buffer = osm.read(8192)
