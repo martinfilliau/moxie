@@ -30,7 +30,7 @@ def dev():
     Configuration for Vagrant VMs (provisioned w/ Puppet)
     """
     env.environment = 'dev'
-    env.hosts = ['127.0.0.1:2222']
+    env.hosts = ['new-mox.vm']
     env.user = 'moxie'
     env.remote_install_dir_api = '/srv/moxie/precise32.oucs.ox.ac.uk'
     env.remote_git_checkout_api = '/srv/moxie/source-moxie'
@@ -142,7 +142,7 @@ def install_moxie():
     require('remote_git_checkout_api', provided_by=ENVIRONMENTS)
     with cd(env.remote_git_checkout_api):
         run('python setup.py install')
-    run('pip install -r %s' % env.additional_requirements)
+    run('pip install -r %s --use-mirrors' % env.additional_requirements)
 
 
 def git_branch(git_checkout, git_repo, name):
