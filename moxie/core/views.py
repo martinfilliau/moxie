@@ -49,7 +49,8 @@ class ServiceView(View):
     cors_allow_credentials = False
     cors_max_age = 21600
 
-    expires = None  # timedelta or None
+    # Set to a timedelta to control HTTP caching headers
+    expires = None
 
     @classmethod
     def as_view(cls, *args, **kwargs):
