@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask.views import View
 from flask import request, jsonify, make_response, current_app
@@ -49,8 +49,10 @@ class ServiceView(View):
     cors_allow_credentials = False
     cors_max_age = 21600
 
-    # Set to a timedelta to control HTTP caching headers
+    # Set to a timedelta or datetime to control HTTP caching headers
     expires = None
+
+    EXPIRES_TIME_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
 
     @classmethod
     def as_view(cls, *args, **kwargs):
@@ -91,10 +93,15 @@ class ServiceView(View):
         """
         h = {}
         if self.expires:
-            now = datetime.utcnow()
-            now += self.expires
-            h['Expires'] = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
-            h['Cache-Control'] = 'max-age={seconds}'.format(seconds=self.expires.seconds)
+            if isinstance(self.expires, timedelta):
+                now = datetime.utcnow()
+                now += self.expires
+                h['Expires'] = now.strftime(self.EXPIRES_TIME_FORMAT)
+                h['Cache-Control'] = 'max-age={seconds}'.format(seconds=self.expires.seconds)
+            elif isinstance(self.expires, datetime):
+                difference = self.expires - datetime.utcnow()
+                h['Expires'] = self.expires.strftime(self.EXPIRES_TIME_FORMAT)
+                h['Cache-Control'] = 'max-age={seconds}'.format(seconds=difference.seconds)
             response.headers.extend(h)
         return response
 

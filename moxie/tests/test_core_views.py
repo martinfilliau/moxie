@@ -51,6 +51,10 @@ class TestExpiringView(TestServiceView):
     expires = timedelta(seconds=10)
 
 
+class TestFixedExpiringView(TestServiceView):
+    expires = datetime.utcnow().replace(hour=23, minute=59, second=59)
+
+
 class TestMultiInheritance(TestServiceView, TestSecondServiceView):
     pass
 
@@ -61,6 +65,7 @@ class ServiceViewTestCase(unittest.TestCase):
         self.app = flask.Flask(__name__)
         self.app.add_url_rule('/foo', view_func=TestServiceView.as_view('foo'))
         self.app.add_url_rule('/expires', view_func=TestExpiringView.as_view('expires'))
+        self.app.add_url_rule('/fixed', view_func=TestFixedExpiringView.as_view('fixed'))
 
     def test_service_response(self):
         sv = TestServiceView()
@@ -107,6 +112,15 @@ class ServiceViewTestCase(unittest.TestCase):
             self.assertEqual(rv.headers.get('Expires'), expected)
             self.assertEqual(rv.headers.get('Cache-Control'), 'max-age={seconds}'
                                 .format(seconds=TestExpiringView.expires.seconds))
+
+    def test_expires_fixed(self):
+        with self.app.test_client() as c:
+            rv = c.get('/fixed', headers=[('Accept', 'foo/bar')])
+            self.assertEqual(rv.status_code, 200)
+            now = datetime.utcnow().replace(hour=23, minute=59, second=59)
+            expected = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            self.assertEqual(rv.headers.get('Expires'), expected)
+            self.assertIsNotNone(rv.headers.get('Cache-Control', None))
 
     def test_no_expires(self):
         with self.app.test_client() as c:
