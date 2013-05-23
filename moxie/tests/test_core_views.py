@@ -1,4 +1,5 @@
 import unittest
+from mock import patch
 import flask
 from datetime import timedelta, datetime
 
@@ -52,7 +53,7 @@ class TestExpiringView(TestServiceView):
 
 
 class TestFixedExpiringView(TestServiceView):
-    expires = datetime.utcnow().replace(hour=23, minute=59, second=59)
+    expires = datetime(year=2010, month=10, day=10, hour=23, minute=59, second=59)
 
 
 class TestMultiInheritance(TestServiceView, TestSecondServiceView):
@@ -102,25 +103,28 @@ class ServiceViewTestCase(unittest.TestCase):
         self.assertEqual(sv.service_responses['foo/bar'], TestSecondServiceView.basic_response.im_func)
         self.assertNotEqual(sv.service_responses['foo/bar'], TestServiceView.basic_response.im_func)
 
-    def test_expires(self):
+    def test_expires_timedelta(self):
         with self.app.test_client() as c:
-            rv = c.get('/expires', headers=[('Accept', 'foo/bar')])
-            self.assertEqual(rv.status_code, 200)
-            now = datetime.utcnow()
-            now += TestExpiringView.expires
-            expected = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
-            self.assertEqual(rv.headers.get('Expires'), expected)
-            self.assertEqual(rv.headers.get('Cache-Control'), 'max-age={seconds}'
-                                .format(seconds=TestExpiringView.expires.seconds))
+            with patch('moxie.core.views.datetime') as now_mock:
+                now_mock.utcnow.return_value = datetime(2010, 10, 10, 10, 10, 10)
+                rv = c.get('/expires', headers=[('Accept', 'foo/bar')])
+                self.assertEqual(rv.status_code, 200)
+                now = datetime(2010, 10, 10, 10, 10, 10)
+                now += TestExpiringView.expires
+                expected = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
+                self.assertEqual(rv.headers.get('Expires'), expected)
+                self.assertEqual(rv.headers.get('Cache-Control'), 'max-age={seconds}'
+                                    .format(seconds=TestExpiringView.expires.seconds))
 
-    def test_expires_fixed(self):
+    def test_expires_datetime(self):
         with self.app.test_client() as c:
-            rv = c.get('/fixed', headers=[('Accept', 'foo/bar')])
-            self.assertEqual(rv.status_code, 200)
-            now = datetime.utcnow().replace(hour=23, minute=59, second=59)
-            expected = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
-            self.assertEqual(rv.headers.get('Expires'), expected)
-            self.assertIsNotNone(rv.headers.get('Cache-Control', None))
+            with patch('moxie.core.views.datetime') as now_mock:
+                now_mock.utcnow.return_value = datetime(2010, 10, 10, 23, 59, 00)
+                rv = c.get('/fixed', headers=[('Accept', 'foo/bar')])
+                self.assertEqual(rv.status_code, 200)
+                expected = datetime(2010, 10, 10, 23, 59, 59).strftime("%a, %d %b %Y %H:%M:%S GMT")
+                self.assertEqual(rv.headers.get('Expires'), expected)
+                self.assertEqual(rv.headers.get('Cache-Control'), 'max-age=59')
 
     def test_no_expires(self):
         with self.app.test_client() as c:

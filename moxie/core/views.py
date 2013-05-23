@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import datetime as dt   # dt is used here to make the tests pass (datetime is mocked)
 
 from flask.views import View
 from flask import request, jsonify, make_response, current_app
@@ -97,7 +98,7 @@ class ServiceView(View):
                 now += self.expires
                 h['Expires'] = http_date(now)
                 h['Cache-Control'] = 'max-age={seconds}'.format(seconds=self.expires.seconds)
-            elif isinstance(self.expires, datetime):
+            elif isinstance(self.expires, dt.datetime):
                 difference = self.expires - datetime.utcnow()
                 h['Expires'] = http_date(self.expires)
                 h['Cache-Control'] = 'max-age={seconds}'.format(seconds=difference.seconds)
