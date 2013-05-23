@@ -4,6 +4,7 @@ from flask.views import View
 from flask import request, jsonify, make_response, current_app
 from werkzeug.exceptions import NotAcceptable
 from werkzeug.wrappers import BaseResponse
+from werkzeug.http import http_date
 
 from moxie.core.exceptions import ApplicationException, abort
 
@@ -52,8 +53,6 @@ class ServiceView(View):
     # Set to a timedelta or datetime to control HTTP caching headers
     expires = None
 
-    EXPIRES_TIME_FORMAT = "%a, %d %b %Y %H:%M:%S GMT"
-
     @classmethod
     def as_view(cls, *args, **kwargs):
         view = super(ServiceView, cls).as_view(*args, **kwargs)
@@ -96,11 +95,11 @@ class ServiceView(View):
             if isinstance(self.expires, timedelta):
                 now = datetime.utcnow()
                 now += self.expires
-                h['Expires'] = now.strftime(self.EXPIRES_TIME_FORMAT)
+                h['Expires'] = http_date(now)
                 h['Cache-Control'] = 'max-age={seconds}'.format(seconds=self.expires.seconds)
             elif isinstance(self.expires, datetime):
                 difference = self.expires - datetime.utcnow()
-                h['Expires'] = self.expires.strftime(self.EXPIRES_TIME_FORMAT)
+                h['Expires'] = http_date(self.expires)
                 h['Cache-Control'] = 'max-age={seconds}'.format(seconds=difference.seconds)
             response.headers.extend(h)
         return response
