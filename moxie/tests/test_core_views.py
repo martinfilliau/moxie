@@ -1,5 +1,6 @@
 import unittest
 import flask
+from datetime import timedelta, datetime
 
 from moxie.core.views import accepts, ServiceView
 
@@ -46,6 +47,10 @@ class TestInheritedServiceView(TestServiceView):
         return "foobar!"
 
 
+class TestExpiringView(TestServiceView):
+    expires = timedelta(seconds=10)
+
+
 class TestMultiInheritance(TestServiceView, TestSecondServiceView):
     pass
 
@@ -55,6 +60,7 @@ class ServiceViewTestCase(unittest.TestCase):
     def setUp(self):
         self.app = flask.Flask(__name__)
         self.app.add_url_rule('/foo', view_func=TestServiceView.as_view('foo'))
+        self.app.add_url_rule('/expires', view_func=TestExpiringView.as_view('expires'))
 
     def test_service_response(self):
         sv = TestServiceView()
@@ -90,3 +96,22 @@ class ServiceViewTestCase(unittest.TestCase):
         sv = TestMultiInheritance()
         self.assertEqual(sv.service_responses['foo/bar'], TestSecondServiceView.basic_response.im_func)
         self.assertNotEqual(sv.service_responses['foo/bar'], TestServiceView.basic_response.im_func)
+
+    def test_expires(self):
+        with self.app.test_client() as c:
+            rv = c.get('/expires', headers=[('Accept', 'foo/bar')])
+            self.assertEqual(rv.status_code, 200)
+            now = datetime.utcnow()
+            now += TestExpiringView.expires
+            expected = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            self.assertEqual(rv.headers.get('Expires'), expected)
+            self.assertEqual(rv.headers.get('Cache-Control'), 'max-age={seconds}'
+                                .format(seconds=TestExpiringView.expires.seconds))
+
+    def test_no_expires(self):
+        with self.app.test_client() as c:
+            rv = c.get('/foo', headers=[('Accept', 'application/json')])
+            self.assertEqual(rv.status_code, 200)
+            self.assertEqual(rv.content_type, 'application/json')
+            self.assertIsNone(rv.headers.get('Expires', None))
+            self.assertIsNone(rv.headers.get('Cache-Control', None))

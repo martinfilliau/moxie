@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask.views import View
 from flask import request, jsonify, make_response, current_app
 from werkzeug.exceptions import NotAcceptable
@@ -47,6 +49,8 @@ class ServiceView(View):
     cors_allow_credentials = False
     cors_max_age = 21600
 
+    expires = None  # timedelta or None
+
     @classmethod
     def as_view(cls, *args, **kwargs):
         view = super(ServiceView, cls).as_view(*args, **kwargs)
@@ -79,6 +83,20 @@ class ServiceView(View):
         response.headers.extend(h)
         return response
 
+    def _expires_headers(self, response):
+        """Applies Expires and Cache-Control headers
+        :param response: response to extend
+        :return: response
+        """
+        h = {}
+        if self.expires:
+            now = datetime.utcnow()
+            now += self.expires
+            h['Expires'] = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            h['Cache-Control'] = 'max-age={seconds}'.format(seconds=self.expires.seconds)
+            response.headers.extend(h)
+        return response
+
     def dispatch_request(self, *args, **kwargs):
         """Finds the best_match service_response from those registered
         If no good service_response can be found we generally want to
@@ -99,7 +117,9 @@ class ServiceView(View):
                 if current_app.debug:
                     raise
                 return abort(500)
-            return self._cors_headers(response)
+            response = self._cors_headers(response)
+            response = self._expires_headers(response)
+            return response
         else:
             return self.default_response()
 
