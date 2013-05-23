@@ -118,6 +118,7 @@ class ServiceView(View):
             try:
                 response = self.handle_request(*args, **kwargs)
                 response = make_response(service_response(self, response))
+                response = self._expires_headers(response)
             except ApplicationException as ae:
                 return abort(ae.http_code, ae.message)
             except:
@@ -125,7 +126,6 @@ class ServiceView(View):
                     raise
                 return abort(500)
             response = self._cors_headers(response)
-            response = self._expires_headers(response)
             return response
         else:
             return self.default_response()
