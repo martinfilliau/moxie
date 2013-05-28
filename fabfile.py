@@ -135,14 +135,18 @@ Private methods
 
 
 def createvirtualenv(path):
-    run('virtualenv %s' % path)
+    run('virtualenv --extra-search-dir=/usr/share/moxie-virtualenv %s' % path)
 
 
 def install_moxie():
     require('remote_git_checkout_api', provided_by=ENVIRONMENTS)
+    run('pip install wheel')
+    run('pip install -U distribute>=0.6.34')
     with cd(env.remote_git_checkout_api):
-        run('python setup.py install')
-    run('pip install -r %s --use-mirrors' % env.additional_requirements)
+        run('pip wheel --wheel-dir=/tmp/wheelhouse -r requirements.txt')
+        run('pip install --use-wheel --no-index --find-links=/tmp/wheelhouse .')
+    run('pip wheel --wheel-dir=/tmp/wheelhouse -r %s' % env.additional_requirements)
+    run('pip install --use-wheel --no-index --find-links=/tmp/wheelhouse -r %s' % env.additional_requirements)
 
 
 def git_branch(git_checkout, git_repo, name):
