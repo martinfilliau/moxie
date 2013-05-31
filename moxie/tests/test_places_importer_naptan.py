@@ -81,18 +81,30 @@ class NaptanTestCase(unittest.TestCase):
     def test_finds_all_stops(self):
         xml_handler = NaptanXMLHandler(['639'], 'identifiers')
         parse(open(self.naptan_file), xml_handler)
-        self.assertEqual(len(xml_handler.stop_points), 5)
+        self.assertEqual(len(xml_handler.stop_points), 6)
 
     def test_finds_all_stop_areas(self):
         xml_handler = NaptanXMLHandler(['639'], 'identifiers')
         parse(open(self.naptan_file), xml_handler)
         self.assertEqual(len(xml_handler.stop_areas), 6)
 
-    def test_finds_no_stops_in_different_location(self):
+    def test_finds_no_stop_areas_in_different_location(self):
         xml_handler = NaptanXMLHandler(['123'], 'identifiers')
         parse(open(self.naptan_file), xml_handler)
-        self.assertEqual(len(xml_handler.stop_points), 0)
         self.assertEqual(len(xml_handler.stop_areas), 0)
+
+    def test_find_single_rail_station_regardless_of_location(self):
+        xml_handler = NaptanXMLHandler(['123'], 'identifiers')
+        xml_handler2 = NaptanXMLHandler(['321'], 'identifiers')
+        parse(open(self.naptan_file), xml_handler)
+        parse(open(self.naptan_file), xml_handler2)
+        self.assertEqual(xml_handler.stop_points, xml_handler2.stop_points)
+
+    def test_precedence_given_to_rail_CRSCode(self):
+        xml_handler = NaptanXMLHandler(['123'], 'identifiers')
+        parse(open(self.naptan_file), xml_handler)
+        idkey = xml_handler.stop_points.values()[0]['id'].split(':')[0]
+        self.assertEqual(idkey, 'crs')
 
     def test_search_called_each_result(self):
         naptan_importer = NaPTANImporter(self.mock_solr, 10, file(self.naptan_file), ['639'], 'identifiers')

@@ -1,6 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <NaPTAN xmlns="http://www.naptan.org.uk/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" CreationDateTime="2012-06-26T11:22:11" ModificationDateTime="2012-06-26T11:22:11" Modification="new" RevisionNumber="0" FileName="NaPTAN.xml" SchemaVersion="2.1" xsi:schemaLocation="http://www.naptan.org.uk/ http://www.naptan.org.uk/schema/2.1/NaPTAN.xsd">
     <StopPoints>
+        <StopPoint CreationDateTime="2006-09-08T14:30:00" ModificationDateTime="2007-09-26T13:00:00" Modification="revise" RevisionNumber="1" Status="active">
+            <AtcoCode>639000023</AtcoCode>
+            <Descriptor>
+                <CommonName>Oxford Rail Station</CommonName>
+                <Street>-</Street>
+            </Descriptor>
+            <Place>
+                <NptgLocalityRef>E0056504</NptgLocalityRef>
+                <MainNptgLocalities>
+                    <NptgLocalityRef CreationDateTime="2005-12-22T00:00:00" ModificationDateTime="2005-12-22T00:00:00" RevisionNumber="0">E0000347</NptgLocalityRef>
+                </MainNptgLocalities>
+                <LocalityCentre>1</LocalityCentre>
+                <Location>
+                    <Translation>
+                        <GridType>UKOS</GridType>
+                        <Easting>450477</Easting>
+                        <Northing>206341</Northing>
+                        <Longitude>-1.2701511727</Longitude>
+                        <Latitude>51.7535007473</Latitude>
+                    </Translation>
+                </Location>
+            </Place>
+            <StopClassification>
+                <StopType>RLY</StopType>
+                <OffStreet>
+                    <Rail>
+                        <AccessArea/>
+                        <AnnotatedRailRef>
+                            <TiplocRef>OXFD</TiplocRef>
+                            <CrsRef>OXF</CrsRef>
+                            <StationName>Oxford Rail Station</StationName>
+                            <Location>
+                                <GridType>UKOS</GridType>
+                                <Easting>450477</Easting>
+                                <Northing>206341</Northing>
+                            </Location>
+                        </AnnotatedRailRef>
+                    </Rail>
+                </OffStreet>
+            </StopClassification>
+            <StopAreas>
+                <StopAreaRef CreationDateTime="2006-12-08T00:00:00" ModificationDateTime="2006-12-08T00:00:00" Modification="new" RevisionNumber="0" Status="active">910GOXFD</StopAreaRef>
+            </StopAreas>
+            <AdministrativeAreaRef>110</AdministrativeAreaRef>
+            <PlusbusZones>
+                <PlusbusZoneRef CreationDateTime="2010-10-07T14:27:15" ModificationDateTime="2010-10-07T14:27:15" Modification="new" RevisionNumber="0" Status="active">OXFD</PlusbusZoneRef>
+            </PlusbusZones>
+        </StopPoint>
         <StopPoint CreationDateTime="2003-07-15T00:00:00" ModificationDateTime="2011-10-05T14:27:00" Modification="revise" RevisionNumber="2" Status="active">
             <AtcoCode>639000011</AtcoCode>
             <NaptanCode>23234375</NaptanCode>
