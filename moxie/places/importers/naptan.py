@@ -97,8 +97,16 @@ class NaptanXMLHandler(ContentHandler):
 
     @tag_handler('StopPoint')
     def add_stop(self, sp):
-        """Set the location to our agreed format of lon,lat and pick a
-        friendly name. We also apply a busstop tag """
+        """Format the StopPoint for insertion into our indexer.
+        - Set location as lat,lon string
+        - Formats name
+
+        We insert any Stops which have AtcoCodes within self.areas for example,
+        everything within Oxfordshire. We also import any StopPoints which have
+        a CRS key. This is the identifier used for the rail network.
+
+        Meaning we import all rail stations (at time of writing ~2500).
+        """
         sp.default_factory = None
         area_code = sp['AtcoCode'][:3]
         if area_code in self.areas or CRS_KEY in sp:
