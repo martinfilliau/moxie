@@ -129,6 +129,15 @@ def delete_index(core):
     run("curl http://localhost:8080/solr/{core}/update --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'".format(core=core))
 
 
+@task
+def reload_core(core):
+    """Reload core
+    """
+    if not core:
+        utils.abort('You must specify the core')
+    run("curl http://localhost:8080/solr/admin/cores?action=RELOAD&core={core}".format(core=core))
+
+
 """
 Private methods
 """
