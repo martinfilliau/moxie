@@ -16,7 +16,7 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
     def __init__(self, token, ldb_service=None, max_services=15):
         self._token = token
         self._max_services = max_services
-        self.ldb_service = None
+        self._ldb_service = None
 
     def handles(self, doc):
         for ident in doc.identifiers:
@@ -24,23 +24,30 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
                 return True
         return False
 
-    def invoke(self, doc):
-        if not self.ldb_service:
+    def get_ldb_service(self):
+        """Tries to cache the SOAP Client so we don't keep recreating
+        it and loading in the WSDL each time.
+        """
+        if not self._ldb_service:
             try:
                 soapheaders = Element('AccessToken').insert(
                         Element('TokenValue').setText(self._token))
-                self.ldb_service = suds.client.Client(self._WSDL_URL,
+                self._ldb_service = suds.client.Client(self._WSDL_URL,
                         soapheaders=soapheaders)
             except:
                 logger.warning("Could not instantiate suds client for live departure board.",
                         exc_info=True, extra={'wsdl_url': self._WSDL_URL})
+        return self._ldb_service
+
+    def invoke(self, doc):
         for ident in doc.identifiers:
             if ident.startswith('crs'):
                 _, crs_code = ident.split(':')
                 return self.get_departure_board(crs_code)
 
     def get_departure_board(self, crs):
-        db = self.ldb_service.service.GetDepartureBoard(self._max_services, crs)
+        ldb_service = self.get_ldb_service()
+        db = ldb_service.service.GetDepartureBoard(self._max_services, crs)
         db = self.transform_suds(db)
         if 'nrccMessages' in db:
             messages = db['nrccMessages']['message']
@@ -49,7 +56,8 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
         return db['trainServices']['service'], messages
 
     def get_arrival_board(self, crs):
-        db = self.ldb_service.service.GetArrivalBoard(self._max_services, crs)
+        ldb_service = self.get_ldb_service()
+        db = ldb_service.service.GetArrivalBoard(self._max_services, crs)
         db = self.transform_suds(db)
         if 'nrccMessages' in db:
             messages = db['nrccMessages']['message']
@@ -64,47 +72,3 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
             return map(self.transform_suds, o)
         else:
             return o
-
-    def delayed(self, eta, sta, etd, std):
-        """
-        Try and figure out if a service is delayed based on free text values
-        for estimated/scheduled times of arrival/depature
-        """
-        if eta in ('Delayed', 'Cancelled') or etd in ('Delayed', 'Cancelled'):
-            # Easy case
-            return True
-        else:
-            # More complex case, have to parse time stamps
-            try:
-                # Compare scheduled and expected arrival times
-                schedh, schedm = sta.split(':')
-                exph, expm = eta.rstrip('*').split(':')
-            except ValueError:
-                pass
-            else:
-                # Minutes since midnight, as we can't compare time objects
-                sched_msm = int(schedh) * 60 + int(schedm)
-                exp_msm = int(exph) * 60 + int(expm)
-                if exp_msm < sched_msm:
-                    # Deal with wraparound at midnight
-                    sched_msm += 1440
-                if exp_msm - sched_msm >= 5:
-                    # 5 minute delay
-                    return True
-            try:
-                # Compare scheduled and expected departure times
-                schedh, schedm = std.split(':')
-                exph, expm = etd.rstrip('*').split(':')
-            except ValueError:
-                pass
-            else:
-                # Minutes since midnight, as we can't compare time objects
-                sched_msm = int(schedh) * 60 + int(schedm)
-                exp_msm = int(exph) * 60 + int(expm)
-                if exp_msm < sched_msm:
-                    # Deal with wraparound at midnight
-                    sched_msm += 1440
-                if exp_msm - sched_msm >= 5:
-                    # 5 minute delay
-                    return True
-            return False
