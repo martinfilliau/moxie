@@ -6,6 +6,9 @@ from fabric.contrib import *
 from fabric.contrib.files import exists, sed
 from fabric import utils
 
+_private_pypi = os.getenv('PRIVATE_PYPI')
+PIP_OPTIONS = '-i %s' % _private_pypi if _private_pypi else ''
+
 MOXIE_REPO = "git://github.com/ox-it/moxie.git"
 MOXIE_CLIENT_REPO = "git://github.com/ox-it/moxie-js-client.git"
 
@@ -150,8 +153,8 @@ def createvirtualenv(path):
 def install_moxie():
     require('remote_git_checkout_api', provided_by=ENVIRONMENTS)
     with cd(env.remote_git_checkout_api):
-        run('python setup.py install')
-    run('pip install -r %s --use-mirrors' % env.additional_requirements)
+        run('pip install . %s' % PIP_OPTIONS)
+    run('pip install -r %s %s' % (env.additional_requirements, PIP_OPTIONS))
 
 
 def git_branch(git_checkout, git_repo, name):
