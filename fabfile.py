@@ -128,6 +128,8 @@ def delete_index(core):
     """
     if not core:
         utils.abort('You must specify the core')
+    if not console.confirm('Are you sure you want to delete all documents from this index?', default=False):
+        utils.abort('Aborted.')
     run("curl http://localhost:8080/solr/{core}/update --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'".format(core=core))
     run("curl http://localhost:8080/solr/{core}/update --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'".format(core=core))
 
