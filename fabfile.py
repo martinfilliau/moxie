@@ -83,6 +83,8 @@ def deploy_api(version):
         install_moxie()
         run('rm -f %s' % env.remote_install_dir_api)
         run('ln -s %s %s' % (versioned_path, env.remote_install_dir_api))
+        run('circusctl stop moxie-celerybeat')
+        run('circusctl start moxie-celerybeat')
         run('circusctl stop moxie-celery')
         run('circusctl start moxie-celery')
         run('circusctl stop moxie-uwsgi')
