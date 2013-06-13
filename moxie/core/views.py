@@ -7,7 +7,7 @@ from werkzeug.exceptions import NotAcceptable
 from werkzeug.wrappers import BaseResponse
 from werkzeug.http import http_date
 
-from moxie.core.exceptions import ApplicationException, BadRequest, exception_handler
+from moxie.core.exceptions import ApplicationException, exception_handler
 
 
 def accepts(*accept_values):
