@@ -13,9 +13,9 @@ class RTI(ServiceView):
     expires = timedelta(seconds=TIMEOUT)
 
     @cache.cached(timeout=TIMEOUT)
-    def handle_request(self, ident):
+    def handle_request(self, ident, rtitype):
         transport_service = TransportService.from_context()
-        services, messages = transport_service.get_rti(ident)
+        services, messages = transport_service.get_rti(ident, rtitype)
         response = {
             'services': services,
             'messages': messages
