@@ -4,6 +4,7 @@ import mock
 from flask import Blueprint
 
 from moxie import create_app
+from moxie.transport.providers import TransportRTIProvider
 from moxie.places.representations import HALPOIRepresentation
 from moxie.places.domain import POI
 from moxie.core.service import Service
@@ -16,7 +17,7 @@ class MockTransportServiceNeverProvide(Service):
 
 class MockTransportServiceAlwaysProvide(Service):
     def get_provider(self, poi):
-        return True
+        return TransportRTIProvider()
 
 
 class PlacesRepresentationsTestCase(unittest.TestCase):
