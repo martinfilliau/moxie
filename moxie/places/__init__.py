@@ -39,15 +39,9 @@ def get_routes():
             title='List of types')
     representation.add_link('hl:detail', '{bp}{{id}}'.format(bp=path),
                             templated=True, title='POI detail')
-    # Real Time Information - These links only appear on certain POI's
-    representation.add_link('hl:rti:bus', '{bp}{{id}}/rti/bus'.format(bp=path),
-                            templated=True, title='Real-Time Bus Information')
-    representation.add_link('hl:rti:rail:departures',
-            '{bp}{{id}}/rti/rail/departures'.format(bp=path), templated=True,
-            title='Real-Time Rail Departures')
-    representation.add_link('hl:rti:rail:arrivals',
-            '{bp}{{id}}/rti/rail/departures'.format(bp=path), templated=True,
-            title='Real-Time Rail Arrivals')
+    representation.add_link('hl:rti',
+            '{bp}{{id}}/rti/{{type}}'.format(bp=path), templated=True,
+            title='Real-Time Information for a given POI')
     response = make_response(representation.as_json(), 200)
     response.headers['Content-Type'] = "application/json"
     return response
