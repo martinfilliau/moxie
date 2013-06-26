@@ -15,7 +15,7 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
     Parses an HTML page from a CloudAmber instance
     """
 
-    provides = [('bus', 'bus')]
+    provides = ['bus']
 
     def __init__(self, url, timeout=2):
         """
