@@ -1,5 +1,6 @@
 from moxie.core.service import ProviderService
 from moxie.core.search import searcher
+from moxie.core.exceptions import BadRequest
 from moxie.places.solr import doc_to_poi
 
 
@@ -19,4 +20,7 @@ class TransportService(ProviderService):
         :return RTI
         """
         provider = self.get_provider(poi)
+        if rti_type not in provider.provides:
+            raise BadRequest("POI: %s doesn't support the RTI requested: %s"
+                    % (poi.id, rti_type))
         return provider(poi, rti_type)
