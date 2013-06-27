@@ -10,6 +10,8 @@ from moxie.places.services import POIService
 
 logger = logging.getLogger(__name__)
 
+RTI_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/rti/{type}.html"
+
 
 class POIRepresentation(Representation):
 
@@ -112,9 +114,9 @@ class HALPOIRepresentation(POIRepresentation):
         else:
             provider = transport_service.get_provider(self.poi)
             if provider:
-                representation.add_curie('hl', RELATIONS_CURIE)
+                representation.add_curie('rti', RTI_CURIE)
                 for rtitype in provider.provides:
-                    representation.add_link('hl:%s' % rtitype,
+                    representation.add_link('rti:%s' % rtitype,
                         url_for('places.rti', ident=self.poi.id, rtitype=rtitype),
                         title="Real-time information")
         return representation.as_dict()
