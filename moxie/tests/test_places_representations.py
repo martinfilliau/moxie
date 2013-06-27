@@ -4,6 +4,7 @@ import mock
 from flask import Blueprint
 
 from moxie import create_app
+from moxie.transport.providers import TransportRTIProvider
 from moxie.places.representations import HALPOIRepresentation
 from moxie.places.domain import POI
 from moxie.core.service import Service
@@ -14,9 +15,24 @@ class MockTransportServiceNeverProvide(Service):
         return False
 
 
+class MockTransportRTIProvider(TransportRTIProvider):
+    provides = ['some-fake-rti']
+
+
 class MockTransportServiceAlwaysProvide(Service):
+
     def get_provider(self, poi):
-        return True
+        return MockTransportRTIProvider()
+
+
+class MockTransportMultiRTIProvider(TransportRTIProvider):
+    provides = ['rti1', 'rti2', 'rti3']
+
+
+class MockTransportServiceAlwaysProvideMulti(Service):
+
+    def get_provider(self, poi):
+        return MockTransportMultiRTIProvider()
 
 
 class PlacesRepresentationsTestCase(unittest.TestCase):
@@ -25,7 +41,9 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
         self.test_poi = POI(id=42, name='Test POI', lat=4.2, lon=2.4, type='boat')
         self.app = create_app()
         services = {'foobar': {'MockTransportServiceNeverProvide': {},
-                'MockTransportServiceAlwaysProvide': {}}}
+                'MockTransportServiceAlwaysProvide': {},
+                'MockTransportServiceAlwaysProvideMulti': {},
+                }}
         self.app.config['SERVICES'] = services
         bp = Blueprint('foobar', 'foobar')
         self.app.register_blueprint(bp)
@@ -48,4 +66,13 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
             with self.app.blueprint_context('foobar'):
                 poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
                 poi = poi.as_dict()
-                self.assertTrue('hl:rti' in poi['_links'])
+                self.assertTrue('hl:some-fake-rti' in poi['_links'])
+
+    def test_as_dict_with_transport_service_provided_multiple_rti(self):
+        with mock.patch('moxie.places.representations.TransportService', new=MockTransportServiceAlwaysProvideMulti):
+            with self.app.blueprint_context('foobar'):
+                poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
+                poi = poi.as_dict()
+                self.assertTrue('hl:rti1' in poi['_links'])
+                self.assertTrue('hl:rti2' in poi['_links'])
+                self.assertTrue('hl:rti3' in poi['_links'])

@@ -1,3 +1,5 @@
+import logging
+
 from flask import url_for, jsonify
 
 from moxie.core.representations import Representation, HALRepresentation, get_nav_links, RELATIONS_CURIE
@@ -5,6 +7,8 @@ from moxie.places.importers.helpers import find_type_name
 from moxie.transport.services import TransportService
 from moxie.core.service import NoConfiguredService
 from moxie.places.services import POIService
+
+logger = logging.getLogger(__name__)
 
 
 class POIRepresentation(Representation):
@@ -104,11 +108,15 @@ class HALPOIRepresentation(POIRepresentation):
             transport_service = TransportService.from_context()
         except NoConfiguredService:
             # Transport service not configured so no RTI information
-            transport_service = None
-        if transport_service and transport_service.get_provider(self.poi):
-            representation.add_curie('hl', RELATIONS_CURIE)
-            representation.add_link('hl:rti', url_for('places.rti', ident=self.poi.id),
-                title="Real-time information")
+            logger.warning('No configured Transport service', exc_info=True)
+        else:
+            provider = transport_service.get_provider(self.poi)
+            if provider:
+                representation.add_curie('hl', RELATIONS_CURIE)
+                for rtitype in provider.provides:
+                    representation.add_link('hl:%s' % rtitype,
+                        url_for('places.rti', ident=self.poi.id, rtitype=rtitype),
+                        title="Real-time information")
         return representation.as_dict()
 
 

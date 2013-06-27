@@ -1,8 +1,9 @@
 from datetime import timedelta
 
+from moxie.core.exceptions import BadRequest
 from moxie.core.cache import cache
 from moxie.core.views import ServiceView
-from .services import TransportService
+from .services import TransportService, RTITypeNotSupported
 
 
 class RTI(ServiceView):
@@ -13,11 +14,18 @@ class RTI(ServiceView):
     expires = timedelta(seconds=TIMEOUT)
 
     @cache.cached(timeout=TIMEOUT)
-    def handle_request(self, ident):
+    def handle_request(self, ident, rtitype):
         transport_service = TransportService.from_context()
-        services, messages = transport_service.get_rti(ident)
-        response = {
-            'services': services,
-            'messages': messages
-        }
-        return response
+        try:
+            rti_data = transport_service.get_rti(ident, rtitype)
+        except RTITypeNotSupported:
+            raise BadRequest("POI: %s doesn't support the RTI requested: %s"
+                    % (ident, rtitype))
+        else:
+            services, messages = rti_data
+            response = {
+                'services': services,
+                'messages': messages,
+                'type': rtitype,
+            }
+            return response
