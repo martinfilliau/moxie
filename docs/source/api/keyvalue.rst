@@ -6,3 +6,4 @@ Key-value Store
    :undoc-members:
    :private-members:
    :special-members:
+   :exclude-members: kv_store
