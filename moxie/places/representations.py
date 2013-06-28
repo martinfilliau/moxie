@@ -10,7 +10,7 @@ from moxie.places.services import POIService
 
 logger = logging.getLogger(__name__)
 
-RTI_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/rti/{type}.html"
+RTI_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/rti.html#{type}"
 
 
 class POIRepresentation(Representation):
