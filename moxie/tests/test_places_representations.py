@@ -59,20 +59,21 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
             with self.app.blueprint_context('foobar'):
                 poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
                 poi = poi.as_dict()
-                self.assertFalse('hl:rti' in poi['_links'])
+                # Test we don't have any links starting with 'rti:'
+                self.assertFalse(any([link.startswith('rti') for link in poi['_links']]))
 
     def test_as_dict_with_transport_service_provided(self):
         with mock.patch('moxie.places.representations.TransportService', new=MockTransportServiceAlwaysProvide):
             with self.app.blueprint_context('foobar'):
                 poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
                 poi = poi.as_dict()
-                self.assertTrue('hl:some-fake-rti' in poi['_links'])
+                self.assertTrue('rti:some-fake-rti' in poi['_links'])
 
     def test_as_dict_with_transport_service_provided_multiple_rti(self):
         with mock.patch('moxie.places.representations.TransportService', new=MockTransportServiceAlwaysProvideMulti):
             with self.app.blueprint_context('foobar'):
                 poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
                 poi = poi.as_dict()
-                self.assertTrue('hl:rti1' in poi['_links'])
-                self.assertTrue('hl:rti2' in poi['_links'])
-                self.assertTrue('hl:rti3' in poi['_links'])
+                self.assertTrue('rti:rti1' in poi['_links'])
+                self.assertTrue('rti:rti2' in poi['_links'])
+                self.assertTrue('rti:rti3' in poi['_links'])
