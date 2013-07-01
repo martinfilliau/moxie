@@ -6,9 +6,10 @@ Moxie supports an API for providing RTI from Service providers. Currently all RT
 .. code-block:: javascript
    {mesages: [],
     services: [],
-    type: ''}
+    type: '',
+    title: ''}
 
-The ``type`` attribute should be a unique identifier for that RTI representation. Here are the existing RTI representations.
+The ``type`` attribute should be a unique identifier for that RTI representation and the ``title`` attribute should be a human readable title for the information. Here are examples of RTI representations.
 
 rail-arrivals
 -------------
@@ -53,7 +54,8 @@ Rail live arrivals board information, for example:
           "sta": "13:02"
         }
       ], 
-      "type": "rail-arrivals"
+      "type": "rail-arrivals",
+      "title": "Arrivals"
     }
 
 rail-departures
@@ -94,7 +96,8 @@ Rail live departures board information, for example:
           "std": "11:31"
         }
       ], 
-      "type": "rail-departures"
+      "type": "rail-departures",
+      "title": "Departures"
     }
 
 bus
@@ -160,5 +163,6 @@ Bus stop current real time information, for example:
           "service": "X40"
         }
       ], 
-      "type": "bus"
+      "type": "bus",
+      "title": "Live bus timetable information"
     }
