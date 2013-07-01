@@ -115,10 +115,10 @@ class HALPOIRepresentation(POIRepresentation):
             provider = transport_service.get_provider(self.poi)
             if provider:
                 representation.add_curie('rti', RTI_CURIE)
-                for rtitype in provider.provides:
+                for rtitype, title in provider.provides.items():
                     representation.add_link('rti:%s' % rtitype,
                         url_for('places.rti', ident=self.poi.id, rtitype=rtitype),
-                        title="Real-time information")
+                        title=title)
         return representation.as_dict()
 
 
