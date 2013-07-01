@@ -15,7 +15,7 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
     Parses an HTML page from a CloudAmber instance
     """
 
-    provides = ['bus']
+    provides = {'bus': "Live bus departure times"}
 
     def __init__(self, url, timeout=2):
         """
@@ -33,10 +33,13 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         return False
 
     def invoke(self, doc, rti_type):
+        normalised_rti_type = rti_type.lower()
         for ident in doc.identifiers:
             if ident.startswith('naptan'):
                 _, naptan_code = ident.split(':')
-                return self.get_rti(naptan_code)
+                services, messages = self.get_rti(naptan_code)
+                title = self.provides.get(normalised_rti_type)
+                return services, messages, normalised_rti_type, title
 
     def get_url(self, naptan_code):
         """

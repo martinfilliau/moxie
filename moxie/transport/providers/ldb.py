@@ -13,7 +13,8 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
     _ATTRIBUTION = {'title': ("Powered by National Rail Enquiries"),
                   'url': "http://www.nationalrail.co.uk"}
 
-    provides = ['rail-departures', 'rail-arrivals']
+    provides = {'rail-departures': "Departures",
+            'rail-arrivals': "Arrivals"}
 
     def __init__(self, token, ldb_service=None, max_services=15):
         self._token = token
@@ -42,13 +43,16 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
         return self._ldb_service
 
     def invoke(self, doc, rti_type):
+        normalised_rti_type = rti_type.lower()
         for ident in doc.identifiers:
             if ident.startswith('crs'):
                 _, crs_code = ident.split(':')
-                if rti_type == 'rail-departures':
-                    return self.get_departure_board(crs_code)
-                elif rti_type == 'rail-arrivals':
-                    return self.get_arrival_board(crs_code)
+                if normalised_rti_type == 'rail-departures':
+                    services, messages = self.get_departure_board(crs_code)
+                elif normalised_rti_type == 'rail-arrivals':
+                    services, messages = self.get_arrival_board(crs_code)
+                title = self.provides.get(normalised_rti_type)
+                return services, messages, normalised_rti_type, title
 
     def get_departure_board(self, crs):
         ldb_service = self.get_ldb_service()
