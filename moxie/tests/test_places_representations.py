@@ -16,7 +16,7 @@ class MockTransportServiceNeverProvide(Service):
 
 
 class MockTransportRTIProvider(TransportRTIProvider):
-    provides = ['some-fake-rti']
+    provides = {'some-fake-rti': 'Fake RTI'}
 
 
 class MockTransportServiceAlwaysProvide(Service):
@@ -26,7 +26,7 @@ class MockTransportServiceAlwaysProvide(Service):
 
 
 class MockTransportMultiRTIProvider(TransportRTIProvider):
-    provides = ['rti1', 'rti2', 'rti3']
+    provides = {'rti1': 'RTI One', 'rti2': 'RTI Two', 'rti3': 'RTI Three'}
 
 
 class MockTransportServiceAlwaysProvideMulti(Service):
@@ -77,3 +77,10 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
                 self.assertTrue('rti:rti1' in poi['_links'])
                 self.assertTrue('rti:rti2' in poi['_links'])
                 self.assertTrue('rti:rti3' in poi['_links'])
+
+    def test_as_dict_with_transport_service_rti_titles(self):
+        with mock.patch('moxie.places.representations.TransportService', new=MockTransportServiceAlwaysProvide):
+            with self.app.blueprint_context('foobar'):
+                poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
+                poi = poi.as_dict()
+                self.assertTrue(poi['_links']['rti:some-fake-rti']['title'] == 'Fake RTI')
