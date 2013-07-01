@@ -22,10 +22,11 @@ class RTI(ServiceView):
             raise BadRequest("POI: %s doesn't support the RTI requested: %s"
                     % (ident, rtitype))
         else:
-            services, messages = rti_data
+            services, messages, rtitype, title = rti_data
             response = {
                 'services': services,
                 'messages': messages,
                 'type': rtitype,
+                'title': title,
             }
             return response
