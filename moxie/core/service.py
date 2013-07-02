@@ -74,6 +74,14 @@ class Service(object):
         return klass(**conf)
 
 
+class NoSuitableProviderFound(Exception):
+    pass
+
+
+class MultipleProvidersFound(Exception):
+    pass
+
+
 class ProviderService(Service):
     """Used where a :class:`Service` deals with many external providers.
     Example usage can be found in the
@@ -82,11 +90,17 @@ class ProviderService(Service):
     def __init__(self, providers={}):
         self.providers = map(self._import_provider, providers.items())
 
-    def get_provider(self, doc):
+    def get_provider(self, doc, *args, **kwargs):
         """Returns a :class:`~moxie.core.provider.Provider` which can handle
         your ``doc``.  If no provider can be found, returns ``None``.
         """
+        suitable_providers = []
         for provider in self.providers:
-            if provider.handles(doc):
-                return provider
-        return None
+            if provider.handles(doc, *args, **kwargs):
+                suitable_providers.append(provider)
+        if len(suitable_providers) == 1:
+            return suitable_providers[0]
+        elif len(suitable_providers) > 1:
+            raise MultipleProvidersFound()
+        elif len(suitable_providers) == 0:
+            raise NoSuitableProviderFound()
