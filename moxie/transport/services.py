@@ -3,10 +3,6 @@ from moxie.core.search import searcher
 from moxie.places.solr import doc_to_poi
 
 
-class RTITypeNotSupported(Exception):
-    pass
-
-
 class TransportService(ProviderService):
 
     def get_rti(self, ident, rti_type):
@@ -22,7 +18,5 @@ class TransportService(ProviderService):
         :param poi: POI object
         :return tuple of services and messages
         """
-        provider = self.get_provider(poi)
-        if rti_type not in provider.provides:
-            raise RTITypeNotSupported()
+        provider = self.get_provider(poi, rti_type)
         return provider(poi, rti_type)
