@@ -26,20 +26,21 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         self.url = url
         self.timeout = timeout
 
-    def handles(self, doc):
+    def handles(self, doc, rti_type=None):
+        if rti_type and rti_type not in self.provides:
+            return False
         for ident in doc.identifiers:
             if ident.startswith('naptan'):
                 return True
         return False
 
     def invoke(self, doc, rti_type):
-        normalised_rti_type = rti_type.lower()
         for ident in doc.identifiers:
             if ident.startswith('naptan'):
                 _, naptan_code = ident.split(':')
                 services, messages = self.get_rti(naptan_code)
-                title = self.provides.get(normalised_rti_type)
-                return services, messages, normalised_rti_type, title
+                title = self.provides.get(rti_type)
+                return services, messages, rti_type, title
 
     def get_url(self, naptan_code):
         """
@@ -133,4 +134,3 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
                 })
 
         return services, messages
-

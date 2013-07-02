@@ -21,7 +21,9 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
         self._max_services = max_services
         self._ldb_service = None
 
-    def handles(self, doc):
+    def handles(self, doc, rti_type=None):
+        if rti_type and rti_type not in self.provides:
+            return False
         for ident in doc.identifiers:
             if ident.startswith('crs'):
                 return True
@@ -43,16 +45,15 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
         return self._ldb_service
 
     def invoke(self, doc, rti_type):
-        normalised_rti_type = rti_type.lower()
         for ident in doc.identifiers:
             if ident.startswith('crs'):
                 _, crs_code = ident.split(':')
-                if normalised_rti_type == 'rail-departures':
+                if rti_type == 'rail-departures':
                     services, messages = self.get_departure_board(crs_code)
-                elif normalised_rti_type == 'rail-arrivals':
+                elif rti_type == 'rail-arrivals':
                     services, messages = self.get_arrival_board(crs_code)
-                title = self.provides.get(normalised_rti_type)
-                return services, messages, normalised_rti_type, title
+                title = self.provides.get(rti_type)
+                return services, messages, rti_type, title
 
     def get_departure_board(self, crs):
         ldb_service = self.get_ldb_service()
