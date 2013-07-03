@@ -1,9 +1,15 @@
+import logging
+
 from datetime import timedelta
 
 from moxie.core.exceptions import BadRequest
 from moxie.core.cache import cache
 from moxie.core.views import ServiceView
-from .services import TransportService, RTITypeNotSupported
+from moxie.core.service import NoSuitableProviderFound, MultipleProvidersFound
+from .services import TransportService
+
+
+logger = logging.getLogger(__name__)
 
 
 class RTI(ServiceView):
@@ -18,14 +24,20 @@ class RTI(ServiceView):
         transport_service = TransportService.from_context()
         try:
             rti_data = transport_service.get_rti(ident, rtitype)
-        except RTITypeNotSupported:
-            raise BadRequest("POI: %s doesn't support the RTI requested: %s"
-                    % (ident, rtitype))
+        except NoSuitableProviderFound:
+            msg = "NoSuitableProviderFound for: %s (%s)" % (ident, rtitype)
+            logger.warn(msg, exc_info=True)
+            raise BadRequest(msg)
+        except MultipleProvidersFound:
+            msg = "MultipleProvidersFound for: %s (%s)" % (ident, rtitype)
+            logger.critical(msg, exc_info=True)
+            raise BadRequest(msg)
         else:
-            services, messages = rti_data
+            services, messages, rtitype, title = rti_data
             response = {
                 'services': services,
                 'messages': messages,
                 'type': rtitype,
+                'title': title,
             }
             return response
