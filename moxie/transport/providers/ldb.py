@@ -1,11 +1,24 @@
 import logging
 import suds
 
+from contextlib import contextmanager
 from suds.sax.element import Element
 from . import TransportRTIProvider
 
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def override_loglevel(level):
+    """Silence pesky logs"""
+    previous_level = logger.getEffectiveLevel()
+    root_previous_level = logger.root.getEffectiveLevel()
+    logger.setLevel(level)
+    logger.root.setLevel(level)
+    yield
+    logger.setLevel(previous_level)
+    logger.root.setLevel(root_previous_level)
 
 
 class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
@@ -56,8 +69,9 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
                 return services, messages, rti_type, title
 
     def get_departure_board(self, crs):
-        ldb_service = self.get_ldb_service()
-        db = ldb_service.service.GetDepartureBoard(self._max_services, crs)
+        with override_loglevel('WARNING'):
+            ldb_service = self.get_ldb_service()
+            db = ldb_service.service.GetDepartureBoard(self._max_services, crs)
         db = self.transform_suds(db)
         if 'nrccMessages' in db:
             messages = db['nrccMessages']['message']
@@ -66,8 +80,9 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
         return db['trainServices']['service'], messages
 
     def get_arrival_board(self, crs):
-        ldb_service = self.get_ldb_service()
-        db = ldb_service.service.GetArrivalBoard(self._max_services, crs)
+        with override_loglevel('WARNING'):
+            ldb_service = self.get_ldb_service()
+            db = ldb_service.service.GetArrivalBoard(self._max_services, crs)
         db = self.transform_suds(db)
         if 'nrccMessages' in db:
             messages = db['nrccMessages']['message']
