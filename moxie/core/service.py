@@ -74,11 +74,15 @@ class Service(object):
         return klass(**conf)
 
 
-class NoSuitableProviderFound(Exception):
+class ProviderException(Exception):
     pass
 
 
-class MultipleProvidersFound(Exception):
+class NoSuitableProviderFound(ProviderException):
+    pass
+
+
+class MultipleProvidersFound(ProviderException):
     pass
 
 
