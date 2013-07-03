@@ -7,16 +7,27 @@ from moxie import create_app
 from moxie.transport.providers import TransportRTIProvider
 from moxie.places.representations import HALPOIRepresentation
 from moxie.places.domain import POI
-from moxie.core.service import Service
+from moxie.core.service import Service, NoSuitableProviderFound, ProviderService
 
 
 class MockTransportServiceNeverProvide(Service):
     def get_provider(self, poi):
-        return False
+        raise NoSuitableProviderFound()
 
 
 class MockTransportRTIProvider(TransportRTIProvider):
     provides = {'some-fake-rti': 'Fake RTI'}
+
+
+class MockTransportRTIProviderHandlesAll(TransportRTIProvider):
+    provides = {'all-rti-1': 'All RTI 1'}
+
+    def handles(self, *args, **kwargs):
+        return True
+
+
+class MockTransportRTIProviderHandlesAllTwo(MockTransportRTIProviderHandlesAll):
+    provides = {'all-rti-2': 'All RTI 2'}
 
 
 class MockTransportServiceAlwaysProvide(Service):
@@ -35,6 +46,10 @@ class MockTransportServiceAlwaysProvideMulti(Service):
         return MockTransportMultiRTIProvider()
 
 
+class MockTransportServiceMultipleProviders(ProviderService):
+    pass
+
+
 class PlacesRepresentationsTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -43,6 +58,9 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
         services = {'foobar': {'MockTransportServiceNeverProvide': {},
                 'MockTransportServiceAlwaysProvide': {},
                 'MockTransportServiceAlwaysProvideMulti': {},
+                'MockTransportServiceMultipleProviders': {'providers': {
+                    'moxie.tests.test_places_representations.MockTransportRTIProviderHandlesAll': {},
+                    'moxie.tests.test_places_representations.MockTransportRTIProviderHandlesAllTwo': {}}},
                 }}
         self.app.config['SERVICES'] = services
         bp = Blueprint('foobar', 'foobar')
@@ -84,3 +102,10 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
                 poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
                 poi = poi.as_dict()
                 self.assertTrue(poi['_links']['rti:some-fake-rti']['title'] == 'Fake RTI')
+
+    def test_as_dict_with_many_providers_no_rti(self):
+        with mock.patch('moxie.places.representations.TransportService', new=MockTransportServiceMultipleProviders):
+            with self.app.blueprint_context('foobar'):
+                poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
+                poi = poi.as_dict()
+                self.assertFalse(any([link.startswith('rti') for link in poi['_links']]))
