@@ -1,15 +1,27 @@
 Real-time Information
 =====================
 
-Moxie supports an API for providing RTI from Service providers. Currently all RTI is represented in a similar way:
+Moxie supports an API for providing RTI from Service providers. Currently all
+RTI is represented in a similar way:
 
 .. code-block:: javascript
+
    {mesages: [],
     services: [],
     type: '',
     title: ''}
 
-The ``type`` attribute should be a unique identifier for that RTI representation and the ``title`` attribute should be a human readable title for the information. Here are examples of RTI representations.
+The contents of this structure is left to the ``provider`` itself. Here are
+some guidelines for each key, ``messages``, which is used for human readable
+messages from the RTI provider. For example in the case of rail travel it might
+be a message informing you of delays on a line due to maintenance work.
+
+``services`` should contain the RTI itself. The choice of format is left to the
+providers to expose in whatever form makes the most sense.
+
+The ``type`` attribute should be a unique identifier for that RTI
+representation and the ``title`` attribute should be a human readable title for
+the information. Here are examples of RTI representations.
 
 rail-arrivals
 -------------
