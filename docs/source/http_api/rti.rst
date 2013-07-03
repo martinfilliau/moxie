@@ -6,10 +6,12 @@ RTI is represented in a similar way:
 
 .. code-block:: javascript
 
-   {mesages: [],
-    services: [],
-    type: '',
-    title: ''}
+   {
+    "messages": [],
+    "services": [],
+    "type": '',
+    "title": ''
+   }
 
 The contents of this structure is left to the ``provider`` itself. Here are
 some guidelines for each key, ``messages``, which is used for human readable
