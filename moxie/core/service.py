@@ -96,7 +96,13 @@ class ProviderService(Service):
 
     def get_provider(self, doc, *args, **kwargs):
         """Returns a :class:`~moxie.core.provider.Provider` which can handle
-        your ``doc``.  If no provider can be found, returns ``None``.
+        your ``doc``.
+
+        If no (single) approrpriate provider can be found for your document
+        we raise a :class:`ProviderException`. Two subclasses are currently
+        raised:
+         - :class:`NoSuitableProviderFound` if we can't find *any* provider.
+         - :class:`MultipleProvidersFound` if we find more than one provider.
         """
         suitable_providers = []
         for provider in self.providers:
