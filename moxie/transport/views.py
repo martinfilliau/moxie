@@ -41,3 +41,14 @@ class RTI(ServiceView):
                 'title': title,
             }
             return response
+
+
+class ParkAndRides(ServiceView):
+
+    TIMEOUT = 10    # seconds
+
+    expires = timedelta(seconds=TIMEOUT)
+
+    def handle_request(self):
+        transport_service = TransportService.from_context()
+        return transport_service.get_park_and_ride()

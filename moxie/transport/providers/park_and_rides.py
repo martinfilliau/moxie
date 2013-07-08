@@ -44,6 +44,11 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
                 return services, messages, rti_type, title
         return None
 
+    def get_all(self):
+        """Get data from all park and rides
+        """
+        return self.get_data()
+
     def get_data(self):
         """
         Requests the URL and parses the page
