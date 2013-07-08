@@ -4,6 +4,7 @@ import suds
 from contextlib import contextmanager
 from suds.sax.element import Element
 from . import TransportRTIProvider
+from moxie.core.exceptions import ServiceUnavailable
 
 
 logger = logging.getLogger(__name__)
@@ -55,6 +56,7 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
             except:
                 logger.warning("Could not instantiate suds client for live departure board.",
                         exc_info=True, extra={'wsdl_url': self._WSDL_URL})
+                raise ServiceUnavailable()
         return self._ldb_service
 
     def invoke(self, doc, rti_type):
@@ -72,22 +74,26 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
         with override_loglevel('WARNING'):
             ldb_service = self.get_ldb_service()
             db = ldb_service.service.GetDepartureBoard(self._max_services, crs)
-        db = self.transform_suds(db)
-        if 'nrccMessages' in db:
-            messages = db['nrccMessages']['message']
-        else:
-            messages = []
-        return db['trainServices']['service'], messages
+        return self.handle_ws_response(db)
 
     def get_arrival_board(self, crs):
         with override_loglevel('WARNING'):
             ldb_service = self.get_ldb_service()
             db = ldb_service.service.GetArrivalBoard(self._max_services, crs)
+        return self.handle_ws_response(db)
+
+    def handle_ws_response(self, db):
+        """Handles the response from the web service
+        :param db: response from the service
+        :return: list of services, list of messages
+        """
         db = self.transform_suds(db)
         if 'nrccMessages' in db:
             messages = db['nrccMessages']['message']
         else:
             messages = []
+        if not 'trainServices' in db:
+            raise ServiceUnavailable()
         return db['trainServices']['service'], messages
 
     def transform_suds(self, o):
