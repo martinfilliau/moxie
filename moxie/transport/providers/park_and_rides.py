@@ -42,7 +42,7 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
         for ident in doc.identifiers:
             if ident in self._REVERSE_CARPARKS:
                 data = self.get_data()
-                services = data.get(self._REVERSE_CARPARKS[ident])
+                services = data.get(ident)
                 messages = []
                 title = self.provides.get(rti_type)
                 return services, messages, rti_type, title
