@@ -3,11 +3,13 @@ import requests
 from lxml import etree
 from requests.exceptions import RequestException
 
+from . import TransportRTIProvider
+
 
 logger = logging.getLogger(__name__)
 
 
-class OxfordParkAndRideProvider(object):
+class OxfordParkAndRideProvider(TransportRTIProvider):
     """Provider for Oxfordshire Park and Ride website
     """
 
@@ -18,22 +20,29 @@ class OxfordParkAndRideProvider(object):
         'Thornhill Park & Ride OX3 8DP': "osm:24719725",
         'Water Eaton Park & Ride OX2 8HA': "osm:4329908",
     }
-    _CARPARK_IDS = _CARPARKS.values()
+    _REVERSE_CARPARKS = dict((v, k) for k, v in _CARPARKS.iteritems())
 
     provides = {'p-r': "Park and Rides Live Information"}
 
-    def __init__(self, url="http://voyager.oxfordshire.gov.uk/Carpark.aspx", timeout="4"):
+    def __init__(self, url="http://voyager.oxfordshire.gov.uk/Carpark.aspx", timeout=4):
         self.url = url
         self.timeout = timeout
 
     def handles(self, doc, rti_type=None):
         for ident in doc.identifiers:
-            if ident in self._CARPARK_IDS:
+            if ident in self._REVERSE_CARPARKS:
                 return True
         return False
 
     def invoke(self, doc, rti_type=None):
-        pass
+        for ident in doc.identifiers:
+            if ident in self._REVERSE_CARPARKS:
+                data = self.get_data()
+                services = data.get(self._REVERSE_CARPARKS[ident])
+                messages = []
+                title = self.provides.get(rti_type)
+                return services, messages, rti_type, title
+        return None
 
     def get_data(self):
         """
