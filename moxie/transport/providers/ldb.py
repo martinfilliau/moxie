@@ -29,7 +29,7 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
     provides = {'rail-departures': "Departures",
             'rail-arrivals': "Arrivals"}
 
-    def __init__(self, token, ldb_service=None, max_services=15):
+    def __init__(self, token, max_services=15):
         self._token = token
         self._max_services = max_services
         self._ldb_service = None
