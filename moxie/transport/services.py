@@ -25,3 +25,6 @@ class TransportService(ProviderService):
     def get_park_and_ride(self):
         provider = OxfordParkAndRideProvider()
         return provider.get_all()
+        
+    def import_park_and_ride(self):
+        self.get_park_and_ride()
