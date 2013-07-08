@@ -88,6 +88,10 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
 
             for tr in tbody:
                 name = tr[1].text.strip()
+                identifier = self._CARPARKS.get(name, None)
+
+                if not identifier:
+                    break
 
                 if tr[6].text == 'Faulty':
                     spaces = 0
@@ -100,7 +104,8 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
                         spaces = 0
                         unavailable = True
 
-                carparks[name] = {
+                carparks[identifier] = {
+                    'name': name,
                     'spaces': spaces,
                     'capacity': int(tr[4].text),
                     'percentage': int(100 * (1 - float(spaces) / float(tr[4].text))),
