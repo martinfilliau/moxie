@@ -3,10 +3,14 @@ import requests
 from lxml import etree
 from requests.exceptions import RequestException
 
+from moxie.core.cache import cache
 from . import TransportRTIProvider
 
 
 logger = logging.getLogger(__name__)
+
+CACHE_KEY = "ox-p-r"
+CACHE_TIMEOUT = 30
 
 
 class OxfordParkAndRideProvider(TransportRTIProvider):
@@ -54,16 +58,22 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
         Requests the URL and parses the page
         :return dictionary of park and rides availability information
         """
-        try:
-            response = requests.get(self.url, timeout=self.timeout, config={'danger_mode': True})
-        except RequestException as re:
-            logger.warning('Error in request to Park & Ride info', exc_info=True,
-                           extra={
-                               'data': {
-                                   'url': self.url}
-                           })
+        data = cache.get(CACHE_KEY)
+        if data:
+            return data
         else:
-            return self.parse_html(response.text)
+            try:
+                response = requests.get(self.url, timeout=self.timeout, config={'danger_mode': True})
+            except RequestException as re:
+                logger.warning('Error in request to Park & Ride info', exc_info=True,
+                               extra={
+                                   'data': {
+                                       'url': self.url}
+                            })
+            else:
+                data = self.parse_html(response.text)
+                cache.set(CACHE_KEY, data, CACHE_TIMEOUT)
+                return data
 
     def parse_html(self, html):
         """Parses the HTML of the page
