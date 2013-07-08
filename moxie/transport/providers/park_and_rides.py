@@ -11,9 +11,29 @@ class OxfordParkAndRideProvider(object):
     """Provider for Oxfordshire Park and Ride website
     """
 
+    _CARPARKS = {
+        'Pear Tree Park & Ride OX2 8JD': "osm:4333225",
+        'Redbridge Park & Ride OX1 4XG': "osm:2809915",
+        'Seacourt Park & Ride OX2 0HP': "osm:34425625",
+        'Thornhill Park & Ride OX3 8DP': "osm:24719725",
+        'Water Eaton Park & Ride OX2 8HA': "osm:4329908",
+    }
+    _CARPARK_IDS = _CARPARKS.values()
+
+    provides = {'p-r': "Park and Rides Live Information"}
+
     def __init__(self, url="http://voyager.oxfordshire.gov.uk/Carpark.aspx", timeout="4"):
         self.url = url
         self.timeout = timeout
+
+    def handles(self, doc, rti_type=None):
+        for ident in doc.identifiers:
+            if ident in self._CARPARK_IDS:
+                return True
+        return False
+
+    def invoke(self, doc, rti_type=None):
+        pass
 
     def get_data(self):
         """
