@@ -24,10 +24,10 @@ def override_loglevel(level):
 class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
     _WSDL_URL = "https://realtime.nationalrail.co.uk/ldbws/wsdl.aspx"
     _ATTRIBUTION = {'title': ("Powered by National Rail Enquiries"),
-                  'url': "http://www.nationalrail.co.uk"}
+                    'url': "http://www.nationalrail.co.uk"}
 
     provides = {'rail-departures': "Departures",
-            'rail-arrivals': "Arrivals"}
+                'rail-arrivals': "Arrivals"}
 
     def __init__(self, token, max_services=15):
         self._token = token
