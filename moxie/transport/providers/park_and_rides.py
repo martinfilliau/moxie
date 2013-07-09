@@ -4,6 +4,7 @@ from lxml import etree
 from requests.exceptions import RequestException
 
 from moxie.core.cache import cache
+from moxie.core.service import ProviderException
 from . import TransportRTIProvider
 
 
@@ -70,6 +71,7 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
                                    'data': {
                                        'url': self.url}
                             })
+                raise ProviderException
             else:
                 data = self.parse_html(response.text)
                 cache.set(CACHE_KEY, data, CACHE_TIMEOUT)
