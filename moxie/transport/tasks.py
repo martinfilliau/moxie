@@ -7,7 +7,7 @@ from moxie.transport.services import TransportService
 
 logger = get_task_logger(__name__)
 
-BLUEPRINT_NAME = 'places'
+BLUEPRINT_NAME = 'transport'
 
 
 @celery.task

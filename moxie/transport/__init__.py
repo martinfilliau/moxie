@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from flask.helpers import make_response
 
 from moxie.core.representations import HALRepresentation
-from .views import ParkAndRides
+from moxie.transport.views import ParkAndRides
 
 TRANSPORT_CURIE = 'http://moxie.readthedocs.org/en/latest/http_api/transport.html#{rel}'
 

@@ -6,7 +6,7 @@ from moxie.core.exceptions import BadRequest
 from moxie.core.cache import cache
 from moxie.core.views import ServiceView
 from moxie.core.service import NoSuitableProviderFound, MultipleProvidersFound
-from .services import TransportService
+from moxie.transport.services import TransportService
 
 
 logger = logging.getLogger(__name__)

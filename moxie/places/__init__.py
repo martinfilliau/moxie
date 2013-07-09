@@ -1,14 +1,15 @@
 from flask import Blueprint, request
 from flask.helpers import make_response
 
-from moxie.transport.views import RTI
 from moxie.core.representations import HALRepresentation
-from .views import Search, PoiDetail, Types
 
 PLACES_CURIE = 'http://moxie.readthedocs.org/en/latest/http_api/places.html#{rel}'
 
 
 def create_blueprint(blueprint_name, conf):
+    from moxie.places.views import Search, PoiDetail, Types
+    from moxie.transport.views import RTI
+
     places_blueprint = Blueprint(blueprint_name, __name__, **conf)
 
     places_blueprint.add_url_rule('/', view_func=get_routes)
