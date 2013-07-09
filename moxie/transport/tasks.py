@@ -12,6 +12,8 @@ BLUEPRINT_NAME = 'transport'
 
 @celery.task
 def import_park_and_ride():
+    """Imports data from park and rides, it is recommended to run it quite often
+    """
     app = create_app()
     with app.blueprint_context(BLUEPRINT_NAME):
         service = TransportService.from_context()

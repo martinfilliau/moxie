@@ -45,7 +45,7 @@ class RTI(ServiceView):
 
 class ParkAndRides(ServiceView):
 
-    TIMEOUT = 10    # seconds
+    TIMEOUT = 30    # seconds
 
     expires = timedelta(seconds=TIMEOUT)
 
