@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from flask.helpers import make_response
 
-from moxie.transport.views import RTI, ParkAndRides
+from moxie.transport.views import RTI
 from moxie.core.representations import HALRepresentation
 from .views import Search, PoiDetail, Types
 
@@ -25,9 +25,6 @@ def create_blueprint(blueprint_name, conf):
     places_blueprint.add_url_rule('/<path:ident>/rti/<path:rtitype>',
             view_func=RTI.as_view('rti'))
 
-    places_blueprint.add_url_rule('/transport/park-and-rides',
-            view_func=ParkAndRides.as_view('p-r'))      # TODO should be in the Transport blueprint
-
     return places_blueprint
 
 
@@ -45,8 +42,6 @@ def get_routes():
     representation.add_link('hl:rti',
             '{bp}{{id}}/rti/{{type}}'.format(bp=path), templated=True,
             title='Real-Time Information for a given POI')
-    representation.add_link('hl:p-r', '/transport/park-and-ride',
-            title='Park and Rides Real-Time information')   # TODO do not hard-code path
     response = make_response(representation.as_json(), 200)
     response.headers['Content-Type'] = "application/json"
     return response
