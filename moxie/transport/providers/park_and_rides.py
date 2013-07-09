@@ -2,6 +2,7 @@ import logging
 import requests
 from lxml import etree
 from requests.exceptions import RequestException
+from datetime import datetime
 
 from moxie.core.cache import cache
 from moxie.core.service import ProviderException
@@ -11,6 +12,7 @@ from . import TransportRTIProvider
 logger = logging.getLogger(__name__)
 
 CACHE_KEY = "ox-p-r"
+CACHE_KEY_UPDATE = CACHE_KEY + "_updated"
 CACHE_TIMEOUT = 30
 
 
@@ -75,6 +77,7 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
             else:
                 data = self.parse_html(response.text)
                 cache.set(CACHE_KEY, data, CACHE_TIMEOUT)
+                cache.set(CACHE_KEY_UPDATE, datetime.now().isoformat(), CACHE_TIMEOUT)
                 return data
 
     def parse_html(self, html):
