@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 CACHE_KEY = "ox-p-r"
 CACHE_KEY_UPDATE = CACHE_KEY + "_updated"
-CACHE_TIMEOUT = 30
 
 
 class OxfordParkAndRideProvider(TransportRTIProvider):
@@ -56,6 +55,21 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
         """
         return self.get_data()
 
+    def import_data(self):
+        try:
+            response = requests.get(self.url, timeout=self.timeout, config={'danger_mode': True})
+        except RequestException as re:
+            logger.warning('Error in request to Park & Ride info', exc_info=True,
+                           extra={
+                               'data': {
+                                   'url': self.url}
+                           })
+            raise ProviderException
+        else:
+            data = self.parse_html(response.text)
+            cache.set(CACHE_KEY, data)
+            cache.set(CACHE_KEY_UPDATE, datetime.now().isoformat())
+
     def get_data(self):
         """
         Requests the URL and parses the page
@@ -65,20 +79,7 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
         if data:
             return data
         else:
-            try:
-                response = requests.get(self.url, timeout=self.timeout, config={'danger_mode': True})
-            except RequestException as re:
-                logger.warning('Error in request to Park & Ride info', exc_info=True,
-                               extra={
-                                   'data': {
-                                       'url': self.url}
-                            })
-                raise ProviderException
-            else:
-                data = self.parse_html(response.text)
-                cache.set(CACHE_KEY, data, CACHE_TIMEOUT)
-                cache.set(CACHE_KEY_UPDATE, datetime.now().isoformat(), CACHE_TIMEOUT)
-                return data
+            raise ProviderException
 
     def parse_html(self, html):
         """Parses the HTML of the page
