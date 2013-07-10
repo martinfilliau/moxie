@@ -8,9 +8,9 @@ from werkzeug.local import LocalProxy
 logger = logging.getLogger(__name__)
 
 #TODO managed keys should come from the configuration files
-managed_keys = ['name', 'location']
-mergable_keys = ['identifiers', 'tags']
-precedence_key = 'meta_precedence'
+MANAGED_KEYS = ['name', 'location']
+MERGABLE_KEYS = ['identifiers', 'tags']
+PRECEDENCE_KEY = 'meta_precedence'
 
 
 class ACIDException(Exception):
@@ -45,7 +45,7 @@ def prepare_document(doc, results, precedence):
 
     # Attempt to merge documents
     if len(results.results) == 0:
-        doc[precedence_key] = precedence
+        doc[PRECEDENCE_KEY] = precedence
         return doc
     elif len(results.results) == 1:
         return merge_docs(doc, results.results[0], precedence)
@@ -93,11 +93,11 @@ def merge_docs(current_doc, new_doc, new_precedence):
 
     @param new_precedence Integer proportional to the reliability of new data
     """
-    new_doc = merge_keys(current_doc, new_doc, mergable_keys)
+    new_doc = merge_keys(current_doc, new_doc, MERGABLE_KEYS)
     current_precedence = current_doc.get('meta_precedence', -1)
     if new_precedence > current_precedence:
         current_doc['meta_precedence'] = new_precedence
-        for key in managed_keys:
+        for key in MANAGED_KEYS:
             if key in new_doc:
                 current_doc[key] = new_doc[key]
     current_doc.update(new_doc)
