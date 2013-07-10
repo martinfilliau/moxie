@@ -139,6 +139,7 @@ transport:
         car-park:
           name_singular: Car park
           name_plural: Car parks
+          description: Car parks, park and rides...
           types:
             park-and-ride:
               name_singular: Park and Ride
