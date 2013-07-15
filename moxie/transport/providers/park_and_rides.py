@@ -26,7 +26,6 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
         'Thornhill Park & Ride OX3 8DP': "osm:24719725",
         'Water Eaton Park & Ride OX2 8HA': "osm:4329908",
     }
-    _REVERSE_CARPARKS = dict((v, k) for k, v in _CARPARKS.iteritems())
 
     provides = {'p-r': "Park and Rides Live Information"}
 
@@ -36,13 +35,13 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
 
     def handles(self, doc, rti_type=None):
         for ident in doc.identifiers:
-            if ident in self._REVERSE_CARPARKS:
+            if ident in self._CARPARKS.values():
                 return True
         return False
 
     def invoke(self, doc, rti_type=None):
         for ident in doc.identifiers:
-            if ident in self._REVERSE_CARPARKS:
+            if ident in self._CARPARKS.values():
                 data = self.get_data()
                 services = data.get(ident)
                 messages = []
