@@ -53,7 +53,7 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
     def get_all(self):
         """Get data from all park and rides
         """
-        return self.get_data()
+        return {'park_and_rides':[dict(v, identifier=k) for k, v in self.get_data().items()] }
 
     def import_data(self):
         try:
