@@ -1,6 +1,7 @@
 from moxie.core.service import ProviderService
 from moxie.core.search import searcher
 from moxie.places.solr import doc_to_poi
+from moxie.transport.providers.park_and_rides import OxfordParkAndRideProvider
 
 
 class TransportService(ProviderService):
@@ -20,3 +21,11 @@ class TransportService(ProviderService):
         """
         provider = self.get_provider(poi, rti_type)
         return provider(poi, rti_type)
+
+    def get_park_and_ride(self):
+        provider = OxfordParkAndRideProvider()
+        return provider.get_all()
+        
+    def import_park_and_ride(self):
+        provider = OxfordParkAndRideProvider()
+        provider.import_data()

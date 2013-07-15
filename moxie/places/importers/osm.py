@@ -46,6 +46,8 @@ AMENITIES = {'atm': '/amenities/atm',
              'waste_basket': '/amenities/recycling-facility',
              }
 
+PARK_AND_RIDE = '/transport/car-park/park-and-ride'
+
 
 class OSMHandler(handler.ContentHandler):
 
@@ -124,7 +126,12 @@ class OSMHandler(handler.ContentHandler):
                 # Filter elements depending on amenity / shop tags
                 if 'amenity' in self.tags:
                     if self.tags['amenity'] in AMENITIES:
-                        result['type'] = AMENITIES[self.tags['amenity']]
+                        # special case for Park and Rides where amenity=parking and park_ride=bus/yes/... except no
+                        # TODO we should be able to handle this kind of case in a better way
+                        if self.tags['amenity'] == "parking" and self.tags.get('park_ride', 'no') != 'no':
+                            result['type'] = PARK_AND_RIDE
+                        else:
+                            result['type'] = AMENITIES[self.tags['amenity']]
                     else:
                         return
                 elif 'shop' in self.tags:
