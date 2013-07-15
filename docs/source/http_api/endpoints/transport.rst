@@ -23,21 +23,26 @@ Endpoint to retrieve information about transport.
         Content-Type: application/json
 
         {
-          "osm:24719725": {
-            "capacity": 855,
-            "name": "Thornhill Park & Ride OX3 8DP",
-            "percentage": 100,
-            "spaces": 0,
-            "unavailable": true
-          },
-          "osm:2809915": {
-            "capacity": 1389,
-            "name": "Redbridge Park & Ride OX1 4XG",
-            "percentage": 45,
-            "spaces": 754,
-            "unavailable": false
-          },
-          [...]
+          "park_and_rides": [
+            {
+              "capacity": 1389,
+              "identifier": "osm:2809915",
+              "name": "Redbridge Park & Ride OX1 4XG",
+              "percentage": 0,
+              "spaces": 0,
+              "unavailable": true   // real-time information not available
+            },
+            [...]
+            {
+              "capacity": 758,
+              "identifier": "osm:4329908",
+              "name": "Water Eaton Park & Ride OX2 8HA",
+              "percentage": 48,
+              "spaces": 390,
+              "unavailable": false
+            }
+          ]
+        }
 
     :statuscode 200: resource found
     :statuscode 503: Service not available
