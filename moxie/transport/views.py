@@ -54,4 +54,5 @@ class ParkAndRides(ServiceView):
         try:
             return transport_service.get_park_and_ride()
         except ProviderException:
+            logger.critical("Unable to reach P-R provider", exc_info=True)
             raise ServiceUnavailable(message="Unable to reach provider")
