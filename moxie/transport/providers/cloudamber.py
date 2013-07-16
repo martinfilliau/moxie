@@ -6,6 +6,7 @@ from itertools import chain
 from . import TransportRTIProvider
 from requests.exceptions import RequestException
 from moxie.core.exceptions import ServiceUnavailable
+from moxie.core.metrics import statsd
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +51,7 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         """
         return "{0}/Naptan.aspx?t=departure&sa={1}&dc=&ac=96&vc=&x=0&y=0&format=xhtml".format(self.url, naptan_code)
 
+    @statsd.timer('transport.providers.cloudamber.rti_request')
     def get_rti(self, naptan_code):
         """
         Get a dict containing RTI
@@ -69,6 +71,7 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         else:
             return self.parse_html(response.text)
 
+    @statsd.timer('transport.providers.cloudamber.parse_html')
     def parse_html(self, content):
         """
         Parse HTML content from a CloudAmber page
