@@ -17,6 +17,8 @@ from moxie.core.exceptions import exception_handler
 from moxie.core.healthchecks import check_services
 from moxie.core.browser import RootView
 
+logger = logging.getLogger(__name__)
+
 
 def create_app():
     app = Moxie(__name__)
@@ -34,8 +36,12 @@ def create_app():
                                 level=logging.getLevelName(app.config.get('SENTRY_LEVEL', 'WARNING')))
         setup_logging(handler)
 
+    if 'STATSD_HOST' in app.config:
+        logger.debug('Init statsd')
+        statsd.init_app(app)
+
     cache.init_app(app)
-    statsd.init_app(app)
+
     # Static URL Route for API Health checks
     app.add_url_rule('/_health', view_func=check_services)
     app.add_url_rule('/', view_func=RootView.as_view('root'))
