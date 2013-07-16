@@ -4,6 +4,7 @@ from requests.exceptions import RequestException
 import json
 
 from moxie.core.search import SearchResponse, SearchServerException
+from moxie.core.metrics import statsd
 
 
 logger = logging.getLogger(__name__)
@@ -128,6 +129,7 @@ class SolrSearch(object):
         query_string = {'q': " OR ".join(query)}
         return self.search(query_string, start=0, count=100)
 
+    @statsd.timer('core.search.solr.request')
     def connection(self, method, params=None, data=None, headers=None):
         """Does a GET request if there is no data otherwise a POST
         :param params: URL parameters as a dict
