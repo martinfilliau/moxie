@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from suds.sax.element import Element
 from . import TransportRTIProvider
 from moxie.core.exceptions import ServiceUnavailable
+from moxie.core.metrics import statsd
 
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,7 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
                 raise ServiceUnavailable()
         return self._ldb_service
 
+    @statsd.timer('transport.providers.ldb.rti')
     def invoke(self, doc, rti_type):
         for ident in doc.identifiers:
             if ident.startswith('crs'):
