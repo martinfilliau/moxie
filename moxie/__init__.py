@@ -36,10 +36,7 @@ def create_app():
                                 level=logging.getLevelName(app.config.get('SENTRY_LEVEL', 'WARNING')))
         setup_logging(handler)
 
-    if 'STATSD_HOST' in app.config:
-        logger.debug('Init statsd')
-        statsd.init_app(app)
-
+    statsd.init_app(app)
     cache.init_app(app)
 
     # Static URL Route for API Health checks
