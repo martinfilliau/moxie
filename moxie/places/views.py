@@ -1,10 +1,10 @@
-from flask import request, current_app, url_for, abort, redirect
+from flask import request, current_app, url_for, redirect
 from werkzeug.wrappers import BaseResponse
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import JSON, HAL_JSON
-from moxie.places.representations import (HALPOIsRepresentation, HALPOIRepresentation, POIsRepresentation,
-                                          POIRepresentation, TypesRepresentation, HALTypesRepresentation)
+from moxie.core.exceptions import BadRequest, NotFound
+from moxie.places.representations import (HALPOIsRepresentation, HALPOIRepresentation, HALTypesRepresentation)
 from .services import POIService
 
 
@@ -30,8 +30,7 @@ class Search(ServiceView):
         if self.query:
             all_types = True
         if self.type and self.types_exact:
-            # Bad request, you cannot have both type and types exact at the moment
-            return abort(400)
+            raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
 
         poi_service = POIService.from_context()
         # Try to match the query to identifiers if it's a one word query,
@@ -63,7 +62,7 @@ class PoiDetail(ServiceView):
         poi_service = POIService.from_context()
         doc = poi_service.get_place_by_identifier(ident)
         if not doc:
-            abort(404)
+            raise NotFound()
         if doc.id != ident:
             # redirection to the same URL but with the main ID of the doc
             path = url_for(request.url_rule.endpoint, ident=doc.id)

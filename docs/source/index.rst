@@ -30,6 +30,13 @@ List of standard relations describing links between resources.
 
     http_api/relations/overview
 
+List of real-time information resources.
+
+.. toctree::
+    :maxdepth: 1
+
+    http_api/rti
+
 Internal API
 ------------
 

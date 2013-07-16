@@ -11,7 +11,9 @@ NAPTAN_MAPPING = {
     'TXR': '/transport/taxi-rank',
     'BCT': '/transport/bus-stop',
     'AIR': '/transport/airport',
+    'RLY': '/transport/rail-station',
 }
+CRS_KEY = 'StopClassification_OffStreet_Rail_AnnotatedRailRef_CrsRef'
 
 
 #if self.meta['stop-type'] in ('AIR', 'FTD', 'RSE', 'TMU', 'BCE'):
@@ -95,11 +97,19 @@ class NaptanXMLHandler(ContentHandler):
 
     @tag_handler('StopPoint')
     def add_stop(self, sp):
-        """Set the location to our agreed format of lon,lat and pick a
-        friendly name. We also apply a busstop tag """
+        """Format the StopPoint for insertion into our indexer.
+        - Set location as lat,lon string
+        - Formats name
+
+        We insert any Stops which have AtcoCodes within self.areas for example,
+        everything within Oxfordshire. We also import any StopPoints which have
+        a CRS key. This is the identifier used for the rail network.
+
+        Meaning we import all rail stations (at time of writing ~2500).
+        """
         sp.default_factory = None
         area_code = sp['AtcoCode'][:3]
-        if area_code in self.areas:
+        if area_code in self.areas or CRS_KEY in sp:
             data = dict([('raw_naptan_%s' % k, v) for k, v in sp.items()])
             data['id'] = "atco:%s" % sp['AtcoCode']
             identifiers = []
@@ -107,6 +117,10 @@ class NaptanXMLHandler(ContentHandler):
             if 'NaptanCode' in sp:
                 naptan_id = ''.join(map(self.naptan_dial, sp['NaptanCode']))
                 identifiers.append("naptan:%s" % naptan_id)
+            if CRS_KEY in sp:
+                crs = 'crs:%s' % sp[CRS_KEY]
+                identifiers.append(crs)
+                data['id'] = crs  # CRS code should be primary ID for rail
             data[self.identifier_key] = identifiers
 
             # TODO: should add a test for this
@@ -219,19 +233,18 @@ class NaPTANImporter(object):
             parser.feed(buffered_data)
             buffered_data = self.naptan_file.read(self.buffer_size)
         parser.close()
-        for stop_area_code, data in self.handler.stop_areas.items():
-            search_results = self.indexer.search_for_ids(
-                self.identifier_key, data[self.identifier_key])
-            doc = prepare_document(data, search_results, self.precedence)
-            doc = [doc]
-            self.indexer.index(doc)
-        for atco_code, sp in self.handler.stop_points.items():
-            search_results = self.indexer.search_for_ids(
-                self.identifier_key, sp[self.identifier_key])
-            doc = prepare_document(sp, search_results, self.precedence)
-            doc = [doc]
-            self.indexer.index(doc)
-        self.indexer.commit()
+        if self.indexer:
+            docs = []
+            for stop_area_code, data in self.handler.stop_areas.items():
+                search_results = self.indexer.search_for_ids(
+                    self.identifier_key, data[self.identifier_key])
+                docs.append(prepare_document(data, search_results, self.precedence))
+            for atco_code, sp in self.handler.stop_points.items():
+                search_results = self.indexer.search_for_ids(
+                    self.identifier_key, sp[self.identifier_key])
+                docs.append(prepare_document(sp, search_results, self.precedence))
+            self.indexer.index(docs)
+            self.indexer.commit()
 
 
 def main():
@@ -239,10 +252,11 @@ def main():
     args = argparse.ArgumentParser()
     args.add_argument('naptanfile', type=argparse.FileType('r'))
     ns = args.parse_args()
-    from moxie.core.search.solr import SolrSearch
-    solr = SolrSearch('collection1')
-    naptan_importer = NaPTANImporter(solr, 10, ns.naptanfile, ['340'], 'identifiers')
+    naptan_importer = NaPTANImporter(None, 10, ns.naptanfile, ['340'], 'identifiers')
     naptan_importer.run()
+    import pprint
+    pprint.pprint(naptan_importer.handler.stop_points)
+    pprint.pprint(naptan_importer.handler.stop_areas)
 
 
 if __name__ == '__main__':

@@ -1,17 +1,17 @@
 Transport endpoint
 ==================
 
-Endpoint to search and retrieve information about transport.
+Endpoint to retrieve information about transport.
 
-.. http:get:: /transport/bus/rti
+.. http:get:: /transport/park-and-rides
 
-    Get real-time information about services stopping by a bus-stop. 
+    Get real-time information about status of park and rides
 
     **Example request**:
 
-	.. sourcecode:: http
+    .. sourcecode:: http
 
-		GET /transport/bus/rti?id=1983458 HTTP/1.1
+		GET /transport/park-and-rides HTTP/1.1
 		Host: api.m.ox.ac.uk
 		Accept: application/json
 
@@ -19,16 +19,30 @@ Endpoint to search and retrieve information about transport.
 
     .. sourcecode:: http
 
-		HTTP/1.1 200 OK
-		Content-Type: application/json
+        HTTP/1.1 200 OK
+        Content-Type: application/json
 
-		{
-			"services": {},
-			"messages": {}
-		}
-
-    :query id: Naptan ID of the bus stop
-    :type id: int
+        {
+          "park_and_rides": [
+            {
+              "capacity": 1389,
+              "identifier": "osm:2809915",
+              "name": "Redbridge Park & Ride OX1 4XG",
+              "percentage": 0,
+              "spaces": 0,
+              "unavailable": true   // real-time information not available
+            },
+            [...]
+            {
+              "capacity": 758,
+              "identifier": "osm:4329908",
+              "name": "Water Eaton Park & Ride OX2 8HA",
+              "percentage": 48,
+              "spaces": 390,
+              "unavailable": false
+            }
+          ]
+        }
 
     :statuscode 200: resource found
-    :statuscode 404: no resource found
+    :statuscode 503: Service not available

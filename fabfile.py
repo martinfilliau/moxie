@@ -6,6 +6,9 @@ from fabric.contrib import *
 from fabric.contrib.files import exists, sed
 from fabric import utils
 
+_private_pypi = os.getenv('PRIVATE_PYPI')
+PIP_OPTIONS = '-i %s' % _private_pypi if _private_pypi else ''
+
 MOXIE_REPO = "git://github.com/ox-it/moxie.git"
 MOXIE_CLIENT_REPO = "git://github.com/ox-it/moxie-js-client.git"
 
@@ -30,7 +33,7 @@ def dev():
     Configuration for Vagrant VMs (provisioned w/ Puppet)
     """
     env.environment = 'dev'
-    env.hosts = ['127.0.0.1:2222']
+    env.hosts = ['new-mox.vm']
     env.user = 'moxie'
     env.remote_install_dir_api = '/srv/moxie/precise32.oucs.ox.ac.uk'
     env.remote_git_checkout_api = '/srv/moxie/source-moxie'
@@ -80,6 +83,8 @@ def deploy_api(version):
         install_moxie()
         run('rm -f %s' % env.remote_install_dir_api)
         run('ln -s %s %s' % (versioned_path, env.remote_install_dir_api))
+        run('circusctl stop moxie-celerybeat')
+        run('circusctl start moxie-celerybeat')
         run('circusctl stop moxie-celery')
         run('circusctl start moxie-celery')
         run('circusctl stop moxie-uwsgi')
@@ -125,8 +130,19 @@ def delete_index(core):
     """
     if not core:
         utils.abort('You must specify the core')
+    if not console.confirm('Are you sure you want to delete all documents from this index?', default=False):
+        utils.abort('Aborted.')
     run("curl http://localhost:8080/solr/{core}/update --data '<delete><query>*:*</query></delete>' -H 'Content-type:text/xml; charset=utf-8'".format(core=core))
     run("curl http://localhost:8080/solr/{core}/update --data '<commit/>' -H 'Content-type:text/xml; charset=utf-8'".format(core=core))
+
+
+@task
+def reload_core(core):
+    """Reload core
+    """
+    if not core:
+        utils.abort('You must specify the core')
+    run("curl http://localhost:8080/solr/admin/cores?action=RELOAD&core={core}".format(core=core))
 
 
 """
@@ -141,8 +157,8 @@ def createvirtualenv(path):
 def install_moxie():
     require('remote_git_checkout_api', provided_by=ENVIRONMENTS)
     with cd(env.remote_git_checkout_api):
-        run('python setup.py install')
-    run('pip install -r %s' % env.additional_requirements)
+        run('pip install . %s' % PIP_OPTIONS)
+    run('pip install -r %s %s' % (env.additional_requirements, PIP_OPTIONS))
 
 
 def git_branch(git_checkout, git_repo, name):

@@ -1,45 +1,47 @@
-from werkzeug.exceptions import default_exceptions, HTTPException
-from flask import make_response, request
-from flask.exceptions import JSONHTTPException
+from flask import jsonify
 
 
-def exception_handler(exception):
-    """Exception handler
-    From http://flask.pocoo.org/snippets/83/
+def exception_handler(ex):
+    """Prepare an exception as a JSON response
+    :param ex: exception
+    :return: response
     """
-    return abort((exception.code
-            if isinstance(exception, HTTPException)
-            else 500),
-            body=str(exception))
-
-def abort(status_code, body=None, headers={}):
-    """Content negociate the error response.
-    From http://flask.pocoo.org/snippets/97/
-    """
-
-    if 'text/html' in request.headers.get("Accept", ""):
-        error_cls = HTTPException
-    else:
-        error_cls = JSONHTTPException
-
-    class_name = error_cls.__name__
-    bases = [error_cls]
-    attributes = {'code': status_code}
-
-    if status_code in default_exceptions:
-        # Mixin the Werkzeug exception
-        bases.insert(0, default_exceptions[status_code])
-
-    error_cls = type(class_name, tuple(bases), attributes)
-    return make_response(error_cls(body), status_code, headers)
+    response = jsonify(ex.to_dict())
+    response.status_code = ex.status_code
+    return response
 
 
 class ApplicationException(Exception):
 
-    http_code = 500
+    status_code = 500
     message = "An error has occured"
+
+    def __init__(self, message=None, status_code=None, payload=None):
+        Exception.__init__(self)
+        if message is not None:
+            self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['description'] = self.message
+        return rv
+
 
 class ServiceUnavailable(ApplicationException):
 
-    http_code = 503
+    status_code = 503
     message = "Service not available"
+
+
+class BadRequest(ApplicationException):
+
+    status_code = 400
+
+
+class NotFound(ApplicationException):
+
+    status_code = 404
+    message = "Not found"

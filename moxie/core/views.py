@@ -1,9 +1,13 @@
+from datetime import datetime, timedelta
+import datetime as dt   # dt is used here to make the tests pass (datetime is mocked)
+
 from flask.views import View
-from flask import request, jsonify, make_response, current_app
+from flask import request, jsonify, make_response, current_app, abort
 from werkzeug.exceptions import NotAcceptable
 from werkzeug.wrappers import BaseResponse
+from werkzeug.http import http_date
 
-from moxie.core.exceptions import ApplicationException, abort
+from moxie.core.exceptions import ApplicationException, exception_handler
 
 
 def accepts(*accept_values):
@@ -47,6 +51,9 @@ class ServiceView(View):
     cors_allow_credentials = False
     cors_max_age = 21600
 
+    # Set to a timedelta or datetime to control HTTP caching headers
+    expires = None
+
     @classmethod
     def as_view(cls, *args, **kwargs):
         view = super(ServiceView, cls).as_view(*args, **kwargs)
@@ -68,7 +75,7 @@ class ServiceView(View):
         elif current_app.debug or origin in allow_origins:
             h['Access-Control-Allow-Origin'] = origin
         else:
-            return abort(400)
+            abort(400)
         if preflight:
             h['Access-Control-Allow-Methods'] = response.headers['allow']
             h['Access-Control-Max-Age'] = str(self.cors_max_age)
@@ -77,6 +84,25 @@ class ServiceView(View):
         if self.cors_allow_credentials:
             h['Access-Control-Allow-Credentials'] = 'true'
         response.headers.extend(h)
+        return response
+
+    def _expires_headers(self, response):
+        """Applies Expires and Cache-Control headers
+        :param response: response to extend
+        :return: response
+        """
+        h = {}
+        if self.expires:
+            if isinstance(self.expires, timedelta):
+                now = datetime.utcnow()
+                now += self.expires
+                h['Expires'] = http_date(now)
+                h['Cache-Control'] = 'max-age={seconds}'.format(seconds=self.expires.seconds)
+            elif isinstance(self.expires, dt.datetime):
+                difference = self.expires - datetime.utcnow()
+                h['Expires'] = http_date(self.expires)
+                h['Cache-Control'] = 'max-age={seconds}'.format(seconds=difference.seconds)
+            response.headers.extend(h)
         return response
 
     def dispatch_request(self, *args, **kwargs):
@@ -93,13 +119,15 @@ class ServiceView(View):
             try:
                 response = self.handle_request(*args, **kwargs)
                 response = make_response(service_response(self, response))
+                response = self._expires_headers(response)
             except ApplicationException as ae:
-                return abort(ae.http_code, ae.message)
+                response = exception_handler(ae)
             except:
                 if current_app.debug:
                     raise
-                return abort(500)
-            return self._cors_headers(response)
+                response = exception_handler(ApplicationException())
+            response = self._cors_headers(response)
+            return response
         else:
             return self.default_response()
 

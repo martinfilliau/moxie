@@ -17,14 +17,16 @@ class OxfordParkAndRideProviderTestCase(unittest.TestCase):
         provider = OxfordParkAndRideProvider()
         carparks = provider.parse_html(content)
 
-        seacourt = carparks["Seacourt Park & Ride OX2 0HP"]
+        seacourt = carparks["osm:34425625"]
         self.assertEqual(seacourt['percentage'], 34)
         self.assertEqual(seacourt['spaces'], 514)
+        self.assertEqual(seacourt['name'], "Seacourt Park & Ride OX2 0HP")
         self.assertEqual(seacourt['capacity'], 784)
         self.assertEqual(seacourt['unavailable'], False)
 
-        pear_tree = carparks["Pear Tree Park & Ride OX2 8JD"]
+        pear_tree = carparks["osm:4333225"]
         self.assertEqual(pear_tree['percentage'], 100)
         self.assertEqual(pear_tree['spaces'], 0)
+        self.assertEqual(pear_tree['name'], "Pear Tree Park & Ride OX2 8JD")
         self.assertEqual(pear_tree['capacity'], 1084)
         self.assertEqual(pear_tree['unavailable'], True)

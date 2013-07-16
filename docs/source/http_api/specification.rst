@@ -26,3 +26,9 @@ Pagination
 Standard parameters are available for pagination: start and count.
 It is advised to use :doc:`/http_api/relations/overview` (:doc:`/http_api/relations/first`, :doc:`/http_api/relations/last`,
 :doc:`/http_api/relations/prev` and :doc:`/http_api/relations/next`) to browse results.
+
+Errors
+------
+
+Error messages are provided as JSON, the key `description` gives a technical error message.
+In addition to the message, you should check the HTTP response code which will give you an idea of the problem (4xx vs. 5xx...).
