@@ -60,15 +60,15 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
                 raise ServiceUnavailable()
         return self._ldb_service
 
-    @statsd.timer('transport.providers.ldb.rti')
     def invoke(self, doc, rti_type):
         for ident in doc.identifiers:
             if ident.startswith('crs'):
                 _, crs_code = ident.split(':')
-                if rti_type == 'rail-departures':
-                    services, messages = self.get_departure_board(crs_code)
-                elif rti_type == 'rail-arrivals':
-                    services, messages = self.get_arrival_board(crs_code)
+                with statsd.timer('transport.providers.ldb.rti'):
+                    if rti_type == 'rail-departures':
+                        services, messages = self.get_departure_board(crs_code)
+                    elif rti_type == 'rail-arrivals':
+                        services, messages = self.get_arrival_board(crs_code)
                 title = self.provides.get(rti_type)
                 return services, messages, rti_type, title
 
