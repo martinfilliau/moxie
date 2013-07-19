@@ -1,5 +1,4 @@
 from os import path
-import logging
 
 try:
     from raven.contrib.flask import Sentry
@@ -11,13 +10,9 @@ except ImportError:
 
 from moxie.core.configurator import Configurator
 from moxie.core.cache import cache
-from moxie.core.metrics import statsd
 from moxie.core.app import Moxie
-from moxie.core.exceptions import exception_handler
 from moxie.core.healthchecks import check_services
 from moxie.core.browser import RootView
-
-logger = logging.getLogger(__name__)
 
 
 def create_app():
@@ -36,7 +31,6 @@ def create_app():
                                 level=logging.getLevelName(app.config.get('SENTRY_LEVEL', 'WARNING')))
         setup_logging(handler)
 
-    statsd.init_app(app)
     cache.init_app(app)
 
     # Static URL Route for API Health checks
