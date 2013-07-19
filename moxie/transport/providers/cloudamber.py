@@ -6,6 +6,7 @@ from itertools import chain
 from . import TransportRTIProvider
 from requests.exceptions import RequestException
 from moxie.core.exceptions import ServiceUnavailable
+from moxie.core.metrics import statsd
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +58,10 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         @return: dictionary of services
         """
         try:
-            response = requests.get(self.get_url(naptan_code), timeout=self.timeout, config={'danger_mode': True})
-        except RequestException as re:
+            with statsd.timer('transport.providers.cloudamber.rti_request'):
+                response = requests.get(self.get_url(naptan_code),
+                        timeout=self.timeout, config={'danger_mode': True})
+        except RequestException:
             logger.warning('Error in request to Cloudamber', exc_info=True,
                          extra={
                              'data': {
@@ -67,7 +70,8 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
                          })
             raise ServiceUnavailable()
         else:
-            return self.parse_html(response.text)
+            with statsd.timer('transport.providers.cloudamber.parse_html'):
+                return self.parse_html(response.text)
 
     def parse_html(self, content):
         """

@@ -1,5 +1,4 @@
 from os import path
-import logging
 
 try:
     from raven.contrib.flask import Sentry
@@ -12,7 +11,6 @@ except ImportError:
 from moxie.core.configurator import Configurator
 from moxie.core.cache import cache
 from moxie.core.app import Moxie
-from moxie.core.exceptions import exception_handler
 from moxie.core.healthchecks import check_services
 from moxie.core.browser import RootView
 
@@ -34,6 +32,7 @@ def create_app():
         setup_logging(handler)
 
     cache.init_app(app)
+
     # Static URL Route for API Health checks
     app.add_url_rule('/_health', view_func=check_services)
     app.add_url_rule('/', view_func=RootView.as_view('root'))

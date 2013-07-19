@@ -2,6 +2,7 @@ import unittest
 
 from moxie.transport.providers.cloudamber import CloudAmberBusRtiProvider
 
+
 class CloudAmberBusRtiProviderTestCase(unittest.TestCase):
 
     def setUp(self):
