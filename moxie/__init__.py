@@ -1,3 +1,5 @@
+import logging
+
 from os import path
 
 try:
@@ -10,6 +12,7 @@ except ImportError:
 
 from moxie.core.configurator import Configurator
 from moxie.core.cache import cache
+from moxie.core.metrics import statsd
 from moxie.core.app import Moxie
 from moxie.core.healthchecks import check_services
 from moxie.core.browser import RootView
@@ -28,9 +31,11 @@ def create_app():
         # capture uncaught exceptions within Flask
         sentry.init_app(app)
         handler = SentryHandler(app.config['SENTRY_DSN'],
-                                level=logging.getLevelName(app.config.get('SENTRY_LEVEL', 'WARNING')))
+                                level=logging.getLevelName(
+                                    app.config.get('SENTRY_LEVEL', 'WARNING')))
         setup_logging(handler)
 
+    statsd.init_app(app)
     cache.init_app(app)
 
     # Static URL Route for API Health checks
