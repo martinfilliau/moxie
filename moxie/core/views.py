@@ -8,6 +8,7 @@ from werkzeug.wrappers import BaseResponse
 from werkzeug.http import http_date
 
 from moxie.core.exceptions import ApplicationException, exception_handler
+from moxie.core.metrics import statsd
 
 
 def accepts(*accept_values):
@@ -117,9 +118,10 @@ class ServiceView(View):
         if best_match:
             service_response = self.service_responses[best_match]
             try:
-                response = self.handle_request(*args, **kwargs)
-                response = make_response(service_response(self, response))
-                response = self._expires_headers(response)
+                with statsd.timer('{module}.{view}'.format(module=self.__module__, view=self.__class__.__name__)):
+                    response = self.handle_request(*args, **kwargs)
+                    response = make_response(service_response(self, response))
+                    response = self._expires_headers(response)
             except ApplicationException as ae:
                 response = exception_handler(ae)
             except:
