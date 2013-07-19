@@ -129,7 +129,6 @@ class SolrSearch(object):
         query_string = {'q': " OR ".join(query)}
         return self.search(query_string, start=0, count=100)
 
-    @statsd.timer('core.search.solr.request')
     def connection(self, method, params=None, data=None, headers=None):
         """Does a GET request if there is no data otherwise a POST
         :param params: URL parameters as a dict
@@ -141,14 +140,15 @@ class SolrSearch(object):
         url = '{0}{1}/{2}'.format(self.server_url, self.core, method)
         logger.debug(data)
         try:
-            if data:
-                return requests.post(url, data, headers=headers,
-                    params=params, timeout=self.DEFAULT_TIMEOUT,
-                    config={'danger_mode': True})
-            else:
-                return requests.get(url, headers=headers,
-                    params=params, timeout=self.DEFAULT_TIMEOUT,
-                    config={'danger_mode': True})
+            with statsd.timer('core.search.solr.request'):
+                if data:
+                    return requests.post(url, data, headers=headers,
+                        params=params, timeout=self.DEFAULT_TIMEOUT,
+                        config={'danger_mode': True})
+                else:
+                    return requests.get(url, headers=headers,
+                        params=params, timeout=self.DEFAULT_TIMEOUT,
+                        config={'danger_mode': True})
         except RequestException as re:
             logger.error('Error in request to Solr', exc_info=True,
                 extra={

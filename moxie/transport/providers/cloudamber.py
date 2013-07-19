@@ -51,7 +51,6 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         """
         return "{0}/Naptan.aspx?t=departure&sa={1}&dc=&ac=96&vc=&x=0&y=0&format=xhtml".format(self.url, naptan_code)
 
-    @statsd.timer('transport.providers.cloudamber.rti_request')
     def get_rti(self, naptan_code):
         """
         Get a dict containing RTI
@@ -59,8 +58,10 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         @return: dictionary of services
         """
         try:
-            response = requests.get(self.get_url(naptan_code), timeout=self.timeout, config={'danger_mode': True})
-        except RequestException as re:
+            with statsd.timer('transport.providers.cloudamber.rti_request'):
+                response = requests.get(self.get_url(naptan_code),
+                        timeout=self.timeout, config={'danger_mode': True})
+        except RequestException:
             logger.warning('Error in request to Cloudamber', exc_info=True,
                          extra={
                              'data': {
@@ -69,9 +70,9 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
                          })
             raise ServiceUnavailable()
         else:
-            return self.parse_html(response.text)
+            with statsd.timer('transport.providers.cloudamber.parse_html'):
+                return self.parse_html(response.text)
 
-    @statsd.timer('transport.providers.cloudamber.parse_html')
     def parse_html(self, content):
         """
         Parse HTML content from a CloudAmber page
