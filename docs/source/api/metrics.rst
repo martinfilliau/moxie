@@ -14,11 +14,17 @@ The following configuration variables are available (in the Flask section):
 
 See `Flask-Statsd documentation <https://github.com/cyberdelia/flask-statsd>`_ for more information.
 
-E.g. timing a function
-----------------------
+Views timing
+------------
 
-To use it on a view, you have to decorate your method with `@statsd.timer`
-(imported from `moxie.core.metrics`) and specify the name of the metric.
+All views are automatically timed (from `moxie.core.views`), metrics are sent in the form of <module name>.<view name>
+e.g. `moxie_events.views.Search`.
+
+E.g. timing some code execution
+-------------------------------
+
+To time some code execution, you should use a context manager `statsd.timer`
+(imported from `moxie.core.metrics` and specify the name of the metric.
 
 .. code-block:: python
 
@@ -27,7 +33,10 @@ To use it on a view, you have to decorate your method with `@statsd.timer`
 
     class TimedView(ServiceView):
 
-        @statsd.timer('timed_view')
         def handle_request(self):
+            self.expensive_method()
             return {'near': 'real-time'}
 
+        def expensive_method(self):
+            with statsd.timer('expensive'):
+                # some code
