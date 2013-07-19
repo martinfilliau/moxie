@@ -1,4 +1,9 @@
 from flask.ext.statsd import StatsD
+from werkzeug.local import LocalProxy
+from flask import current_app
 
 
-statsd = StatsD()
+def _get_statsd():
+    return StatsD(current_app)
+
+statsd = LocalProxy(_get_statsd)
