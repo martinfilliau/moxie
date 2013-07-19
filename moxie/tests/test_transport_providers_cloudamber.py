@@ -1,5 +1,7 @@
 import unittest
 
+from moxie.transport.providers.cloudamber import CloudAmberBusRtiProvider
+
 
 class CloudAmberBusRtiProviderTestCase(unittest.TestCase):
 
@@ -11,7 +13,6 @@ class CloudAmberBusRtiProviderTestCase(unittest.TestCase):
         """
         Test case covering stop's services and departure times
         """
-        from moxie.transport.providers.cloudamber import CloudAmberBusRtiProvider
 
         # HTML retrived from http://oxontime.voyagertest.com/Naptan.aspx?t=departure&sa=69327545&dc=&ac=96&vc=&x=0&y=0&format=xhtml
         with open(self.html_test_file_info) as f:
@@ -53,7 +54,6 @@ class CloudAmberBusRtiProviderTestCase(unittest.TestCase):
         """
         Test case covering messages added to a bus stop
         """
-        from moxie.transport.providers.cloudamber import CloudAmberBusRtiProvider
 
         # HTML retrieved from http://oxontime.voyagertest.com/Naptan.aspx?t=departure&sa=69327545&dc=&ac=96&vc=&x=0&y=0&format=xhtml
         with open(self.html_test_file_messages) as f:
