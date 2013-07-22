@@ -8,4 +8,5 @@ lxml==2.3.5
 Flask-Cache==0.11
 raven==3.4.1
 blinker==1.2
+Flask-StatsD==0.1.1
 suds==0.4

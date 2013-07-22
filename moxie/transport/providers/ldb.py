@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from suds.sax.element import Element
 from . import TransportRTIProvider
 from moxie.core.exceptions import ServiceUnavailable
+from moxie.core.metrics import statsd
 
 
 logger = logging.getLogger(__name__)
@@ -63,10 +64,11 @@ class LiveDepartureBoardPlacesProvider(TransportRTIProvider):
         for ident in doc.identifiers:
             if ident.startswith('crs'):
                 _, crs_code = ident.split(':')
-                if rti_type == 'rail-departures':
-                    services, messages = self.get_departure_board(crs_code)
-                elif rti_type == 'rail-arrivals':
-                    services, messages = self.get_arrival_board(crs_code)
+                with statsd.timer('transport.providers.ldb.rti'):
+                    if rti_type == 'rail-departures':
+                        services, messages = self.get_departure_board(crs_code)
+                    elif rti_type == 'rail-arrivals':
+                        services, messages = self.get_arrival_board(crs_code)
                 title = self.provides.get(rti_type)
                 return services, messages, rti_type, title
 
