@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 NAPTAN_MAPPING = {
     'TXR': '/transport/taxi-rank',
     'BCT': '/transport/bus-stop',
+    'BCS': '/transport/bus-stop',   # bay within coach station
     'AIR': '/transport/airport',
     'RLY': '/transport/rail-station',
 }
