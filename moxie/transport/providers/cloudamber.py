@@ -60,7 +60,8 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         try:
             with statsd.timer('transport.providers.cloudamber.rti_request'):
                 response = requests.get(self.get_url(naptan_code),
-                        timeout=self.timeout, config={'danger_mode': True})
+                                        timeout=self.timeout)
+                response.raise_for_status()
         except RequestException:
             logger.warning('Error in request to Cloudamber', exc_info=True,
                          extra={
