@@ -68,8 +68,8 @@ class SearchService(Service):
     def search_for_ids(self, id_key, identifiers):
         return self._backend.search_for_ids(id_key, identifiers)
 
-    def index(self, document):
-        return self._backend.index(document)
+    def index(self, document, **kwargs):
+        return self._backend.index(document, **kwargs)
 
     def commit(self):
         return self._backend.commit()
