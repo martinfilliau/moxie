@@ -56,7 +56,8 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
 
     def import_data(self):
         try:
-            response = requests.get(self.url, timeout=self.timeout, config={'danger_mode': True})
+            response = requests.get(self.url, timeout=self.timeout)
+            response.raise_for_status()
         except RequestException as re:
             logger.warning('Error in request to Park & Ride info', exc_info=True,
                            extra={
