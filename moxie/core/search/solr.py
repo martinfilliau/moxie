@@ -166,17 +166,15 @@ class SolrSearch(object):
                 except:
                     json = None
                 if json and 'error' in json and 'msg' in json['error']:
-                    message = "HTTP {exception}: {msg}".format(exception=response.status_code,
+                    message = "Solr HTTP {exception}: {msg}".format(exception=response.status_code,
                                                                msg=json['error']['msg'])
                 else:
                     message = "General Solr error"
-                logger.error('Error in request to Solr', exc_info=True,
-                             extra={
-                                 'data': {
-                                     'url': url,
-                                     'message': message,
-                                     'params': params,
-                                     'headers': headers}})
+                logger.error(message, extra={
+                    'data': {
+                        'url': url,
+                        'params': params,
+                        'headers': headers}})
                 raise SearchServerException(message)
 
     def healthcheck(self):
