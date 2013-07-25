@@ -109,15 +109,14 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
                     parsed_services[service][2].append((proximity, diff))
 
             services = [(s[0], s[1][0], s[1][1], s[1][2]) for s in parsed_services.items()]
-            services.sort(key = lambda x: ( ' '*(5-len(x[0]) + (1 if x[0][-1].isalpha() else 0)) + x[0] ))
-            services.sort(key = lambda x: x[2][1])
+            services.sort(key=lambda x: (' '*(5-len(x[0]) + (1 if x[0][-1].isalpha() else 0)) + x[0]))
+            services.sort(key=lambda x: x[2][1])
 
-            services = [{
-                            'service': s[0],
-                            'destination': s[1],
-                            'next': s[2][0],
-                            'following': [f[0] for f in s[3]],
-                            } for s in services]
+            services = [{'service': s[0],
+                         'destination': s[1],
+                         'next': s[2][0],
+                         'following': [f[0] for f in s[3]],
+                         } for s in services]
 
             # messages that can be displayed (bus stop)
             cells = xml.findall('.//table')[0].findall('tr/td')
