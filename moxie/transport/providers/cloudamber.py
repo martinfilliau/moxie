@@ -78,9 +78,9 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
         """
         Parse HTML content from a CloudAmber page
         @param content: HTML content
-        @return: dictionary of services, messages
+        @return: list of services, messages
         """
-        services = {}
+        services = []
         messages = []
         try:
             xml = etree.fromstring(content, parser=etree.HTMLParser())
@@ -90,6 +90,8 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
             # retrieved all cells, splitting every CELLS_PER_ROW to get rows
             CELLS_PER_ROW = 5
             rows = [cells[i:i+CELLS_PER_ROW] for i in range(0, len(cells), CELLS_PER_ROW)]
+
+            parsed_services = {}
 
             for row in rows:
                 service, destination, proximity = [row[i].text.encode('utf8').replace('\xc2\xa0', '')
@@ -101,12 +103,12 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
 
                 if not service in services:
                     # first departure of this service
-                    services[service] = (destination, (proximity, diff), [])
+                    parsed_services[service] = (destination, (proximity, diff), [])
                 else:
                     # following departure of this service
-                    services[service][2].append((proximity, diff))
+                    parsed_services[service][2].append((proximity, diff))
 
-            services = [(s[0], s[1][0], s[1][1], s[1][2]) for s in services.items()]
+            services = [(s[0], s[1][0], s[1][1], s[1][2]) for s in parsed_services.items()]
             services.sort(key = lambda x: ( ' '*(5-len(x[0]) + (1 if x[0][-1].isalpha() else 0)) + x[0] ))
             services.sort(key = lambda x: x[2][1])
 
