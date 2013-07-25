@@ -2,6 +2,7 @@ import logging
 import requests
 from requests.exceptions import RequestException
 import json
+import time
 
 from moxie.core.search import SearchResponse, SearchServerException
 from moxie.core.metrics import statsd
@@ -60,7 +61,7 @@ class SolrSearch(object):
         headers = {'Content-Type': self.content_types['form']}
         results = self.connection(self.methods['select'],
                 data=data, headers=headers)
-        return SolrSearchResponse(results.json)
+        return SolrSearchResponse(results.json())
 
     def suggest(self, query):
         params = {'q': query}
@@ -79,7 +80,7 @@ class SolrSearch(object):
         params = { 'ids': ids }
         results = self.connection(self.methods['get'],
             params=params)
-        return SolrSearchResponse(results.json)
+        return SolrSearchResponse(results.json())
 
     def index(self, document, params=None, count_per_page=50):
         """Index a list of objects, do paging
@@ -91,7 +92,11 @@ class SolrSearch(object):
             self.index_all(document, params)
         else:
             for i in range(0, len(document), count_per_page):
-                self.index_all(document[i:i+count_per_page], params)
+                try:
+                    self.index_all(document[i:i+count_per_page], params)
+                except SearchServerException:
+                    logger.error("Error in batch indexing", exc_info=True)
+                time.sleep(0.5)
 
     def index_all(self, document, params=None):
         """Index a list of objects
@@ -100,11 +105,8 @@ class SolrSearch(object):
         """
         data = json.dumps(document)
         headers = {'Content-Type': self.content_types[self.return_type]}
-        response = self.connection(self.methods['update'], params=params,
-            data=data, headers=headers)
-        if response.status_code != 200:
-            raise SearchServerException("Server returned HTTP {code}".format(
-                code=response.status_code))
+        self.connection(self.methods['update'], params=params,
+                        data=data, headers=headers)
 
     def commit(self):
         return self.connection(self.methods['update'],
@@ -142,31 +144,47 @@ class SolrSearch(object):
         try:
             with statsd.timer('core.search.solr.request'):
                 if data:
-                    return requests.post(url, data, headers=headers,
-                        params=params, timeout=self.DEFAULT_TIMEOUT,
-                        config={'danger_mode': True})
+                    response = requests.post(url, data, headers=headers,
+                                             params=params, timeout=self.DEFAULT_TIMEOUT)
                 else:
-                    return requests.get(url, headers=headers,
-                        params=params, timeout=self.DEFAULT_TIMEOUT,
-                        config={'danger_mode': True})
+                    response = requests.get(url, headers=headers,
+                                            params=params, timeout=self.DEFAULT_TIMEOUT)
         except RequestException as re:
             logger.error('Error in request to Solr', exc_info=True,
-                extra={
+                         extra={
+                             'data': {
+                                 'url': url,
+                                  'params': params,
+                                  'headers': headers}})
+            raise SearchServerException(re.message)
+        else:
+            if response.ok:
+                return response
+            else:
+                try:
+                    json = response.json()
+                except:
+                    json = None
+                if json and 'error' in json and 'msg' in json['error']:
+                    message = "Solr HTTP {exception}: {msg}".format(exception=response.status_code,
+                                                               msg=json['error']['msg'])
+                else:
+                    message = "General Solr error"
+                logger.error(message, extra={
                     'data': {
                         'url': url,
                         'params': params,
                         'headers': headers}})
-            raise SearchServerException("Search service not available")
+                raise SearchServerException(message)
 
     def healthcheck(self):
         try:
             response = requests.get('{url}{core}/{method}'.format(url=self.server_url,
-                core=self.core, method=self.methods['healthcheck']), timeout=2,
-                config={'danger_mode': True})
-            return response.ok, response.json['status']
+                core=self.core, method=self.methods['healthcheck']), timeout=2)
+            return response.ok, response.json()['status']
         except Exception as e:
-            return False, e
             logger.error('Error while checking health of Solr', exc_info=True)
+            return False, e
 
     @staticmethod
     def solr_escape(string):

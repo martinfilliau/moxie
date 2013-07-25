@@ -3,7 +3,7 @@ import requests
 import logging
 
 from moxie.core.service import Service
-from requests.auth import OAuth1
+from requests_oauthlib import OAuth1
 from flask import request, session
 
 
