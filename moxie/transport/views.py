@@ -2,7 +2,7 @@ import logging
 
 from datetime import timedelta
 
-from moxie.core.exceptions import BadRequest, ServiceUnavailable
+from moxie.core.exceptions import BadRequest, ServiceUnavailable, NotFound
 from moxie.core.cache import cache
 from moxie.core.views import ServiceView
 from moxie.core.service import NoSuitableProviderFound, MultipleProvidersFound, ProviderException
@@ -32,6 +32,8 @@ class RTI(ServiceView):
             msg = "MultipleProvidersFound for: %s (%s)" % (ident, rtitype)
             logger.critical(msg, exc_info=True)
             raise BadRequest(msg)
+        except NotFound:
+            raise NotFound("POI {ident} not found".format(ident=ident))
         else:
             services, messages, rtitype, title = rti_data
             response = {
