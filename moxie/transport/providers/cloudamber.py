@@ -101,7 +101,7 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
                 else:
                     diff = int(proximity.split(' ')[0])
 
-                if not service in services:
+                if not service in parsed_services:
                     # first departure of this service
                     parsed_services[service] = (destination, (proximity, diff), [])
                 else:
