@@ -15,6 +15,7 @@ class OxpointsImporter(object):
         'oxp_hasOSMIdentifier': 'osm',
         'oxp_hasFinanceCode': 'finance',
         'oxp_hasOBNCode': 'obn',
+        'oxp_hasLibraryDataId': 'librarydata'
     }
 
     # Alignment between OxPoints types we want to store and our hierarchy of types
