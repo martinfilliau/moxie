@@ -33,13 +33,13 @@ def policies(l, n):
     pol = {}
     if e is not None:
         for policy in e:
-            #pol[policy.get('for')] = {'access': POLICIES[policy.find('access').text],
-            #                          'borrowing': POLICIES[policy.find('borrowing').text],
-            #                          'notes': string_cleanup(policy.find('notes').text)}
-            pol[policy.get('for')] = "Admissions: {access}. Borrowings: {borrowing}. Notes: {notes}".format(
+            access = "Admissions: {access}. Borrowings: {borrowing}.".format(
                 access=POLICIES[policy.find('access').text],
-                borrowing=POLICIES[policy.find('borrowing').text],
-                notes=string_cleanup(policy.find('notes').text))
+                borrowing=POLICIES[policy.find('borrowing').text])
+            notes = string_cleanup(policy.find('notes').text)
+            if notes:
+                access = "{access} Notes: {notes}".format(access=access, notes=notes)
+            pol[policy.get('for')] = access
     return pol
 
 
