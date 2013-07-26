@@ -9,10 +9,14 @@ logger = logging.getLogger(__name__)
 rx = re.compile('\W+')
 
 
-def f(l, n):
+def text(l, n):
     e = l.find(n)
     if e is not None and e.text is not None:
-        return rx.sub(' ', e.text).strip()
+        return string_cleanup(e.text)
+
+
+def string_cleanup(str):
+    return rx.sub(' ', str).strip()
 
 
 class OxLibraryDataImporter(object):
@@ -25,11 +29,11 @@ class OxLibraryDataImporter(object):
     def run(self):
         xml = etree.parse(self.file)
         libraries = xml.xpath('.//library')
-        self.libs = [{'name': f(l, 'name'),
-         'id': f(l, 'id'),
-         'opening_hours_term_time': f(l, 'hours/termtime'),
-         'opening_hours_vacation': f(l, 'hours/vacation'),
-         'opening_hours_closed': f(l, 'hours/closed')} for l in libraries]
+        self.libs = [{'name': text(l, 'name'),
+                      'id': text(l, 'id'),
+                      'opening_hours_term_time': text(l, 'hours/termtime'),
+                      'opening_hours_vacation': text(l, 'hours/vacation'),
+                      'opening_hours_closed': text(l, 'hours/closed')} for l in libraries]
 
 
 def main():
