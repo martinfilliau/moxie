@@ -1,12 +1,13 @@
 import logging
 import re
+import unicodedata
 from lxml import etree
 
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
 
-rx = re.compile('\W+')
+rx = re.compile(' +')
 
 POLICIES = {
     '1': 'All',
@@ -42,9 +43,11 @@ def policies(l, n):
     return pol
 
 
-def string_cleanup(str):
-    if str:
-        return rx.sub(' ', str).strip()
+def string_cleanup(s):
+    if s:
+        if isinstance(s, unicode):
+            s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore')
+        return rx.sub(' ', s).strip()
     else:
         return None
 
