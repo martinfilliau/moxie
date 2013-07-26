@@ -24,6 +24,7 @@ def import_all(force_update_all=False):
         import_osm.delay(force_update=force_update_all)
         import_oxpoints.delay(force_update=force_update_all)
         import_naptan.delay(force_update=force_update_all)
+        import_ox_library_data.delay(force_update=force_update_all)
 
 
 @celery.task
