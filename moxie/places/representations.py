@@ -44,7 +44,7 @@ class POIRepresentation(Representation):
             values['lat'] = self.poi.lat
         if self.poi.alternative_names:
             values['alternative_names'] = self.poi.alternative_names
-        if self.poi.meta:
+        if getattr(self.poi, 'meta', False):
             for k, v in self.poi.meta.items():
                 values[k] = v
         return values
