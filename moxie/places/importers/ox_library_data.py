@@ -78,26 +78,36 @@ class OxLibraryDataImporter(object):
                      } for l in libraries]
 
     def index(self):
+        not_found = 0
+        imported = 0
         for lib in self.libs:
+            ident = "{key}:{value}".format(key=self.lib_data_identifier,
+                                           value=lib['id'])
             search_results = self.indexer.search_for_ids(self.identifier_key,
-                                                         "{key}:{value}".format(
-                                                             key=self.lib_data_identifier,
-                                                             value=lib['id']))
-            doc = search_results.results[0]
-            doc[self.prefix_index_key+'opening_hours_termtime'] = lib['opening_hours_termtime']
-            doc[self.prefix_index_key+'opening_hours_vacation'] = lib['opening_hours_vacation']
-            doc[self.prefix_index_key+'opening_hours_closed'] = lib['opening_hours_closed']
-            doc[self.prefix_index_key+'subject'] = lib['subjects']
-            if 'academic' in lib['policies']:
-                doc[self.prefix_index_key+'policy_academic'] = lib['policies']['academic']
-            if 'other' in lib['policies']:
-                doc[self.prefix_index_key+'policy_other'] = lib['policies']['other']
-            if 'postgraduate' in lib['policies']:
-                doc[self.prefix_index_key+'policy_postgraduate'] = lib['policies']['postgraduate']
-            if 'undergraduate' in lib['policies']:
-                doc[self.prefix_index_key+'policy_undergraduate'] = lib['policies']['undergraduate']
-            result = prepare_document(doc, search_results, self.precedence)
-            self.indexer.index([result])
+                                                         [ident])
+            if search_results.results:
+                doc = search_results.results[0]
+                doc[self.prefix_index_key+'opening_hours_termtime'] = lib['opening_hours_termtime']
+                doc[self.prefix_index_key+'opening_hours_vacation'] = lib['opening_hours_vacation']
+                doc[self.prefix_index_key+'opening_hours_closed'] = lib['opening_hours_closed']
+                doc[self.prefix_index_key+'subject'] = lib['subjects']
+                if 'academic' in lib['policies']:
+                    doc[self.prefix_index_key+'policy_academic'] = lib['policies']['academic']
+                if 'other' in lib['policies']:
+                    doc[self.prefix_index_key+'policy_other'] = lib['policies']['other']
+                if 'postgraduate' in lib['policies']:
+                    doc[self.prefix_index_key+'policy_postgraduate'] = lib['policies']['postgraduate']
+                if 'undergraduate' in lib['policies']:
+                    doc[self.prefix_index_key+'policy_undergraduate'] = lib['policies']['undergraduate']
+                doc['type'] = doc['type'][0]    # cannot be a list atm
+                result = prepare_document(doc, search_results, self.precedence)
+                self.indexer.index([result])
+                imported += 1
+            else:
+                logger.info('No results for {ident}'.format(ident=ident))
+                not_found += 1
+        logger.info('{imported} imported, {not_found} not found'.format(imported=imported,
+                                                                        not_found=not_found))
 
 
 def main():
