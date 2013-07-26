@@ -15,6 +15,12 @@ def text(l, n):
         return string_cleanup(e.text)
 
 
+def list(l, n):
+    e = l.findall(n)
+    if e is not None:
+        return [string_cleanup(s.text) for s in e if s is not None]
+
+
 def string_cleanup(str):
     return rx.sub(' ', str).strip()
 
@@ -33,7 +39,9 @@ class OxLibraryDataImporter(object):
                       'id': text(l, 'id'),
                       'opening_hours_term_time': text(l, 'hours/termtime'),
                       'opening_hours_vacation': text(l, 'hours/vacation'),
-                      'opening_hours_closed': text(l, 'hours/closed')} for l in libraries]
+                      'opening_hours_closed': text(l, 'hours/closed'),
+                      'subjects': list(l, 'subjects/subject')
+                     } for l in libraries]
 
 
 def main():
