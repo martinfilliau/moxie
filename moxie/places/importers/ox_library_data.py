@@ -8,6 +8,12 @@ logger = logging.getLogger(__name__)
 
 rx = re.compile('\W+')
 
+POLICIES = {
+    '1': 'All',
+    '2': 'Some',
+    '3': 'None'
+}
+
 
 def text(l, n):
     e = l.find(n)
@@ -21,8 +27,22 @@ def list(l, n):
         return [string_cleanup(s.text) for s in e if s is not None]
 
 
+def policies(l, n):
+    e = l.findall(n)
+    pol = {}
+    if e is not None:
+        for policy in e:
+            pol[policy.get('for')] = {'access': POLICIES[policy.find('access').text],
+                                      'borrowing': POLICIES[policy.find('borrowing').text],
+                                      'notes': string_cleanup(policy.find('notes').text)}
+    return pol
+
+
 def string_cleanup(str):
-    return rx.sub(' ', str).strip()
+    if str:
+        return rx.sub(' ', str).strip()
+    else:
+        return None
 
 
 class OxLibraryDataImporter(object):
@@ -40,7 +60,8 @@ class OxLibraryDataImporter(object):
                       'opening_hours_term_time': text(l, 'hours/termtime'),
                       'opening_hours_vacation': text(l, 'hours/vacation'),
                       'opening_hours_closed': text(l, 'hours/closed'),
-                      'subjects': list(l, 'subjects/subject')
+                      'subjects': list(l, 'subjects/subject'),
+                      'policies': policies(l, 'policies/policy')
                      } for l in libraries]
 
 
