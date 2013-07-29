@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 rx = re.compile(' +')
 
+# Values for policies from librarydata
 POLICIES = {
     '1': 'All',
     '2': 'Some',
