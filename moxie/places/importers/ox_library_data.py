@@ -9,6 +9,9 @@ logger = logging.getLogger(__name__)
 
 rx = re.compile(' +')
 
+# Normalization Form Compatibility Decomposition
+UNICODE_NORMALIZE = "NFKD"
+
 # Values for policies from librarydata
 POLICIES = {
     '1': 'All',
@@ -18,18 +21,34 @@ POLICIES = {
 
 
 def text(l, n):
+    """Handles a text node
+    :param l: XMLNode
+    :param n: occurrence to find
+    :return: string if node found
+    """
     e = l.find(n)
     if e is not None and e.text is not None:
         return string_cleanup(e.text)
 
 
 def list(l, n):
+    """Handles list of text nodes
+    :param l: XMLNode
+    :param n: occurrence to find
+    :return: list of string if nodes found
+    """
     e = l.findall(n)
     if e is not None:
         return [string_cleanup(s.text) for s in e if s is not None]
 
 
 def policies(l, n):
+    """Handles "policies" nodes
+    Transform/format XML structure in flat strings per policy
+    :param l: XMLNode
+    :param n: occurrence to find
+    :return: dict of policies
+    """
     e = l.findall(n)
     pol = {}
     if e is not None:
@@ -45,9 +64,14 @@ def policies(l, n):
 
 
 def string_cleanup(s):
+    """Cleanup string (removes multiple whitespaces...)
+    Normalize it if it is unicode
+    :param s: string (or unicode)
+    :return: string
+    """
     if s:
         if isinstance(s, unicode):
-            s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore')
+            s = unicodedata.normalize(UNICODE_NORMALIZE, s).encode('ascii', 'ignore')
         return rx.sub(' ', s).strip()
     else:
         return None
