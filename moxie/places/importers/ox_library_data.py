@@ -31,7 +31,7 @@ def text(l, n):
         return string_cleanup(e.text)
 
 
-def list(l, n):
+def subjects(l, n):
     """Handles list of text nodes
     :param l: XMLNode
     :param n: occurrence to find
@@ -39,7 +39,7 @@ def list(l, n):
     """
     e = l.findall(n)
     if e is not None:
-        return [string_cleanup(s.text) for s in e if s is not None]
+        return list(set(string_cleanup(s.text) for s in e if s is not None))
 
 
 def policies(l, n):
@@ -101,7 +101,7 @@ class OxLibraryDataImporter(object):
                       'opening_hours_termtime': text(l, 'hours/termtime'),
                       'opening_hours_vacation': text(l, 'hours/vacation'),
                       'opening_hours_closed': text(l, 'hours/closed'),
-                      'subjects': list(l, 'subjects/subject'),
+                      'subjects': subjects(l, 'subjects/subject'),
                       'policies': policies(l, 'policies/policy')
                      } for l in libraries]
 
