@@ -81,7 +81,7 @@ class OxLibraryDataImporter(object):
 
     def __init__(self, indexer, precedence, file, identifier_key='identifiers',
                  lib_data_identifier='librarydata',
-                 prefix_index_key='meta_library_'):
+                 prefix_index_key='_library_'):
         self.indexer = indexer
         self.precedence = precedence
         self.file = file

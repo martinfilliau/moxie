@@ -1,7 +1,7 @@
 from moxie.places.domain import POI
 
 
-def doc_to_poi(doc, meta_key="meta_"):
+def doc_to_poi(doc, fields_key="_"):
     """Transforms a document from Solr as a POI.
     :param doc: document from Solr
     :return POI object
@@ -26,8 +26,8 @@ def doc_to_poi(doc, meta_key="meta_"):
     if 'alternative_names' in doc:
         poi.alternative_names = doc['alternative_names']
     for key, val in doc.items():
-        if key.startswith(meta_key):
-            if not getattr(poi, 'meta', False):
-                poi.meta = {}
-            poi.meta[key.replace(meta_key, '')] = val
+        if key.startswith(fields_key):
+            if not getattr(poi, 'fields', False):
+                poi.fields = {}
+            poi.fields[key.replace(fields_key, '', 1)] = val
     return poi

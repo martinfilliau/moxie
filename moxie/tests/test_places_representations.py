@@ -113,16 +113,22 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
 
     def test_poi_no_meta(self):
         poi = POI('my:id', 'Name', '/type')
-        self.assertFalse(getattr(poi, 'meta', False))
+        self.assertFalse(getattr(poi, 'fields', False))
 
         doc = {'id': 'my:id', 'name': 'Name', 'type': '/type'}
         poi = doc_to_poi(doc)
-        self.assertIsNone(getattr(poi, 'meta', None))
+        self.assertIsNone(getattr(poi, 'fields', None))
 
     def test_doc_poi_meta(self):
-        doc = {'id': 'my:id', 'name': 'Name', 'type': '/type', 'my_meta_test': 'test'}
-        poi = doc_to_poi(doc, meta_key='my_meta_')
-        self.assertEqual(poi.meta['test'], 'test')
+        doc = {'id': 'my:id', 'name': 'Name', 'type': '/type', 'my_meta_test': 'test', 'my_meta_test_one': 'two'}
+        poi = doc_to_poi(doc, fields_key='my_meta_')
+        self.assertEqual(poi.fields['test'], 'test')
+        self.assertEqual(poi.fields['test_one'], 'two')
+
+        doc = {'id': 'my:id', 'name': 'Name', 'type': '/type', '_test': 'test', '_test_one': 'two'}
+        poi = doc_to_poi(doc, fields_key='_')
+        self.assertEqual(poi.fields['test'], 'test')
+        self.assertEqual(poi.fields['test_one'], 'two')
 
         representation = POIRepresentation(poi)
         self.assertEqual(representation.as_dict()['test'], 'test')
