@@ -15,11 +15,13 @@ logger = logging.getLogger(__name__)
 class POIService(Service):
     default_search = '*:*'
 
-    def __init__(self, nearby_excludes=None):
+    def __init__(self, nearby_excludes=None, prefix_keys="_"):
         """POI service
         :param nearby_excludes: list of types to exclude in a nearby search
+        :param prefix_keys: prefix used for keys not being in the schema of the search engine
         """
         self.nearby_excludes = nearby_excludes or []
+        self.prefix_keys = prefix_keys
 
     def get_results(self, original_query, location, start, count, type=None,
             types_exact=[], all_types=False):
@@ -79,7 +81,7 @@ class POIService(Service):
             facets = dict(izip(i, i))
         else:
             facets = None
-        return [doc_to_poi(r) for r in response.results], response.size, facets
+        return [doc_to_poi(r, self.prefix_keys) for r in response.results], response.size, facets
 
     def get_place_by_identifier(self, ident):
         """Get place by identifier
@@ -101,7 +103,7 @@ class POIService(Service):
         response = searcher.get_by_ids(idents)
         # First do a GET request by IDs
         if response.results:
-            return [doc_to_poi(result) for result in response.results]
+            return [doc_to_poi(result, self.prefix_keys) for result in response.results]
         else:
             # If no result, do a SEARCH request on IDs
             return self.search_places_by_identifiers(idents)
@@ -124,7 +126,7 @@ class POIService(Service):
         """
         response = searcher.search_for_ids("identifiers", idents)
         if response.results:
-            return [doc_to_poi(result) for result in response.results]
+            return [doc_to_poi(result, self.prefix_keys) for result in response.results]
         else:
             return None
 

@@ -11,6 +11,7 @@ from moxie.core.search import searcher
 from moxie.places.importers.osm import OSMHandler
 from moxie.places.importers.oxpoints import OxpointsImporter
 from moxie.places.importers.naptan import NaPTANImporter
+from moxie.places.importers.ox_library_data import OxLibraryDataImporter
 
 logger = logging.getLogger(__name__)
 BLUEPRINT_NAME = 'places'
@@ -23,6 +24,7 @@ def import_all(force_update_all=False):
         import_osm.delay(force_update=force_update_all)
         import_oxpoints.delay(force_update=force_update_all)
         import_naptan.delay(force_update=force_update_all)
+        import_ox_library_data.delay(force_update=force_update_all)
 
 
 @celery.task
@@ -76,3 +78,17 @@ def import_naptan(url=None, force_update=False):
             naptan.run()
         else:
             logger.info("Naptan hasn't been imported - resource not loaded")
+
+
+@celery.task
+def import_ox_library_data(url=None, force_update=False):
+    app = create_app()
+    with app.blueprint_context(BLUEPRINT_NAME):
+        url = url or app.config['LIBRARY_DATA_IMPORT_URL']
+        library_data = get_resource(url, force_update)
+        if library_data:
+            file = open(library_data)
+            importer = OxLibraryDataImporter(searcher, 10, file)
+            importer.run()
+        else:
+            logger.info("OxLibraryData hasn't been imported - resource not loaded")

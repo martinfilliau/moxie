@@ -5,8 +5,9 @@ from flask import Blueprint
 
 from moxie import create_app
 from moxie.transport.providers import TransportRTIProvider
-from moxie.places.representations import HALPOIRepresentation
+from moxie.places.representations import HALPOIRepresentation, POIRepresentation
 from moxie.places.domain import POI
+from moxie.places.solr import doc_to_poi
 from moxie.core.service import Service, NoSuitableProviderFound, ProviderService
 
 
@@ -109,3 +110,25 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
                 poi = HALPOIRepresentation(self.test_poi, 'places.poidetail')
                 poi = poi.as_dict()
                 self.assertFalse(any([link.startswith('rti') for link in poi['_links']]))
+
+    def test_poi_no_meta(self):
+        poi = POI('my:id', 'Name', '/type')
+        self.assertFalse(getattr(poi, 'fields', False))
+
+        doc = {'id': 'my:id', 'name': 'Name', 'type': '/type'}
+        poi = doc_to_poi(doc)
+        self.assertIsNone(getattr(poi, 'fields', None))
+
+    def test_doc_poi_meta(self):
+        doc = {'id': 'my:id', 'name': 'Name', 'type': '/type', 'my_meta_test': 'test', 'my_meta_test_one': 'two'}
+        poi = doc_to_poi(doc, fields_key='my_meta_')
+        self.assertEqual(poi.fields['test'], 'test')
+        self.assertEqual(poi.fields['test_one'], 'two')
+
+        doc = {'id': 'my:id', 'name': 'Name', 'type': '/type', '_test': 'test', '_test_one': 'two'}
+        poi = doc_to_poi(doc, fields_key='_')
+        self.assertEqual(poi.fields['test'], 'test')
+        self.assertEqual(poi.fields['test_one'], 'two')
+
+        representation = POIRepresentation(poi)
+        self.assertEqual(representation.as_dict()['test'], 'test')
