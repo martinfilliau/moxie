@@ -45,3 +45,16 @@ class NotFound(ApplicationException):
 
     status_code = 404
     message = "Not found"
+
+
+class Conflict(ApplicationException):
+
+    status_code = 409
+    message = "Conflict"
+
+
+class UnsupportedMediaType(ApplicationException):
+
+    status_code = 415
+    message = "Unsupported media type"
+
