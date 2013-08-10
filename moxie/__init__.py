@@ -18,11 +18,12 @@ from moxie.core.healthchecks import check_services
 from moxie.core.browser import RootView
 
 
-def create_app():
+def create_app(use_default_settings=True):
     app = Moxie(__name__)
     configurator = Configurator(app)
-    cfg_path = path.join(app.root_path, 'default_settings.yaml')
-    configurator.from_yaml(cfg_path)
+    if use_default_settings:
+        cfg_path = path.join(app.root_path, 'default_settings.yaml')
+        configurator.from_yaml(cfg_path)
     configurator.from_envvar('MOXIE_SETTINGS', silent=True)
 
     # logging configuration for Raven/Sentry
