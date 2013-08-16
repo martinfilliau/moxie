@@ -7,7 +7,7 @@ from werkzeug.exceptions import NotAcceptable
 from werkzeug.wrappers import BaseResponse
 from werkzeug.http import http_date
 
-from moxie.core.exceptions import ApplicationException, exception_handler
+from moxie.core.exceptions import ApplicationException, MethodNotAllowed, exception_handler
 from moxie.core.metrics import statsd
 
 
@@ -148,3 +148,27 @@ class ServiceView(View):
             return response
         else:
             return jsonify(response)
+
+class ServiceMethodView(ServiceView):
+    """
+    A ServiceView that dispatches to method-specific handlers.
+    """
+
+    allowable_methods = frozenset({'head', 'get', 'post',
+                                   'put', 'delete', 'patch'})
+
+    # This method based on flask.views.MethodView, but with support for
+    # returning a 405 Method Not Allowed response.
+    def handle_request(self, *args, **kwargs):
+        method = request.method.lower()
+        # Make sure the request method is in our whitelist of possible methods
+        if method not in self.allowable_methods:
+            raise MethodNotAllowed()
+        meth = getattr(self, method, None)
+        # if the request method is HEAD and we don't have a handler for it
+        # retry with GET
+        if meth is None and method == 'head':
+            meth = getattr(self, 'get', None)
+        if meth in (None, NotImplemented):
+            raise MethodNotAllowed()
+        return meth(*args, **kwargs)

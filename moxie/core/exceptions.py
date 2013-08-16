@@ -47,6 +47,12 @@ class NotFound(ApplicationException):
     message = "Not found"
 
 
+class MethodNotAllowed(ApplicationException):
+    
+    status_code = 405
+    message = "Method not allowed"
+
+
 class Conflict(ApplicationException):
 
     status_code = 409
