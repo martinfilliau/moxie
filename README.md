@@ -21,7 +21,7 @@ You can generate HTML documentation by running `make html` inside the `docs` dir
 Requirements
 ------------
 
-* Solr 4.0
+* Solr 4.4
 * Redis
 * pip (`easy_install pip`)
 
