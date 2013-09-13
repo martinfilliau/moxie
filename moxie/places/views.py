@@ -29,6 +29,7 @@ class Search(ServiceView):
         all_types = False
         if self.query:
             all_types = True
+            self.query = self.query.encode('utf8')
         if self.type and self.types_exact:
             raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
 
@@ -36,6 +37,7 @@ class Search(ServiceView):
         # Try to match the query to identifiers if it's a one word query,
         # useful when querying for bus stop naptan number
         # TODO pass the location to have the distance from the point
+
         if ' ' not in self.query:
             unique_doc = poi_service.search_places_by_identifiers(['*:{id}'.format(id=self.query)])
             if unique_doc:
