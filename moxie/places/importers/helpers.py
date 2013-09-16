@@ -5,6 +5,9 @@ import os
 from flask import _app_ctx_stack
 from werkzeug.local import LocalProxy
 
+from moxie.places.importers import OrderedDictYAMLLoader
+
+
 logger = logging.getLogger(__name__)
 
 #TODO managed keys should come from the configuration files
@@ -21,7 +24,7 @@ def get_types_dict():
     ctx = _app_ctx_stack.top
     types = getattr(ctx, 'places_types', None)
     if types is None:
-        types = yaml.load(open(os.path.join(os.path.dirname(__file__), '..', 'poi-types.yaml')))
+        types = yaml.load(open(os.path.join(os.path.dirname(__file__), '..', 'poi-types.yaml')), OrderedDictYAMLLoader)
         ctx.places_types = types
     return types
 types = LocalProxy(get_types_dict)
