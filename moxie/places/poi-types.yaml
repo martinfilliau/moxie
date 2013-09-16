@@ -3,18 +3,12 @@ university:
     name_plural: University
     description: Libraries, Colleges, Departments...
     types:
-        building:
-          name_singular: Building
-          name_plural: Buildings
         college:
           name_singular: College
           name_plural: Colleges
         department:
           name_singular: Department
           name_plural: Departments
-        division:
-          name_singular: Division
-          name_plural: Divisions
         library:
           name_singular: Library
           name_plural: Librairies
@@ -22,15 +16,15 @@ university:
             sub-library:
               name_singular: Sub-library
               name_plural: Sub-librairies
-        unit:
-          name_singular: Unit
-          name_plural: Units
+        division:
+          name_singular: Division
+          name_plural: Divisions
+        building:
+          name_singular: Building
+          name_plural: Buildings
         room:
           name_singular: Room
           name_plural: Rooms
-        faculty:
-          name_singular: Faculty
-          name_plural: Faculties
         space:
           name_singular: Space
           name_plural: Spaces
