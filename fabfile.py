@@ -113,6 +113,12 @@ def deploy_front(version):
         run('compass compile')
         run('r.js -o app/moxie.build.js')
         sed("index-prod.html", "\{\{build\}\}", git_hash)
+        run('ln -s %s %s' % ('{path}/app/main-built.js'.format(path=versioned_path),
+                             '{path}/app/main-built-{version}.js'.format(path=versioned_path,
+                                                                         version=git_hash)))
+        run('ln -s %s %s' % ('{path}/css/app.css'.format(path=versioned_path),
+                             '{path}/css/app-{version}.css'.format(path=versioned_path,
+                                                                   version=git_hash)))
         if env.environment in ['staging', 'production']:
             run('ln -s %s %s' % ('index-prod.html', 'index.html'))
         else:
@@ -171,4 +177,4 @@ def git_branch(git_checkout, git_repo, name):
     with cd(git_checkout):
         run('git fetch origin')
         run('git checkout origin/%s' % name)
-        return run('git rev-parse HEAD')
+        return run('git rev-parse --short HEAD')
