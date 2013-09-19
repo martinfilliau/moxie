@@ -116,6 +116,8 @@ def deploy_front(version):
         FILES = [
             ('{path}/app/main-built.js', '{path}/app/main-built-{version}.js'),
             ('{path}/css/app.css', '{path}/css/app-{version}.css'),
+            ('css/leaflet.css', 'css/leaflet-{version}.css'),
+            ('css/leaflet.ie.css', 'css/leaflet.ie-{version}.css')
         ]
         for file in FILES:
             run('ln -s %s %s' % (file[0].format(path=versioned_path),
