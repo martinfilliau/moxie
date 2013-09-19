@@ -113,12 +113,14 @@ def deploy_front(version):
         run('compass compile')
         run('r.js -o app/moxie.build.js')
         sed("index-prod.html", "\{\{build\}\}", git_hash)
-        run('ln -s %s %s' % ('{path}/app/main-built.js'.format(path=versioned_path),
-                             '{path}/app/main-built-{version}.js'.format(path=versioned_path,
-                                                                         version=git_hash)))
-        run('ln -s %s %s' % ('{path}/css/app.css'.format(path=versioned_path),
-                             '{path}/css/app-{version}.css'.format(path=versioned_path,
-                                                                   version=git_hash)))
+        FILES = [
+            ('{path}/app/main-built.js', '{path}/app/main-built-{version}.js'),
+            ('{path}/css/app.css', '{path}/css/app-{version}.css'),
+        ]
+        for file in FILES:
+            run('ln -s %s %s' % (file[0].format(path=versioned_path),
+                                 file[1].format(path=versioned_path, version=git_hash)))
+
         if env.environment in ['staging', 'production']:
             run('ln -s %s %s' % ('index-prod.html', 'index.html'))
         else:
