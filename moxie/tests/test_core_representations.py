@@ -20,7 +20,7 @@ class RepresentationsTestCase(unittest.TestCase):
     def test_hal_json_helper_representation(self):
         representation = HALRepresentation({'a':'b'})
         representation.add_link('self', '/a/b')
-        representation.add_link('list', '/list', templated="true")
+        representation.add_link('list', '/list', templated=True)
         representation.update_link('child', '/child/1')
         representation.update_link('child', '/child/2')
         representation.add_curie('cu', 'http://curie.com')
@@ -28,9 +28,9 @@ class RepresentationsTestCase(unittest.TestCase):
             links={'self':{'href':'a'}}).as_dict()])
         self.assertDictContainsSubset({'_links': {
             'self': {'href': '/a/b'},
-            'list': {'href': '/list', 'templated': 'true'},
+            'list': {'href': '/list', 'templated': True},
             'child': [{'href': '/child/1'}, {'href': '/child/2'}],
-            'curie': {'href': 'http://curie.com', 'name': 'cu', 'templated': 'true'}}},
+            'curie': {'href': 'http://curie.com', 'name': 'cu', 'templated': True}}},
             representation.as_dict())
         self.assertDictContainsSubset(
             {'_embedded': {'rel': [{'embed': 'yes',
