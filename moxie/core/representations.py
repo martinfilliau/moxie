@@ -76,7 +76,7 @@ class HALRepresentation(Representation):
         :param name: name of the curie
         :param href: url of the curie
         """
-        self.add_link('curie', href, name=name, templated='true')
+        self.add_link('curie', href, name=name, templated=True)
         
     def add_embed(self, rel, value):
         """Add embedded documents
