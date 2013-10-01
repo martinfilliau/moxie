@@ -5,7 +5,7 @@ import os
 from flask import _app_ctx_stack
 from werkzeug.local import LocalProxy
 
-from moxie.places.importers import OrderedDictYAMLLoader
+from moxie.places.importers.loaders import OrderedDictYAMLLoader
 
 
 logger = logging.getLogger(__name__)
