@@ -132,3 +132,8 @@ class PlacesRepresentationsTestCase(unittest.TestCase):
 
         representation = POIRepresentation(poi)
         self.assertEqual(representation.as_dict()['test'], 'test')
+
+    def test_doc_poi_meta_blacklist(self):
+        doc = {'id': 'my:id', 'name': 'Name', 'type': '/type', '_test': 'test', '_test_one': 'two', '_version_': 12029448}
+        poi = doc_to_poi(doc, fields_key='_')
+        self.assertNotIn('version_', poi.fields)
