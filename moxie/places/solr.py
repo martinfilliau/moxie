@@ -1,5 +1,8 @@
 from moxie.places.domain import POI
 
+# fields specific to Solr that should be ignored
+SOLR_IGNORE_FIELDS = ['_version_',]
+
 
 def doc_to_poi(doc, fields_key="_"):
     """Transforms a document from Solr as a POI.
@@ -26,7 +29,7 @@ def doc_to_poi(doc, fields_key="_"):
     if 'alternative_names' in doc:
         poi.alternative_names = doc['alternative_names']
     for key, val in doc.items():
-        if key.startswith(fields_key):
+        if key.startswith(fields_key) and key not in SOLR_IGNORE_FIELDS:
             if not getattr(poi, 'fields', False):
                 poi.fields = {}
             poi.fields[key.replace(fields_key, '', 1)] = val
