@@ -110,7 +110,7 @@ def deploy_front(version):
     run('cp -R {0}/* {1}'.format(
         env.remote_git_checkout_front, versioned_path))
     with(cd(versioned_path)):
-        run('compass compile')
+        run('compass compile -e production --force')
         run('r.js -o app/moxie.build.js')
         sed("index-prod.html", "\{\{build\}\}", git_hash)
         FILES = [
