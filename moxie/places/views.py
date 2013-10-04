@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import request, current_app, url_for, redirect
 from werkzeug.wrappers import BaseResponse
 
@@ -84,6 +85,8 @@ class PoiDetail(ServiceView):
 class Types(ServiceView):
     """Display list of all types from the configuration.
     """
+
+    expires = timedelta(days=1)
 
     def handle_request(self):
         poi_service = POIService.from_context()
