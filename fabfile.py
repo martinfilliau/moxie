@@ -112,6 +112,8 @@ def deploy_front(version):
     with(cd(versioned_path)):
         run('compass compile -e production --force')
         run('r.js -o app/moxie.build.js')
+        # adding the URL of the git repo for the JS client as the first line of the built file
+        run("sed -i '1s/^/\/\/ https:\/\/github.com\/ox-it\/moxie-js-client\\n/' app/main-built.js")
         sed("index-prod.html", "\{\{build\}\}", git_hash)
         FILES = [
             ('{path}/app/main-built.js', '{path}/app/main-built-{version}.js'),
