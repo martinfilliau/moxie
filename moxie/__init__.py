@@ -13,6 +13,7 @@ except ImportError:
 from moxie.core.configurator import Configurator
 from moxie.core.cache import cache
 from moxie.core.metrics import statsd
+from moxie.core.db import db
 from moxie.core.app import Moxie
 from moxie.core.healthchecks import check_services
 from moxie.core.browser import RootView
@@ -37,6 +38,7 @@ def create_app():
 
     statsd.init_app(app)
     cache.init_app(app)
+    db.init_app(app)
 
     # Static URL Route for API Health checks
     app.add_url_rule('/_health', view_func=check_services)
