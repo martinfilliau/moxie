@@ -8,13 +8,15 @@ from moxie.authentication import HMACView
 class DummyUser(object):
     def __init__(self, secret_key):
         self.secret_key = secret_key
+        self.name = 'Dave'
 
 
 class TestAuthenticatedView(HMACView):
 
     def handle_request(self):
-        if self._check_auth(DummyUser('mysupersecretkey')):
-            return {'name': 'Dave'}
+        one_user = DummyUser('mysupersecretkey')
+        if self.check_auth(one_user.secret_key):
+            return {'name': one_user.name}
 
     @accepts('foo/bar')
     def basic_response(self, response):

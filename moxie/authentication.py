@@ -25,6 +25,21 @@ class HMACSignatureMismatch(ApplicationException):
 
 
 class HMACView(ServiceView):
+    """ServiceView with some helper methods for calculating a HMAC
+    (Keyed-Hashing for Message Authentication).
+
+        http://www.ietf.org/rfc/rfc2104.txt
+
+    This ServiceView handles only calculating a HMAC from a given shared secret
+    between the service and user. It does not specify where the shared secret
+    is scored or how to access it. This is the responsibility of the service
+    itself.
+
+    HMAC Signatures are created from the request headers specified in
+    ``HMACView._HMAC_HEADERS``. The template used to assemble the canonical
+    representation (before creating a signature) is specified in
+    ``HMACView._HMAC_TEMPLATE``.
+    """
     _HMAC_HEADERS = ['date', 'x-hmac-nonce']
     _HMAC_TEMPLATE = """{method}\n{url}\n{headers}"""
 
@@ -47,9 +62,17 @@ class HMACView(ServiceView):
         representation = self._HMAC_TEMPLATE.format(**context)
         return representation
 
-    def _check_auth(self, user):
+    def check_auth(self, secret):
+        """Call with the shared secret between the service and user,
+        ``check_auth`` will create the HMAC Signature for the current
+        ``flask.request`` and check it aligns with the one provided.
+
+        If the signatures are equal (an authorised request) returns True.
+        Otherwise raises ``HMACSignatureMismatch`` with the reason for the
+        failure.
+        """
         rep = self._get_canonical_rep()
-        hmac_hash = hmac.new(user.secret_key, rep, sha1)
+        hmac_hash = hmac.new(secret, rep, sha1)
         request_hash = request.headers['Authorization']
         if request_hash == hmac_hash.hexdigest():
             return True
