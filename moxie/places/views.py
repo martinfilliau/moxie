@@ -21,7 +21,7 @@ class Search(ServiceView):
         else:
             default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
             location = (request.args.get('lat', default_lat),
-                    request.args.get('lon', default_lon))
+                        request.args.get('lon', default_lon))
         self.query = request.args.get('q', '')
         self.type = request.args.get('type', None)
         self.types_exact = request.args.getlist('type_exact')
