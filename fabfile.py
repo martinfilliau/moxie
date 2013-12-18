@@ -35,7 +35,7 @@ def dev():
     env.environment = 'dev'
     env.hosts = ['new-mox.vm']
     env.user = 'moxie'
-    env.remote_install_dir_api = '/srv/moxie/precise32.oucs.ox.ac.uk'
+    env.remote_install_dir_api = '/srv/moxie/new-mox.vm'
     env.remote_git_checkout_api = '/srv/moxie/source-moxie'
     env.remote_install_dir_front = '/srv/moxie/js.mox'
     env.remote_git_checkout_front = '/srv/moxie/source-moxie-js'
