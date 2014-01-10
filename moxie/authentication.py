@@ -50,6 +50,9 @@ class HMACView(ServiceView):
                 headers.append("%s:%s" % (
                     header.lower(), request.headers[header])
                 )
+            # Test the authorization header is included
+            # however we don't include it in our signature
+            request.headers['authorization']
         except KeyError as e:
             raise HMACSignatureMismatch(
                 reason="missing header: %s" % e.message)
