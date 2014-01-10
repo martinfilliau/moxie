@@ -9,12 +9,11 @@ Welcome to Moxie API's documentation!
 HTTP API
 ------------------
 
-Specification
-
 .. toctree::
     :maxdepth: 1
 
     http_api/specification
+    http_api/authentication
 
 Endpoints
 
