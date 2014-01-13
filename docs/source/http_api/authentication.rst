@@ -35,18 +35,18 @@ of a HTTP request looks like this::
 
 All of the canonical representation is in **lowercase**.
 
-Where `method` is the HTTP method being invoked for example get, post, put,
-delete. `url` is the absolute URL being requested. `headers` is the only tricky
-part. Some of the HTTP request headers are included in the canonical
-representation. For Moxie we require the `Date` header and a special header, the
-`X-HMAC-Nonce` (in the canonical representation both of these will be lowercase
-of course). They are included in the following format::
+Where ``method`` is the HTTP method being invoked for example get, post, put,
+delete. ``url`` is the absolute URL being requested. ``headers`` is the only
+tricky part. Some of the HTTP request headers are included in the canonical
+representation. For Moxie we require the ``Date`` header and a special header,
+the ``X-HMAC-Nonce`` (in the canonical representation both of these will be
+lowercase of course). They are included in the following format::
 
     date:{date}
     x-hmac-nonce:{nonce}
 
 The values of these headers is the responsibility of the client making the
-request. However we recommend following the HTTP spec and include a `Date` in
+request. However we recommend following the HTTP spec and include a ``Date`` in
 the standard format, such as "Wed, 15 Nov 2013 06:25:24 GMT". Perhaps more
 important is the usage of a good `Cryptographic Nonce
 <http://en.wikipedia.org/wiki/Cryptographic_nonce>`__. Good options for a nonce
@@ -66,12 +66,12 @@ Step 2. Generating the HMAC
 ---------------------------
 
 As mentioned before HMAC requires the use of a hashing function. We use the
-`SHA-1` hashing function.
+``SHA-1`` hashing function.
 
 This step depends on your toolset, find your preferable hmac function and call
-it with the `SHA-1` algorithm and your shared secret as the hash key and the
-canonical representation built above as the message to be hashed. Here are a few
-possible ways to run this
+it with the ``SHA-1`` algorithm and your shared secret as the hash key and the
+canonical representation built above as the message to be hashed. Here are a
+few possible ways to run this
 
  - Python - `hmac <http://docs.python.org/2/library/hmac.html>`__
  - PHP - `hash_hmac <http://php.net/manual/en/function.hash-hmac.php>`__
@@ -83,10 +83,10 @@ the digest.
 Step 3. Making the request
 --------------------------
 
-Set the `Authorization` HTTP header on your request to the hexidecimal digest
-value from the previous step. Also set a custom `X-Moxie-Key` header to the
-value of your API key, this is used to identify your request. Your complete HTTP
-request should look similar to this::
+Set the ``Authorization`` HTTP header on your request to the hexidecimal digest
+value from the previous step. Also set a custom ``X-Moxie-Key`` header to the
+value of your API key, this is used to identify your request. Your complete
+HTTP request should look similar to this::
 
     POST /alert HTTP/1.1
     Host: api.m.ox.ac.uk
@@ -97,10 +97,10 @@ request should look similar to this::
     Content-Type: application/json
 
 Should your request fail and you receive a 401. There should be a
-`WWW-Authenticate` header which will provide a "reason" why your request failed.
-This also describes how to make requests on the API::
+``WWW-Authenticate`` header which will provide a "reason" why your request
+failed. This also describes how to make requests on the API::
 
 
     WWW-Authenticate: HMACDigest realm="HMACDigest Moxie", reason="missing header: HTTP_AUTHORIZATION", algorithm="HMAC-SHA-1", 
 
-So this request failed because they missed the `Authorization` header.
+So this request failed because they missed the ``Authorization`` header.
