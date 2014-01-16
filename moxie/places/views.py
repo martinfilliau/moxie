@@ -25,13 +25,6 @@ class Search(ServiceView):
 
         location = (float(location[0]), float(location[1]))
 
-        if location[0] < -90 or location[0] > 90 or location[1] < -180 or location[1] > 180:
-            # attempt to reverse lat and lon as it seems that it does happen sometimes?
-            print "reversing"
-            location = (location[1], location[0])
-
-        print location
-
         if (location[0] < -90 or location[0] > 90) or (location[1] < -180 or location[1] > 180):
             raise BadRequest("Latitude should range between -90 and 90, Longitude should range between -180 and 180")
 
