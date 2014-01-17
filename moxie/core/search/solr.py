@@ -156,7 +156,7 @@ class SolrSearch(object):
                                  'url': url,
                                   'params': params,
                                   'headers': headers}})
-            raise SearchServerException(re.message)
+            raise SearchServerException(re.message, status_code=response.status_code)
         else:
             if response.ok:
                 return response
@@ -175,7 +175,7 @@ class SolrSearch(object):
                         'url': url,
                         'params': params,
                         'headers': headers}})
-                raise SearchServerException(message)
+                raise SearchServerException(message, status_code=response.status_code)
 
     def healthcheck(self):
         try:
