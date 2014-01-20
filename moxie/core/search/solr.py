@@ -152,10 +152,9 @@ class SolrSearch(object):
         except RequestException as re:
             logger.error('Error in request to Solr', exc_info=True,
                          extra={
-                             'data': {
-                                 'url': url,
-                                  'params': params,
-                                  'headers': headers}})
+                             'data': {'url': url,
+                                      'params': params,
+                                      'headers': headers}})
             # has to cast to str as sometimes the message is not a string..
             raise SearchServerException(str(re.message))
         else:
