@@ -156,7 +156,7 @@ class SolrSearch(object):
                                  'url': url,
                                   'params': params,
                                   'headers': headers}})
-            raise SearchServerException(re.message, status_code=response.status_code)
+            raise SearchServerException(re.message)
         else:
             if response.ok:
                 return response
