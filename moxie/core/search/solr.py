@@ -155,8 +155,7 @@ class SolrSearch(object):
                              'data': {'url': url,
                                       'params': params,
                                       'headers': headers}})
-            # has to cast to str as sometimes the message is not a string..
-            raise SearchServerException(str(re.message))
+            raise SearchServerException()
         else:
             if response.ok:
                 return response
