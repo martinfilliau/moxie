@@ -119,7 +119,7 @@ class OAuth1Service(Service):
         url = urlparse.urljoin(self.oauth_endpoint, self.authorize_path)
         params = {token_param: token}
         request = requests.Request(url=url, params=params)
-        return request.full_url
+        return request.url
 
     def verify(self, verifier):
         """Sends a signed request to the OAuth server trading in your temporary
