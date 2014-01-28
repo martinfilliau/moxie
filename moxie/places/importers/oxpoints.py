@@ -52,11 +52,16 @@ class OxpointsImporter(object):
             shapes_import.parse()
             self.shapes = shapes_import.shapes
         data = json.load(self.oxpoints_file)
+        documents = []
         for datum in data:
             try:
-                self.process_datum(datum)
+                doc = self.process_datum(datum)
+                if doc:
+                    documents.append(doc)
             except Exception as e:
                 logger.warning("Couldn't process an item.", exc_info=True)
+
+        self.indexer.index(documents)
         self.indexer.commit()
 
     def process_datum(self, datum):
@@ -148,8 +153,7 @@ class OxpointsImporter(object):
         search_results = self.indexer.search_for_ids(
             self.identifier_key, doc[self.identifier_key])
         result = prepare_document(doc, search_results, self.precedence)
-        result = [result]
-        self.indexer.index(result)
+        return result
 
 
 WKT = URIRef('http://data.ordnancesurvey.co.uk/ontology/geometry/asWKT')

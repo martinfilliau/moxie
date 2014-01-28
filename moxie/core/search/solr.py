@@ -106,7 +106,7 @@ class SolrSearch(object):
         data = json.dumps(document)
         headers = {'Content-Type': self.content_types[self.return_type]}
         self.connection(self.methods['update'], params=params,
-                        data=data, headers=headers)
+                        data=data, headers=headers, timeout=5)
 
     def commit(self):
         return self.connection(self.methods['update'],
@@ -131,12 +131,15 @@ class SolrSearch(object):
         query_string = {'q': " OR ".join(query)}
         return self.search(query_string, start=0, count=100)
 
-    def connection(self, method, params=None, data=None, headers=None):
+    def connection(self, method, params=None, data=None, headers=None, timeout=None):
         """Does a GET request if there is no data otherwise a POST
         :param params: URL parameters as a dict
         :param data: POST form
+        :param headers: custom headers to pass to Solr as a dict
+        :param timeout: custom timeout
         """
         headers = headers or dict()
+        timeout = timeout or self.DEFAULT_TIMEOUT
         params = params or dict()
         params['wt'] = self.return_type
         url = '{0}{1}/{2}'.format(self.server_url, self.core, method)
@@ -145,10 +148,10 @@ class SolrSearch(object):
             with statsd.timer('core.search.solr.request'):
                 if data:
                     response = requests.post(url, data, headers=headers,
-                                             params=params, timeout=self.DEFAULT_TIMEOUT)
+                                             params=params, timeout=timeout)
                 else:
                     response = requests.get(url, headers=headers,
-                                            params=params, timeout=self.DEFAULT_TIMEOUT)
+                                            params=params, timeout=timeout)
         except RequestException as re:
             logger.error('Error in request to Solr', exc_info=True,
                          extra={
