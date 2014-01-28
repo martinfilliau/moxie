@@ -1,5 +1,7 @@
 import json
 import logging
+import rdflib
+from rdflib.term import URIRef
 
 from moxie.places.importers.helpers import prepare_document
 
@@ -37,13 +39,18 @@ class OxpointsImporter(object):
         'Hall': '/university/hall',
     }
 
-    def __init__(self, indexer, precedence, oxpoints_file, identifier_key='identifiers'):
+    def __init__(self, indexer, precedence, oxpoints_file, shapes_file=None, identifier_key='identifiers'):
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
         self.oxpoints_file = oxpoints_file
+        self.shapes_file = shapes_file
 
     def import_data(self):
+        if self.shapes_file:
+            shapes_import = OxpointsShapesHelper(self.shapes_file)
+            shapes_import.parse()
+            self.shapes = shapes_import.shapes
         data = json.load(self.oxpoints_file)
         for datum in data:
             try:
@@ -73,6 +80,9 @@ class OxpointsImporter(object):
 
         if 'geo_lat' in datum and 'geo_long' in datum:
             doc['location'] = "%s,%s" % (datum.pop('geo_long'), datum.pop('geo_lat'))
+
+        if self.shapes and oxpoints_id in self.shapes:
+            doc['shape'] = self.shapes[oxpoints_id]
 
         ids = list()
         ids.append(doc['id'])
@@ -140,6 +150,31 @@ class OxpointsImporter(object):
         result = prepare_document(doc, search_results, self.precedence)
         result = [result]
         self.indexer.index(result)
+
+
+WKT = URIRef('http://data.ordnancesurvey.co.uk/ontology/geometry/asWKT')
+
+
+class OxpointsShapesHelper(object):
+
+    def __init__(self, file):
+        self.file = file
+        self.shapes = dict()
+
+    def parse(self):
+        g = rdflib.Graph()
+        result = g.parse(file=self.file, format="application/rdf+xml")
+        for s in result.subjects():
+            for l in g.objects(s, WKT):
+                self.process_subject_object(s, l)
+
+    @staticmethod
+    def _parse_uri(uri):
+        return uri.split('/')[4]
+
+    def process_subject_object(self, s, o):
+        oxpoints_id = self._parse_uri(s)
+        self.shapes[oxpoints_id] = o
 
 
 def main():

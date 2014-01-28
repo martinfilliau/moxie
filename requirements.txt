@@ -12,3 +12,4 @@ Flask-StatsD==0.1.1
 suds==0.4
 requests-oauthlib==0.3.2
 Flask-SQLAlchemy==1.0
+rdflib==4.1.0

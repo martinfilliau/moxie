@@ -55,11 +55,14 @@ def import_oxpoints(url=None, force_update=False):
     app = create_app()
     with app.blueprint_context(BLUEPRINT_NAME):
         url = url or app.config['OXPOINTS_IMPORT_URL']
+        url_shapes = app.config['OXPOINTS_SHAPES_URL']
         oxpoints = get_resource(url, force_update)
+        oxpoints_shape = get_resource(url_shapes, force_update, media_type='application/rdf+xml')
         if oxpoints:
             logger.info("OxPoints Downloaded - Stored here: %s" % oxpoints)
             oxpoints = open(oxpoints)
-            importer = OxpointsImporter(searcher, 10, oxpoints)
+            shapes = open(oxpoints_shape)
+            importer = OxpointsImporter(searcher, 10, oxpoints, shapes)
             importer.import_data()
         else:
             logger.info("OxPoints hasn't been imported - resource not loaded")
