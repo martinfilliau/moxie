@@ -149,7 +149,7 @@ def main():
     parser.add_argument('oxpointsfile', type=argparse.FileType('r'))
     ns = parser.parse_args()
     from moxie.core.search.solr import SolrSearch
-    solr = SolrSearch('places', 'http://33.33.33.10:8080/solr/')
+    solr = SolrSearch('places', 'http://new-mox.vm:8080/solr/')
     importer = OxpointsImporter(solr, 10, ns.oxpointsfile)
     importer.import_data()
 
