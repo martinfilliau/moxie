@@ -28,6 +28,8 @@ def doc_to_poi(doc, fields_key="_"):
         poi.parent = doc['child_of'][0]
     if 'alternative_names' in doc:
         poi.alternative_names = doc['alternative_names']
+    if 'shape' in doc:
+        poi.shape = doc['shape']
     for key, val in doc.items():
         if key.startswith(fields_key) and key not in SOLR_IGNORE_FIELDS:
             if not getattr(poi, 'fields', False):

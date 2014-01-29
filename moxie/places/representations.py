@@ -44,6 +44,8 @@ class POIRepresentation(Representation):
             values['lat'] = self.poi.lat
         if self.poi.alternative_names:
             values['alternative_names'] = self.poi.alternative_names
+        if self.poi.shape:
+            values['shape'] = self.poi.shape
         if getattr(self.poi, 'fields', False):
             for k, v in self.poi.fields.items():
                 values[k] = v
