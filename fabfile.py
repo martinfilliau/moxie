@@ -24,7 +24,7 @@ This script has to be used as follow:
 Environments
 """
 
-ENVIRONMENTS = ('dev', 'staging')
+ENVIRONMENTS = ('dev', 'staging', 'production')
 
 
 @task
@@ -35,7 +35,7 @@ def dev():
     env.environment = 'dev'
     env.hosts = ['new-mox.vm']
     env.user = 'moxie'
-    env.remote_install_dir_api = '/srv/moxie/new-mox.vm'
+    env.remote_install_dir_api = '/srv/moxie/api.mox'
     env.remote_git_checkout_api = '/srv/moxie/source-moxie'
     env.remote_install_dir_front = '/srv/moxie/js.mox'
     env.remote_git_checkout_front = '/srv/moxie/source-moxie-js'
@@ -43,16 +43,31 @@ def dev():
 
 
 @task
-def staging():
+def production():
     """
     Configuration for api.m.ox.ac.uk
     """
-    env.environment = 'staging'
+    env.environment = 'production'
     env.hosts = ['api.m.ox.ac.uk']
     env.user = 'moxie'
-    env.remote_install_dir_api = '/srv/moxie/torvalds.oucs.ox.ac.uk'
+    env.remote_install_dir_api = '/srv/moxie/api.m.ox.ac.uk'
     env.remote_git_checkout_api = '/srv/moxie/moxie-api'
     env.remote_install_dir_front = '/srv/moxie/new.m.ox.ac.uk'
+    env.remote_git_checkout_front = '/srv/moxie/moxie-js'
+    env.additional_requirements = '/srv/moxie/requirements.txt'
+
+
+@task
+def staging():
+    """
+    Configuration for new-mox-staging.oucs.ox.ac.uk
+    """
+    env.environment = 'staging'
+    env.hosts = ['new-mox-staging.oucs.ox.ac.uk']
+    env.user = 'moxie'
+    env.remote_install_dir_api = '/srv/moxie/api-mox-staging.oucs.ox.ac.uk'
+    env.remote_git_checkout_api = '/srv/moxie/moxie-api'
+    env.remote_install_dir_front = '/srv/moxie/new-mox-staging.oucs.ox.ac.uk'
     env.remote_git_checkout_front = '/srv/moxie/moxie-js'
     env.additional_requirements = '/srv/moxie/requirements.txt'
 
