@@ -72,7 +72,7 @@ class OSMHandler(handler.ContentHandler):
         if name == 'node':
             lon, lat = float(attrs['lon']), float(attrs['lat'])
             id = attrs['id']
-            self.node_location = lon, lat
+            self.node_location = lat, lon
             self.attrs = attrs
             self.id = id
             self.tags = {}

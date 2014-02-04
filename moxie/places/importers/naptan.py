@@ -91,7 +91,7 @@ class NaptanXMLHandler(ContentHandler):
             data[self.identifier_key] = [data['id']]
             lon, lat = (sa.pop('Location_Translation_Longitude'),
                     sa.pop('Location_Translation_Latitude'))
-            data['location'] = "%s,%s" % (lon, lat)
+            data['location'] = "%s,%s" % (lat, lon)
             data['name'] = sa['Name']
             data['type'] = "/transport/stop-area"
             self.stop_areas[sa['StopAreaCode']] = data
