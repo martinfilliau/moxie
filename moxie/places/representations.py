@@ -250,7 +250,9 @@ class GeoJsonPointsRepresentation(object):
         features = []
         for result in self.results:
             if result.shape:
-                f = Feature(geometry=wkt_loads(result.shape), properties={"name": result.name})
+                f = Feature(id=result.id,
+                            geometry=wkt_loads(result.shape),
+                            properties={"name": result.name})
                 features.append(f)
         return FeatureCollection(features)
 
