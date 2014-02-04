@@ -84,7 +84,7 @@ class OxpointsImporter(object):
         doc['type'] = self.OXPOINTS_TYPES[oxpoints_type]
 
         if 'geo_lat' in datum and 'geo_long' in datum:
-            doc['location'] = "%s,%s" % (datum.pop('geo_long'), datum.pop('geo_lat'))
+            doc['location'] = "%s,%s" % (datum.pop('geo_lat'), datum.pop('geo_long'))
 
         if self.shapes and oxpoints_id in self.shapes:
             doc['shape'] = self.shapes[oxpoints_id]
