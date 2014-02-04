@@ -1,11 +1,36 @@
 import json
 import logging
 import rdflib
+from rdflib import RDF
 from rdflib.term import URIRef
+from rdflib.namespace import DC
+
 
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
+
+
+class OxPoints(object):
+
+    _BASE = 'http://ns.ox.ac.uk/namespace/oxpoints/2009/02/owl#'
+    SITE = URIRef(_BASE+'Site')
+    COLLEGE = URIRef(_BASE+'College')
+    PRIMARY_PLACE = URIRef(_BASE+'primaryPlace')
+    HAS_OSM_IDENTIFIER = URIRef(_BASE+'hasOSMIdentifier')
+
+
+class Org(object):
+
+    _BASE = 'http://www.w3.org/ns/org#'
+    HAS_PRIMARY_SITE = URIRef(_BASE+"hasPrimarySite")
+
+
+class Geo(object):
+
+    _BASE = 'http://www.w3.org/2003/01/geo/wgs84_pos#'
+    LAT = URIRef(_BASE+'lat')
+    LONG = URIRef(_BASE+'long')
 
 
 class OxpointsImporter(object):
@@ -51,6 +76,15 @@ class OxpointsImporter(object):
             shapes_import = OxpointsShapesHelper(self.shapes_file)
             shapes_import.parse()
             self.shapes = shapes_import.shapes
+
+
+        g = rdflib.Graph()
+        self.graph = g.parse(file=self.oxpoints_file, format="application/rdf+xml")
+
+        colleges = self.process_colleges()
+        print colleges
+        return
+
         data = json.load(self.oxpoints_file)
         documents = []
         for datum in data:
@@ -63,6 +97,17 @@ class OxpointsImporter(object):
 
         self.indexer.index(documents)
         self.indexer.commit()
+
+    def process_colleges(self):
+        colleges = []
+        for college in self.graph.subjects(RDF.type, OxPoints.COLLEGE):
+            c = {}
+            c['name'] = str(self.graph.value(college, DC['title']))
+            site = self.graph.value(college, OxPoints.PRIMARY_PLACE)
+            c['lat'] = self.graph.value(site, Geo.LAT)
+            c['long'] = self.graph.value(site, Geo.LONG)
+            colleges.append(c)
+        return colleges
 
     def process_datum(self, datum):
         """
