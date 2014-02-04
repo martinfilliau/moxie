@@ -3,7 +3,7 @@ import logging
 from flask import url_for, jsonify
 from shapely.wkt import loads as wkt_loads
 from geojson import dumps as geojson_dumps
-from geojson import Feature, Point, FeatureCollection
+from geojson import Feature, FeatureCollection
 
 from moxie.core.representations import Representation, HALRepresentation, get_nav_links, RELATIONS_CURIE
 from moxie.places.importers.helpers import find_type_name
@@ -258,12 +258,3 @@ class GeoJsonPointsRepresentation(object):
 
     def as_json(self):
         return geojson_dumps(self.as_dict())
-
-
-def wkt_to_geojson(pt):
-    """Transforms a string as WKT to its GeoJSON representation
-    :param pt: string representing WKT
-    :returns string as geojson
-    """
-    wkt = wkt_loads(pt)
-    return geojson_dumps(wkt)
