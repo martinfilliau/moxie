@@ -32,7 +32,12 @@ class Geo(object):
     LAT = URIRef(_BASE+'lat')
     LONG = URIRef(_BASE+'long')
 
-WKT = URIRef('http://data.ordnancesurvey.co.uk/ontology/geometry/asWKT')
+
+class Geometry(object):
+
+    _BASE = 'http://data.ordnancesurvey.co.uk/ontology/geometry/'
+    AS_WKT = URIRef(_BASE+'asWKT')
+    EXTENT = URIRef(_BASE+'extent')
 
 
 class OxpointsImporter(object):
@@ -97,10 +102,13 @@ class OxpointsImporter(object):
         colleges = []
         for college in self.graph.subjects(RDF.type, OxPoints.COLLEGE):
             c = {}
-            c['name'] = str(self.graph.value(college, DC['title']))
+            c['name'] = self.graph.value(college, DC['title']).toPython()
             site = self.graph.value(college, OxPoints.PRIMARY_PLACE)
-            c['lat'] = self.graph.value(site, Geo.LAT)
-            c['long'] = self.graph.value(site, Geo.LONG)
+            c['lat'] = self.graph.value(site, Geo.LAT).toPython()
+            c['long'] = self.graph.value(site, Geo.LONG).toPython()
+            site_shape = self.graph.value(site, Geometry.EXTENT)
+            if site_shape:
+                c['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
             colleges.append(c)
         return colleges
 
