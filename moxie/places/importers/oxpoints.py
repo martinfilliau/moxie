@@ -32,6 +32,8 @@ class Geo(object):
     LAT = URIRef(_BASE+'lat')
     LONG = URIRef(_BASE+'long')
 
+WKT = URIRef('http://data.ordnancesurvey.co.uk/ontology/geometry/asWKT')
+
 
 class OxpointsImporter(object):
 
@@ -64,23 +66,16 @@ class OxpointsImporter(object):
         'Hall': '/university/hall',
     }
 
-    def __init__(self, indexer, precedence, oxpoints_file, shapes_file=None, identifier_key='identifiers'):
+    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, identifier_key='identifiers'):
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
-        self.oxpoints_file = oxpoints_file
-        self.shapes_file = shapes_file
+        graph = rdflib.Graph()
+        graph.parse(file=oxpoints_file, format="application/rdf+xml")
+        graph.parse(file=shapes_file, format="application/rdf+xml")
+        self.graph = graph
 
     def import_data(self):
-        if self.shapes_file:
-            shapes_import = OxpointsShapesHelper(self.shapes_file)
-            shapes_import.parse()
-            self.shapes = shapes_import.shapes
-
-
-        g = rdflib.Graph()
-        self.graph = g.parse(file=self.oxpoints_file, format="application/rdf+xml")
-
         colleges = self.process_colleges()
         print colleges
         return
@@ -201,7 +196,6 @@ class OxpointsImporter(object):
         return result
 
 
-WKT = URIRef('http://data.ordnancesurvey.co.uk/ontology/geometry/asWKT')
 
 
 class OxpointsShapesHelper(object):
