@@ -1,6 +1,9 @@
 import logging
 
 from flask import url_for, jsonify
+from shapely.wkt import loads as wkt_loads
+from geojson import dumps as geojson_dumps
+from geojson import Feature, Point, FeatureCollection
 
 from moxie.core.representations import Representation, HALRepresentation, get_nav_links, RELATIONS_CURIE
 from moxie.places.importers.helpers import find_type_name
@@ -236,3 +239,29 @@ class HALTypesRepresentation(TypesRepresentation):
         representation.add_curie('hl', RELATIONS_CURIE)
         representation.add_link('hl:search', url_for('places.search') + "?type={type}")
         return representation.as_dict()
+
+
+class GeoJsonPointsRepresentation(object):
+
+    def __init__(self, results):
+        self.results = results
+
+    def as_dict(self):
+        features = []
+        for result in self.results:
+            if result.shape:
+                f = Feature(geometry=wkt_loads(result.shape), properties={"name": result.name})
+                features.append(f)
+        return FeatureCollection(features)
+
+    def as_json(self):
+        return geojson_dumps(self.as_dict())
+
+
+def wkt_to_geojson(pt):
+    """Transforms a string as WKT to its GeoJSON representation
+    :param pt: string representing WKT
+    :returns string as geojson
+    """
+    wkt = wkt_loads(pt)
+    return geojson_dumps(wkt)
