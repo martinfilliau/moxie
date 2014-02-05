@@ -134,9 +134,6 @@ class OxpointsImporter(object):
         if 'geo_lat' in datum and 'geo_long' in datum:
             doc['location'] = "%s,%s" % (datum.pop('geo_lat'), datum.pop('geo_long'))
 
-        if self.shapes and oxpoints_id in self.shapes:
-            doc['shape'] = self.shapes[oxpoints_id]
-
         ids = list()
         ids.append(doc['id'])
 
@@ -202,30 +199,6 @@ class OxpointsImporter(object):
             self.identifier_key, doc[self.identifier_key])
         result = prepare_document(doc, search_results, self.precedence)
         return result
-
-
-
-
-class OxpointsShapesHelper(object):
-
-    def __init__(self, file):
-        self.file = file
-        self.shapes = dict()
-
-    def parse(self):
-        g = rdflib.Graph()
-        result = g.parse(file=self.file, format="application/rdf+xml")
-        for s in result.subjects():
-            for l in g.objects(s, WKT):
-                self.process_subject_object(s, l)
-
-    @staticmethod
-    def _parse_uri(uri):
-        return uri.split('/')[4]
-
-    def process_subject_object(self, s, o):
-        oxpoints_id = self._parse_uri(s)
-        self.shapes[oxpoints_id] = o
 
 
 def main():
