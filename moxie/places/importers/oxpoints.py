@@ -71,6 +71,22 @@ class OxpointsImporter(object):
             if homepage:
                 doc['website'] = homepage.toPython()
 
+            social_accounts = self._get_values_for_property(subject, FOAF['account'])
+            if social_accounts:
+                for account in social_accounts:
+                    if 'facebook.com' in account:
+                        doc['_social_facebook'] = account
+                    elif 'twitter.com' in account:
+                        doc['_social_twitter'] = account
+
+            logo = self.graph.value(subject, FOAF['logo'])
+            if logo:
+                doc['_picture_logo'] = logo.toPython()
+
+            depiction = self.graph.value(subject, FOAF['depiction'])
+            if depiction:
+                doc['_picture_depiction'] = depiction.toPython()
+
             search_results = self.indexer.search_for_ids(self.identifier_key, doc[self.identifier_key])
             result = prepare_document(doc, search_results, self.precedence)
 
