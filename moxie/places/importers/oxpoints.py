@@ -49,6 +49,14 @@ class Geometry(object):
     EXTENT = URIRef(_BASE+'extent')
 
 
+class Vcard(object):
+
+    _BASE = 'http://www.w3.org/2006/vcard/ns#'
+    STREET_ADDRESS = URIRef(_BASE+'street-address')
+    POSTAL_CODE = URIRef(_BASE+'postal-code')
+    ADR = URIRef(_BASE+'adr')
+
+
 class OxpointsImporter(object):
 
 
@@ -132,6 +140,12 @@ class OxpointsImporter(object):
             if alternative_names:
                 doc['alternative_names'] = alternative_names
 
+            address_node = self.graph.value(subject, Vcard.ADR)
+            if address_node:
+                address = self._get_address_for_subject(address_node)
+                if address:
+                    doc['address'] = address
+
             objects.append(doc)
         return objects
 
@@ -149,6 +163,16 @@ class OxpointsImporter(object):
                     val = val.split('/')[1]
                 ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
         return ids
+
+    def _get_address_for_subject(self, subject):
+        street_address = self.graph.value(subject, Vcard.STREET_ADDRESS)
+        postal_code = self.graph.value(subject, Vcard.POSTAL_CODE)
+
+        if street_address or postal_code:
+            address = "{0} {1}".format(street_address or '', postal_code or '')
+            return " ".join(address.split())
+        else:
+            return None
 
     def _get_values_for_property(self, subject, prop):
         """Find all the values for a given subject and property
@@ -168,16 +192,6 @@ class OxpointsImporter(object):
         """
 
         doc = dict()
-
-        """
-        Address properties:
-        "vCard_postal-code":"OX2 6JF",
-        "vCard_locality":"Oxford",
-        "vCard_extended-address":"St Antony's College",
-        "vCard_street-address":"62 Woodstock Road"},
-        """
-        address = "{0} {1}".format(datum.get("vCard_street-address", ""), datum.get("vCard_postal-code", ""))
-        doc['address'] = " ".join(address.split())
 
         doc['parent_of'] = []
         doc['child_of'] = []
