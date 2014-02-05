@@ -3,7 +3,7 @@ import logging
 import rdflib
 from rdflib import RDF
 from rdflib.term import URIRef
-from rdflib.namespace import DC
+from rdflib.namespace import DC, SKOS
 
 
 from moxie.places.importers.helpers import prepare_document
@@ -125,6 +125,12 @@ class OxpointsImporter(object):
 
             doc['identifiers'] = ids
 
+            alternative_names = set()
+            alternative_names.update(self._get_values_for_property(subject, SKOS['altLabel']))
+            alternative_names.update(self._get_values_for_property(subject, SKOS['hiddenLabel']))
+            if alternative_names:
+                doc['alternative_names'] = alternative_names
+
             objects.append(doc)
         return objects
 
@@ -142,6 +148,17 @@ class OxpointsImporter(object):
                     val = val.split('/')[1]
                 ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
         return ids
+
+    def _get_values_for_property(self, subject, prop):
+        """Find all the values for a given subject and property
+        :param subject: subject to inspect
+        :param prop: property to find
+        :return list of values for given property or empty list
+        """
+        values = []
+        for obj in self.graph.objects(subject, prop):
+            values.append(obj.toPython())
+        return values
 
     def process_datum(self, datum):
         """
