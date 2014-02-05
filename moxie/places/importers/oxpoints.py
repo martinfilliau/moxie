@@ -3,7 +3,7 @@ import rdflib
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF
 
-from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, Vcard
+from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, Vcard, Org
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -86,6 +86,14 @@ class OxpointsImporter(object):
             if depiction:
                 doc['_picture_depiction'] = depiction.toPython()
 
+            parent_of = self._find_inverse_relations(subject, Org.SUB_ORGANIZATION_OF)
+            if parent_of:
+                doc['parent_of'] = parent_of
+
+            child_of = self._find_relations(subject, Org.SUB_ORGANIZATION_OF)
+            if child_of:
+                doc['child_of'] = child_of
+
             search_results = self.indexer.search_for_ids(self.identifier_key, doc[self.identifier_key])
             result = prepare_document(doc, search_results, self.precedence)
 
@@ -106,6 +114,28 @@ class OxpointsImporter(object):
                     val = val.split('/')[1]
                 ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
         return ids
+
+    def _find_relations(self, subject, rel_type):
+        """Find relations between a given subject and predicate
+        :param subject: subject
+        :param rel_type: relation URiRef
+        :return list of string containing formatted OxPoints identifiers
+        """
+        relations = []
+        for s, p, o in self.graph.triples((subject, rel_type, None)):
+            relations.append('oxpoints:%s' % self._get_oxpoints_id(o))
+        return relations
+
+    def _find_inverse_relations(self, subject, rel_type):
+        """Find inverse relations between a given subject and predicate
+        :param subject: subject
+        :param rel_type: relation URiRef
+        :return list of string containing formatted OxPoints identifiers
+        """
+        relations = []
+        for s, p, o in self.graph.triples((None, rel_type, subject)):
+            relations.append('oxpoints:%s' % self._get_oxpoints_id(s))
+        return relations
 
     def _get_address_for_subject(self, subject):
         """Format an address from a given subject
