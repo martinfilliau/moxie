@@ -118,20 +118,27 @@ class OxpointsImporter(object):
             oxpoints_id = 'oxpoints:%s' % oxpoints_id
             doc['id'] = oxpoints_id
 
-            ids = list()
-            ids.append(oxpoints_id)
-
-            for oxp_property, identifier in OxPoints.IDENTIFIERS.items():
-                for obj in self.graph.objects(subject, oxp_property):
-                    val = obj
-                    if identifier == 'osm':
-                        val = val.split('/')[1]
-                    ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
-
+            ids = [oxpoints_id]
+            ids.extend(self._get_identifiers_for_subject(subject))
             doc['identifiers'] = ids
 
             objects.append(doc)
         return objects
+
+    def _get_identifiers_for_subject(self, subject):
+        """Find all identifiers for a given subject and
+        return them as a list of identifier_type:identifier_value
+        :param subject: subject (URI) to inspect
+        :return list of identifiers
+        """
+        ids = []
+        for oxp_property, identifier in OxPoints.IDENTIFIERS.items():
+            for obj in self.graph.objects(subject, oxp_property):
+                val = obj
+                if identifier == 'osm':
+                    val = val.split('/')[1]
+                ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
+        return ids
 
     def process_datum(self, datum):
         """
