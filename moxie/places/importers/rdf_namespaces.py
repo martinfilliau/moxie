@@ -25,6 +25,7 @@ class Org(object):
 
     _BASE = 'http://www.w3.org/ns/org#'
     HAS_PRIMARY_SITE = URIRef(_BASE+"hasPrimarySite")
+    SUB_ORGANIZATION_OF = URIRef(_BASE+"subOrganizationOf")
 
 
 class Geo(object):
