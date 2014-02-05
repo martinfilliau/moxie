@@ -74,7 +74,6 @@ class OxpointsImporter(object):
             oxpoints_id = 'oxpoints:%s' % oxpoints_id
             doc['id'] = oxpoints_id
             doc['type'] = defined_type
-            doc['meta_precedence'] = self.precedence     # TODO should use prepare_document
 
             ids = set()
             ids.add(oxpoints_id)
@@ -90,7 +89,7 @@ class OxpointsImporter(object):
                 if site_shape:
                     doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
 
-            doc['identifiers'] = list(ids)
+            doc[self.identifier_key] = list(ids)
 
             alternative_names = set()
             alternative_names.update(self._get_values_for_property(subject, SKOS['altLabel']))
@@ -108,7 +107,10 @@ class OxpointsImporter(object):
             if homepage:
                 doc['website'] = homepage.toPython()
 
-            objects.append(doc)
+            search_results = self.indexer.search_for_ids(self.identifier_key, doc[self.identifier_key])
+            result = prepare_document(doc, search_results, self.precedence)
+
+            objects.append(result)
         return objects
 
     def _get_identifiers_for_subject(self, subject):
