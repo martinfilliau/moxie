@@ -45,6 +45,8 @@ class OxpointsImporter(object):
         documents = []
         documents.extend(self.process_type(OxPoints.COLLEGE, '/university/college'))
         documents.extend(self.process_type(OxPoints.DEPARTMENT, '/university/department'))
+        documents.extend(self.process_type(OxPoints.LIBRARY, '/university/library'))
+        documents.extend(self.process_type(OxPoints.SUB_LIBRARY, '/university/sub-library'))
         self.indexer.index(documents)
         self.indexer.commit()
 

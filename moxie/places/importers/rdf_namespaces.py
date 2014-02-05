@@ -7,6 +7,8 @@ class OxPoints(object):
     SITE = URIRef(_BASE+'Site')
     COLLEGE = URIRef(_BASE+'College')
     DEPARTMENT = URIRef(_BASE+'Department')
+    LIBRARY = URIRef(_BASE+'Library')
+    SUB_LIBRARY = URIRef(_BASE+'SubLibrary')
     PRIMARY_PLACE = URIRef(_BASE+'primaryPlace')
     IDENTIFIERS = {
         _BASE+'hasOUCSCode': 'oucs',
