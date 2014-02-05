@@ -82,8 +82,8 @@ class OxpointsImporter(object):
 
     def import_data(self):
         documents = []
-        documents.extend(self.process_type(OxPoints.COLLEGE))
-        documents.extend(self.process_type(OxPoints.DEPARTMENT))
+        documents.extend(self.process_type(OxPoints.COLLEGE, '/university/college'))
+        documents.extend(self.process_type(OxPoints.DEPARTMENT, '/university/department'))
         print documents
         return
 
@@ -100,14 +100,15 @@ class OxpointsImporter(object):
         self.indexer.index(documents)
         self.indexer.commit()
 
-    def process_type(self, type):
+    def process_type(self, rdf_type, defined_type):
         objects = []
-        for subject in self.graph.subjects(RDF.type, type):
+        for subject in self.graph.subjects(RDF.type, rdf_type):
             doc = {}
             doc['name'] = self.graph.value(subject, DC['title']).toPython()
             oxpoints_id = subject.toPython().rsplit('/')[-1]
             oxpoints_id = 'oxpoints:%s' % oxpoints_id
             doc['id'] = oxpoints_id
+            doc['type'] = defined_type
 
             ids = set()
             ids.add(oxpoints_id)
@@ -166,46 +167,7 @@ class OxpointsImporter(object):
         @param datum: dict with item
         """
 
-        oxpoints_id = datum['uri'].rsplit('/')[-1]
-        oxpoints_type = datum['type'].rsplit('#')[-1]
-        name = datum.get('dc_title', datum.get('oxp_fullyQualifiedTitle', ''))
-
-        # Do not index items without name or not in the list of types defined
-        if not oxpoints_type in self.OXPOINTS_TYPES or not name:
-            return
-
         doc = dict()
-        doc['name'] = name
-        doc['id'] = 'oxpoints:{0}'.format(oxpoints_id)
-        doc['type'] = self.OXPOINTS_TYPES[oxpoints_type]
-
-        if 'geo_lat' in datum and 'geo_long' in datum:
-            doc['location'] = "%s,%s" % (datum.pop('geo_lat'), datum.pop('geo_long'))
-
-        ids = list()
-        ids.append(doc['id'])
-
-        for oxp_property, identifier in self.IDENTIFIERS.items():
-            if oxp_property in datum:
-                value = datum.pop(oxp_property)
-                if identifier == "osm":
-                    value = value.split('/')[1]
-                if type(value) is list:
-                    for val in value:
-                        ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
-                else:
-                    ids.append('{0}:{1}'.format(identifier, value.replace(' ', '-').replace('/', '-')))
-
-        doc['identifiers'] = ids
-
-        # Adding alternative names (alt, hidden) to the full-text search
-        alternative_names = set()
-        if 'skos_altLabel' in datum:
-            alternative_names.update(datum.get('skos_altLabel'))
-        if 'skos_hiddenLabel' in datum:
-            alternative_names.update(datum.get('skos_hiddenLabel'))
-        if alternative_names:
-            doc['alternative_names'] = list(alternative_names)
 
         """
         Address properties:
