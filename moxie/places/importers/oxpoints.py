@@ -45,7 +45,9 @@ class OxpointsImporter(object):
         documents = []
         documents.extend(self.process_type(OxPoints.COLLEGE, '/university/college'))
         documents.extend(self.process_type(OxPoints.DEPARTMENT, '/university/department'))
-        print documents
+        self.indexer.index(documents)
+        self.indexer.commit()
+
         return
 
         data = json.load(self.oxpoints_file)
@@ -70,6 +72,7 @@ class OxpointsImporter(object):
             oxpoints_id = 'oxpoints:%s' % oxpoints_id
             doc['id'] = oxpoints_id
             doc['type'] = defined_type
+            doc['meta_precedence'] = self.precedence     # TODO should use prepare_document
 
             ids = set()
             ids.add(oxpoints_id)
@@ -79,19 +82,19 @@ class OxpointsImporter(object):
             if site:
                 ids.update(self._get_identifiers_for_subject(site))
                 if (site, Geo.LAT, None) in self.graph and (site, Geo.LONG, None) in self.graph:
-                    doc['lat'] = self.graph.value(site, Geo.LAT).toPython()
-                    doc['long'] = self.graph.value(site, Geo.LONG).toPython()
+                    doc['location'] = "%s,%s" % (self.graph.value(site, Geo.LAT).toPython(),
+                                                 self.graph.value(site, Geo.LONG).toPython())
                 site_shape = self.graph.value(site, Geometry.EXTENT)
                 if site_shape:
                     doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
 
-            doc['identifiers'] = ids
+            doc['identifiers'] = list(ids)
 
             alternative_names = set()
             alternative_names.update(self._get_values_for_property(subject, SKOS['altLabel']))
             alternative_names.update(self._get_values_for_property(subject, SKOS['hiddenLabel']))
             if alternative_names:
-                doc['alternative_names'] = alternative_names
+                doc['alternative_names'] = list(alternative_names)
 
             address_node = self.graph.value(subject, Vcard.ADR)
             if address_node:
