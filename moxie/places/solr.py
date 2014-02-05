@@ -11,7 +11,7 @@ def doc_to_poi(doc, fields_key="_"):
     """
     poi = POI(doc['id'], doc['name'], doc['type'])
     if 'location' in doc:
-        lon, lat = doc['location'].split(',')
+        lat, lon = doc['location'].split(',')
         poi.lon = lon
         poi.lat = lat
     poi.type_name = doc.get('type_name', None)
