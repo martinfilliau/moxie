@@ -34,17 +34,16 @@ class OxpointsImporter(object):
         for subject in self.graph.subjects(RDF.type, rdf_type):
             doc = {}
             doc['name'] = self.graph.value(subject, DC['title']).toPython()
-            oxpoints_id = subject.toPython().rsplit('/')[-1]
-            oxpoints_id = 'oxpoints:%s' % oxpoints_id
-            doc['id'] = oxpoints_id
+            doc['id'] = 'oxpoints:%s' % self._get_oxpoints_id(subject)
             doc['type'] = defined_type
 
             ids = set()
-            ids.add(oxpoints_id)
+            ids.add(doc['id'])
             ids.update(self._get_identifiers_for_subject(subject))
 
             site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
             if site:
+                ids.add('oxpoints:%s' % self._get_oxpoints_id(site))
                 ids.update(self._get_identifiers_for_subject(site))
                 if (site, Geo.LAT, None) in self.graph and (site, Geo.LONG, None) in self.graph:
                     doc['location'] = "%s,%s" % (self.graph.value(site, Geo.LAT).toPython(),
@@ -128,6 +127,13 @@ class OxpointsImporter(object):
         for obj in self.graph.objects(subject, prop):
             values.append(obj.toPython())
         return values
+
+    def _get_oxpoints_id(self, uri_ref):
+        """Split an URI to get the OxPoints ID
+        :param uri_ref: URIRef object
+        :return string representing oxpoints ID
+        """
+        return uri_ref.toPython().rsplit('/')[-1]
 
 
 def main():
