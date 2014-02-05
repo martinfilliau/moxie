@@ -11,13 +11,13 @@ class OxPoints(object):
     SUB_LIBRARY = URIRef(_BASE+'SubLibrary')
     PRIMARY_PLACE = URIRef(_BASE+'primaryPlace')
     IDENTIFIERS = {
-        _BASE+'hasOUCSCode': 'oucs',
-        _BASE+'hasOLISCode': 'olis',
-        _BASE+'hasOLISAlephCode': 'olis-aleph',
-        _BASE+'hasOSMIdentifier': 'osm',
-        _BASE+'hasFinanceCode': 'finance',
-        _BASE+'hasOBNCode': 'obn',
-        _BASE+'hasLibraryDataId': 'librarydata'
+        URIRef(_BASE+'hasOUCSCode'): 'oucs',
+        URIRef(_BASE+'hasOLISCode'): 'olis',
+        URIRef(_BASE+'hasOLISAlephCode'): 'olis-aleph',
+        URIRef(_BASE+'hasOSMIdentifier'): 'osm',
+        URIRef(_BASE+'hasFinanceCode'): 'finance',
+        URIRef(_BASE+'hasOBNCode'): 'obn',
+        URIRef(_BASE+'hasLibraryDataId'): 'librarydata'
     }
 
 
