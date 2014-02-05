@@ -16,6 +16,7 @@ class OxPoints(object):
     _BASE = 'http://ns.ox.ac.uk/namespace/oxpoints/2009/02/owl#'
     SITE = URIRef(_BASE+'Site')
     COLLEGE = URIRef(_BASE+'College')
+    DEPARTMENT = URIRef(_BASE+'Department')
     PRIMARY_PLACE = URIRef(_BASE+'primaryPlace')
     IDENTIFIERS = {
         _BASE+'hasOUCSCode': 'oucs',
@@ -80,8 +81,10 @@ class OxpointsImporter(object):
         self.graph = graph
 
     def import_data(self):
-        colleges = self.process_colleges()
-        print colleges
+        documents = []
+        documents.extend(self.process_type(OxPoints.COLLEGE))
+        documents.extend(self.process_type(OxPoints.DEPARTMENT))
+        print documents
         return
 
         data = json.load(self.oxpoints_file)
@@ -97,37 +100,38 @@ class OxpointsImporter(object):
         self.indexer.index(documents)
         self.indexer.commit()
 
-    def process_colleges(self):
-        colleges = []
-        for college in self.graph.subjects(RDF.type, OxPoints.COLLEGE):
-            c = {}
-            c['name'] = self.graph.value(college, DC['title']).toPython()
-            site = self.graph.value(college, OxPoints.PRIMARY_PLACE)
-            c['lat'] = self.graph.value(site, Geo.LAT).toPython()
-            c['long'] = self.graph.value(site, Geo.LONG).toPython()
-            site_shape = self.graph.value(site, Geometry.EXTENT)
-            if site_shape:
-                c['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
+    def process_type(self, type):
+        objects = []
+        for subject in self.graph.subjects(RDF.type, type):
+            doc = {}
+            doc['name'] = self.graph.value(subject, DC['title']).toPython()
+            site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
+            if site:
+                if (site, Geo.LAT, None) in self.graph and (site, Geo.LONG, None) in self.graph:
+                    doc['lat'] = self.graph.value(site, Geo.LAT).toPython()
+                    doc['long'] = self.graph.value(site, Geo.LONG).toPython()
+                site_shape = self.graph.value(site, Geometry.EXTENT)
+                if site_shape:
+                    doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
 
-            oxpoints_id = college.toPython().rsplit('/')[-1]
+            oxpoints_id = subject.toPython().rsplit('/')[-1]
             oxpoints_id = 'oxpoints:%s' % oxpoints_id
-            c['id'] = oxpoints_id
+            doc['id'] = oxpoints_id
 
             ids = list()
             ids.append(oxpoints_id)
 
             for oxp_property, identifier in OxPoints.IDENTIFIERS.items():
-                for obj in self.graph.objects(college, oxp_property):
+                for obj in self.graph.objects(subject, oxp_property):
                     val = obj
                     if identifier == 'osm':
                         val = val.split('/')[1]
                     ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
 
-            c['identifiers'] = ids
+            doc['identifiers'] = ids
 
-            colleges.append(c)
-
-        return colleges
+            objects.append(doc)
+        return objects
 
     def process_datum(self, datum):
         """
