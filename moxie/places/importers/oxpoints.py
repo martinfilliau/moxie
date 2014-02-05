@@ -1,4 +1,3 @@
-import json
 import logging
 import rdflib
 from rdflib import RDF
@@ -11,26 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class OxpointsImporter(object):
-
-
-    # Alignment between OxPoints types we want to store and our hierarchy of types
-    OXPOINTS_TYPES = {
-        'College': '/university/college',
-        'Department': '/university/department',
-        'Carpark': '/transport/car-park/university',
-        'Room': '/university/room',
-        'Library': '/university/library',
-        'SubLibrary': '/university/library/sub-library',
-        'Museum': '/leisure/museum',
-        'Building': '/university/building',
-        'Unit': '/university/department',
-        'Faculty': '/university/department',
-        'Division': '/university/division',
-        'University': '/university',
-        'Space': '/university/space',
-        'Site': '/university/site',
-        'Hall': '/university/hall',
-    }
 
     def __init__(self, indexer, precedence, oxpoints_file, shapes_file, identifier_key='identifiers'):
         self.indexer = indexer
@@ -47,21 +26,6 @@ class OxpointsImporter(object):
         documents.extend(self.process_type(OxPoints.DEPARTMENT, '/university/department'))
         documents.extend(self.process_type(OxPoints.LIBRARY, '/university/library'))
         documents.extend(self.process_type(OxPoints.SUB_LIBRARY, '/university/sub-library'))
-        self.indexer.index(documents)
-        self.indexer.commit()
-
-        return
-
-        data = json.load(self.oxpoints_file)
-        documents = []
-        for datum in data:
-            try:
-                doc = self.process_datum(datum)
-                if doc:
-                    documents.append(doc)
-            except Exception as e:
-                logger.warning("Couldn't process an item.", exc_info=True)
-
         self.indexer.index(documents)
         self.indexer.commit()
 
@@ -148,35 +112,6 @@ class OxpointsImporter(object):
         for obj in self.graph.objects(subject, prop):
             values.append(obj.toPython())
         return values
-
-    def process_datum(self, datum):
-        """
-        Process a single OxPoint
-        @param datum: dict with item
-        """
-
-        doc = dict()
-
-        doc['parent_of'] = []
-        doc['child_of'] = []
-
-        if 'dct_isPartOf' in datum:
-            parent_id = datum['dct_isPartOf']['uri'].rsplit('/')[-1]
-            doc['child_of'].append('oxpoints:{0}'.format(parent_id))
-
-        if 'oxp_occupies' in datum:
-            for occupy in datum['oxp_occupies']:
-                doc['child_of'].append('oxpoints:{0}'.format(occupy['uri'].rsplit('/')[-1]))
-
-        if 'passiveProperties' in datum:
-            if 'dct_isPartOf' in datum['passiveProperties']:
-                for child in datum['passiveProperties']['dct_isPartOf']:
-                    doc['parent_of'].append('oxpoints:{0}'.format(child['uri'].rsplit('/')[-1]))
-
-        search_results = self.indexer.search_for_ids(
-            self.identifier_key, doc[self.identifier_key])
-        result = prepare_document(doc, search_results, self.precedence)
-        return result
 
 
 def main():
