@@ -105,8 +105,17 @@ class OxpointsImporter(object):
         for subject in self.graph.subjects(RDF.type, type):
             doc = {}
             doc['name'] = self.graph.value(subject, DC['title']).toPython()
+            oxpoints_id = subject.toPython().rsplit('/')[-1]
+            oxpoints_id = 'oxpoints:%s' % oxpoints_id
+            doc['id'] = oxpoints_id
+
+            ids = set()
+            ids.add(oxpoints_id)
+            ids.update(self._get_identifiers_for_subject(subject))
+
             site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
             if site:
+                ids.update(self._get_identifiers_for_subject(site))
                 if (site, Geo.LAT, None) in self.graph and (site, Geo.LONG, None) in self.graph:
                     doc['lat'] = self.graph.value(site, Geo.LAT).toPython()
                     doc['long'] = self.graph.value(site, Geo.LONG).toPython()
@@ -114,12 +123,6 @@ class OxpointsImporter(object):
                 if site_shape:
                     doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
 
-            oxpoints_id = subject.toPython().rsplit('/')[-1]
-            oxpoints_id = 'oxpoints:%s' % oxpoints_id
-            doc['id'] = oxpoints_id
-
-            ids = [oxpoints_id]
-            ids.extend(self._get_identifiers_for_subject(subject))
             doc['identifiers'] = ids
 
             objects.append(doc)
