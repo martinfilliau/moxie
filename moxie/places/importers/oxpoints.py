@@ -108,6 +108,10 @@ class OxpointsImporter(object):
         return ids
 
     def _get_address_for_subject(self, subject):
+        """Format an address from a given subject
+        :param subject: URIRef of a subject having VCard properties
+        :return formatted string containing address or None
+        """
         street_address = self.graph.value(subject, Vcard.STREET_ADDRESS)
         postal_code = self.graph.value(subject, Vcard.POSTAL_CODE)
 
