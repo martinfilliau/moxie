@@ -17,7 +17,15 @@ class OxPoints(object):
     SITE = URIRef(_BASE+'Site')
     COLLEGE = URIRef(_BASE+'College')
     PRIMARY_PLACE = URIRef(_BASE+'primaryPlace')
-    HAS_OSM_IDENTIFIER = URIRef(_BASE+'hasOSMIdentifier')
+    IDENTIFIERS = {
+        _BASE+'hasOUCSCode': 'oucs',
+        _BASE+'hasOLISCode': 'olis',
+        _BASE+'hasOLISAlephCode': 'olis-aleph',
+        _BASE+'hasOSMIdentifier': 'osm',
+        _BASE+'hasFinanceCode': 'finance',
+        _BASE+'hasOBNCode': 'obn',
+        _BASE+'hasLibraryDataId': 'librarydata'
+    }
 
 
 class Org(object):
@@ -42,15 +50,6 @@ class Geometry(object):
 
 class OxpointsImporter(object):
 
-    IDENTIFIERS = {
-        'oxp_hasOUCSCode': 'oucs',
-        'oxp_hasOLISCode': 'olis',
-        'oxp_hasOLISAlephCode': 'olis-aleph',
-        'oxp_hasOSMIdentifier': 'osm',
-        'oxp_hasFinanceCode': 'finance',
-        'oxp_hasOBNCode': 'obn',
-        'oxp_hasLibraryDataId': 'librarydata'
-    }
 
     # Alignment between OxPoints types we want to store and our hierarchy of types
     OXPOINTS_TYPES = {
@@ -109,7 +108,25 @@ class OxpointsImporter(object):
             site_shape = self.graph.value(site, Geometry.EXTENT)
             if site_shape:
                 c['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
+
+            oxpoints_id = college.toPython().rsplit('/')[-1]
+            oxpoints_id = 'oxpoints:%s' % oxpoints_id
+            c['id'] = oxpoints_id
+
+            ids = list()
+            ids.append(oxpoints_id)
+
+            for oxp_property, identifier in OxPoints.IDENTIFIERS.items():
+                for obj in self.graph.objects(college, oxp_property):
+                    val = obj
+                    if identifier == 'osm':
+                        val = val.split('/')[1]
+                    ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
+
+            c['identifiers'] = ids
+
             colleges.append(c)
+
         return colleges
 
     def process_datum(self, datum):
