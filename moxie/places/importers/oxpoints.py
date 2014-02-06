@@ -47,12 +47,16 @@ class OxpointsImporter(object):
             if site:
                 ids.add('oxpoints:%s' % self._get_oxpoints_id(site))
                 ids.update(self._get_identifiers_for_subject(site))
-                if (site, Geo.LAT, None) in self.graph and (site, Geo.LONG, None) in self.graph:
-                    doc['location'] = "%s,%s" % (self.graph.value(site, Geo.LAT).toPython(),
-                                                 self.graph.value(site, Geo.LONG).toPython())
+                location = self._get_location(site)
+                if location:
+                    doc['location'] = location
                 site_shape = self.graph.value(site, Geometry.EXTENT)
                 if site_shape:
                     doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
+            else:
+                location = self._get_location(subject)
+                if location:
+                    doc['location'] = location
 
             doc[self.identifier_key] = list(ids)
 
@@ -170,6 +174,13 @@ class OxpointsImporter(object):
         :return string representing oxpoints ID
         """
         return uri_ref.toPython().rsplit('/')[-1]
+
+    def _get_location(self, subject):
+        if (subject, Geo.LAT, None) in self.graph and (subject, Geo.LONG, None) in self.graph:
+            return "%s,%s" % (self.graph.value(subject, Geo.LAT).toPython(),
+                              self.graph.value(subject, Geo.LONG).toPython())
+        else:
+            return None
 
 
 def main():
