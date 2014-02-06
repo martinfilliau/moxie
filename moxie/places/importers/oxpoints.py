@@ -28,6 +28,8 @@ class OxpointsImporter(object):
         documents.extend(self.process_type(OxPoints.LIBRARY, '/university/library'))
         documents.extend(self.process_type(OxPoints.SUB_LIBRARY, '/university/sub-library'))
         documents.extend(self.process_type(OxPoints.DIVISION, '/university/division'))
+        documents.extend(self.process_type(OxPoints.MUSEUM, '/leisure/museum'))
+        documents.extend(self.process_type(OxPoints.CAR_PARK, '/transport/car-park/university'))
         self.indexer.index(documents)
         self.indexer.commit()
 
