@@ -2,6 +2,7 @@ import logging
 
 from flask import url_for, jsonify
 from shapely.wkt import loads as wkt_loads
+from shapely.geometry import Point
 from geojson import dumps as geojson_dumps
 from geojson import Feature, FeatureCollection
 
@@ -253,7 +254,17 @@ class GeoJsonPointsRepresentation(object):
                 f = Feature(id=result.id,
                             geometry=wkt_loads(result.shape),
                             properties={'name': result.name,
-                                        'type': result.type_name})
+                                        'type_name': result.type_name,
+                                        'type': result.type})
+                features.append(f)
+            elif result.lat and result.lon:
+                # if a result does not have a shape, attempt to
+                # fallback on latitude / longitude
+                f = Feature(id=result.id,
+                            geometry=Point(float(result.lat), float(result.lon)),
+                            properties={'name': result.name,
+                                        'type_name': result.type_name,
+                                        'type': result.type})
                 features.append(f)
         return FeatureCollection(features)
 
