@@ -46,6 +46,7 @@ class OxpointsImporter(object):
             ids.update(self._get_identifiers_for_subject(subject))
 
             site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
+            # attempt to merge a Thing and its Site if it has one
             if site:
                 ids.add('oxpoints:%s' % self._get_oxpoints_id(site))
                 ids.update(self._get_identifiers_for_subject(site))
@@ -56,9 +57,13 @@ class OxpointsImporter(object):
                 if site_shape:
                     doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
             else:
+                # else attempt to get a location from the actual thing
                 location = self._get_location(subject)
                 if location:
                     doc['location'] = location
+                else:
+                    # TODO attempt to find a location from the parent Thing, if there is one
+                    pass
 
             doc[self.identifier_key] = list(ids)
 
