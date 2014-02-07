@@ -37,84 +37,100 @@ class OxpointsImporter(object):
     def process_type(self, rdf_type, defined_type):
         objects = []
         for subject in self.graph.subjects(RDF.type, rdf_type):
-            doc = {}
-            doc['name'] = self.graph.value(subject, DC['title']).toPython()
-            doc['id'] = 'oxpoints:%s' % self._get_oxpoints_id(subject)
-            doc['type'] = defined_type
-
-            ids = set()
-            ids.add(doc['id'])
-            ids.update(self._get_identifiers_for_subject(subject))
-
-            site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
-            # attempt to merge a Thing and its Site if it has one
-            if site:
-                ids.add('oxpoints:%s' % self._get_oxpoints_id(site))
-                ids.update(self._get_identifiers_for_subject(site))
-                location = self._get_location(site)
-                if location:
-                    doc['location'] = location
-                site_shape = self.graph.value(site, Geometry.EXTENT)
-                if site_shape:
-                    doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
-            else:
-                # else attempt to get a location from the actual thing
-                location = self._get_location(subject)
-                if location:
-                    doc['location'] = location
-                else:
-                    # if not, try to find location from the parent element
-                    parent = self.graph.value(subject, DCTERMS['isPartOf'])
-                    if parent:
-                        location = self._get_location(parent)
-                        if location:
-                            doc['location'] = location
-
-            doc[self.identifier_key] = list(ids)
-
-            alternative_names = self._get_alternative_names(subject)
-            if alternative_names:
-                doc['alternative_names'] = alternative_names
-
-            address_node = self.graph.value(subject, Vcard.ADR)
-            if address_node:
-                address = self._get_address_for_subject(address_node)
-                if address:
-                    doc['address'] = address
-
-            homepage = self.graph.value(subject, FOAF['homepage'])
-            if homepage:
-                doc['website'] = homepage.toPython()
-
-            social_accounts = self._get_values_for_property(subject, FOAF['account'])
-            if social_accounts:
-                for account in social_accounts:
-                    if 'facebook.com' in account:
-                        doc['_social_facebook'] = account
-                    elif 'twitter.com' in account:
-                        doc['_social_twitter'] = account
-
-            logo = self.graph.value(subject, FOAF['logo'])
-            if logo:
-                doc['_picture_logo'] = logo.toPython()
-
-            depiction = self.graph.value(subject, FOAF['depiction'])
-            if depiction:
-                doc['_picture_depiction'] = depiction.toPython()
-
-            parent_of = self._find_inverse_relations(subject, Org.SUB_ORGANIZATION_OF)
-            if parent_of:
-                doc['parent_of'] = parent_of
-
-            child_of = self._find_relations(subject, Org.SUB_ORGANIZATION_OF)
-            if child_of:
-                doc['child_of'] = child_of
-
-            search_results = self.indexer.search_for_ids(self.identifier_key, doc[self.identifier_key])
-            result = prepare_document(doc, search_results, self.precedence)
-
-            objects.append(result)
+            try:
+                doc = self.process_subject(subject, defined_type)
+                if doc:
+                    search_results = self.indexer.search_for_ids(self.identifier_key, doc[self.identifier_key])
+                    result = prepare_document(doc, search_results, self.precedence)
+                    objects.append(result)
+            except Exception:
+                logger.warning('Could not process subject', exc_info=True,
+                               extra={'data': {'subject': subject.toPython()}})
         return objects
+
+    def process_subject(self, subject, mapped_type):
+        """Prepare a document from a Subject by browsing the RDF graph
+        :param subject: subject URIRef
+        :return dict
+        """
+        title = self.graph.value(subject, DC['title'])
+        if not title:
+            return None
+
+        doc = {}
+        doc['name'] = title.toPython()
+        doc['id'] = 'oxpoints:%s' % self._get_oxpoints_id(subject)
+        doc['type'] = mapped_type
+
+        ids = set()
+        ids.add(doc['id'])
+        ids.update(self._get_identifiers_for_subject(subject))
+
+        site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
+        # attempt to merge a Thing and its Site if it has one
+        if site:
+            ids.add('oxpoints:%s' % self._get_oxpoints_id(site))
+            ids.update(self._get_identifiers_for_subject(site))
+            location = self._get_location(site)
+            if location:
+                doc['location'] = location
+            site_shape = self.graph.value(site, Geometry.EXTENT)
+            if site_shape:
+                doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
+        else:
+            # else attempt to get a location from the actual thing
+            location = self._get_location(subject)
+            if location:
+                doc['location'] = location
+            else:
+                # if not, try to find location from the parent element
+                parent = self.graph.value(subject, DCTERMS['isPartOf'])
+                if parent:
+                    location = self._get_location(parent)
+                    if location:
+                        doc['location'] = location
+
+        doc[self.identifier_key] = list(ids)
+
+        alternative_names = self._get_alternative_names(subject)
+        if alternative_names:
+            doc['alternative_names'] = alternative_names
+
+        address_node = self.graph.value(subject, Vcard.ADR)
+        if address_node:
+            address = self._get_address_for_subject(address_node)
+            if address:
+                doc['address'] = address
+
+        homepage = self.graph.value(subject, FOAF['homepage'])
+        if homepage:
+            doc['website'] = homepage.toPython()
+
+        social_accounts = self._get_values_for_property(subject, FOAF['account'])
+        if social_accounts:
+            for account in social_accounts:
+                if 'facebook.com' in account:
+                    doc['_social_facebook'] = account
+                elif 'twitter.com' in account:
+                    doc['_social_twitter'] = account
+
+        logo = self.graph.value(subject, FOAF['logo'])
+        if logo:
+            doc['_picture_logo'] = logo.toPython()
+
+        depiction = self.graph.value(subject, FOAF['depiction'])
+        if depiction:
+            doc['_picture_depiction'] = depiction.toPython()
+
+        parent_of = self._find_inverse_relations(subject, Org.SUB_ORGANIZATION_OF)
+        if parent_of:
+            doc['parent_of'] = parent_of
+
+        child_of = self._find_relations(subject, Org.SUB_ORGANIZATION_OF)
+        if child_of:
+            doc['child_of'] = child_of
+
+        return doc
 
     def _get_identifiers_for_subject(self, subject):
         """Find all identifiers for a given subject and
