@@ -74,7 +74,8 @@ class OxpointsImporter(object):
         site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
         # attempt to merge a Thing and its Site if it has one
         if site:
-            ids.add('oxpoints:%s' % self._get_oxpoints_id(site))
+            main_site_id = 'oxpoints:%s' % self._get_oxpoints_id(site)
+            ids.add(main_site_id)
             ids.update(self._get_identifiers_for_subject(site))
             location = self._get_location(site)
             if location:
@@ -84,6 +85,7 @@ class OxpointsImporter(object):
                 doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
         else:
             # else attempt to get a location from the actual thing
+            main_site_id = None     # has not be merged with a Site
             location = self._get_location(subject)
             if location:
                 doc['location'] = location
@@ -127,13 +129,18 @@ class OxpointsImporter(object):
         if depiction:
             doc['_picture_depiction'] = depiction.toPython()
 
-        parent_of = self._find_inverse_relations(subject, Org.SUB_ORGANIZATION_OF)
+        parent_of = set()
+        parent_of.update(self._find_inverse_relations(subject, Org.SUB_ORGANIZATION_OF))
+        parent_of.update(self._find_relations(subject, Org.HAS_SITE))
+        parent_of.discard(main_site_id)
         if parent_of:
-            doc['parent_of'] = parent_of
+            doc['parent_of'] = list(parent_of)
 
-        child_of = self._find_relations(subject, Org.SUB_ORGANIZATION_OF)
+        child_of = set()
+        child_of.update(self._find_relations(subject, Org.SUB_ORGANIZATION_OF))
+        child_of.update(self._find_inverse_relations(subject, Org.HAS_SITE))
         if child_of:
-            doc['child_of'] = child_of
+            doc['child_of'] = list(child_of)
 
         return doc
 
