@@ -12,6 +12,7 @@ class OxPoints(object):
     DIVISION = URIRef(_BASE+'Division')
     FACULTY = URIRef(_BASE+'Faculty')
     UNIT = URIRef(_BASE+'Unit')
+    ROOM = URIRef(_BASE+'Room')
     MUSEUM = URIRef(_BASE+'Museum')
     CAR_PARK = URIRef(_BASE+'Carpark')
     PRIMARY_PLACE = URIRef(_BASE+'primaryPlace')
