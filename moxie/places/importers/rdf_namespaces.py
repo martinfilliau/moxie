@@ -5,6 +5,7 @@ class OxPoints(object):
 
     _BASE = 'http://ns.ox.ac.uk/namespace/oxpoints/2009/02/owl#'
     SITE = URIRef(_BASE+'Site')
+    UNIVERSITY = URIRef(_BASE+'University')
     COLLEGE = URIRef(_BASE+'College')
     DEPARTMENT = URIRef(_BASE+'Department')
     LIBRARY = URIRef(_BASE+'Library')

@@ -22,6 +22,7 @@ class OxpointsImporter(object):
 
     def import_data(self):
         documents = []
+        documents.extend(self.process_type(OxPoints.UNIVERSITY, '/university'))
         documents.extend(self.process_type(OxPoints.COLLEGE, '/university/college'))
         documents.extend(self.process_type(OxPoints.DEPARTMENT, '/university/department'))
         documents.extend(self.process_type(OxPoints.FACULTY, '/university/department'))
