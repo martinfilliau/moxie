@@ -71,11 +71,9 @@ class OxpointsImporter(object):
 
             doc[self.identifier_key] = list(ids)
 
-            alternative_names = set()
-            alternative_names.update(self._get_values_for_property(subject, SKOS['altLabel']))
-            alternative_names.update(self._get_values_for_property(subject, SKOS['hiddenLabel']))
+            alternative_names = self._get_alternative_names(subject)
             if alternative_names:
-                doc['alternative_names'] = list(alternative_names)
+                doc['alternative_names'] = alternative_names
 
             address_node = self.graph.value(subject, Vcard.ADR)
             if address_node:
@@ -192,6 +190,12 @@ class OxpointsImporter(object):
                               self.graph.value(subject, Geo.LONG).toPython())
         else:
             return None
+
+    def _get_alternative_names(self, subject):
+        alternative_names = set()
+        alternative_names.update(self._get_values_for_property(subject, SKOS['altLabel']))
+        alternative_names.update(self._get_values_for_property(subject, SKOS['hiddenLabel']))
+        return list(alternative_names)
 
 
 def main():
