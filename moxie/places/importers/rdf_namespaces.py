@@ -16,6 +16,8 @@ class OxPoints(object):
     ROOM = URIRef(_BASE+'Room')
     HALL = URIRef(_BASE+'Hall')
     MUSEUM = URIRef(_BASE+'Museum')
+    BUILDING = URIRef(_BASE+'Building')
+    SPACE = URIRef(_BASE+'Space')
     CAR_PARK = URIRef(_BASE+'Carpark')
     PRIMARY_PLACE = URIRef(_BASE+'primaryPlace')
     IDENTIFIERS = {

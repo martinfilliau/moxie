@@ -34,6 +34,8 @@ class OxpointsImporter(object):
         documents.extend(self.process_type(OxPoints.CAR_PARK, '/transport/car-park/university'))
         documents.extend(self.process_type(OxPoints.ROOM, '/university/room'))
         documents.extend(self.process_type(OxPoints.HALL, '/university/hall'))
+        documents.extend(self.process_type(OxPoints.BUILDING, '/university/building'))
+        documents.extend(self.process_type(OxPoints.SPACE, '/university/space'))
         self.indexer.index(documents)
         self.indexer.commit()
 
