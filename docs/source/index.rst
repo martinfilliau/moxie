@@ -63,6 +63,16 @@ List of apps available
     apps/overview
     apps/*
 
+Data
+----
+
+.. toctree::
+    :glob:
+    :maxdepth: 1
+
+    places/*
+
+
 Indices and tables
 ==================
 
