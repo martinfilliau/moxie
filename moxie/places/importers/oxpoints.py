@@ -19,6 +19,7 @@ class OxpointsImporter(object):
         graph.parse(file=oxpoints_file, format="application/rdf+xml")
         graph.parse(file=shapes_file, format="application/rdf+xml")
         self.graph = graph
+        self.merged_things = []     # list of building/sites merged into departments
 
     def import_data(self):
         documents = []
@@ -63,6 +64,10 @@ class OxpointsImporter(object):
         if not title:
             return None
 
+        if subject in self.merged_things:
+            logger.debug('Ignoring %s -- merged with Thing already' % subject.toPython())
+            return None
+
         doc = {}
         doc['name'] = title.toPython()
         doc['id'] = 'oxpoints:%s' % self._get_oxpoints_id(subject)
@@ -75,6 +80,7 @@ class OxpointsImporter(object):
         site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
         # attempt to merge a Thing and its Site if it has one
         if site:
+            self.merged_things.append(site)
             main_site_id = 'oxpoints:%s' % self._get_oxpoints_id(site)
             ids.add(main_site_id)
             ids.update(self._get_identifiers_for_subject(site))
