@@ -1,7 +1,7 @@
 import logging
 import rdflib
 from rdflib import RDF
-from rdflib.namespace import DC, SKOS, FOAF
+from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
 
 from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, Vcard, Org
 from moxie.places.importers.helpers import prepare_document
@@ -62,8 +62,12 @@ class OxpointsImporter(object):
                 if location:
                     doc['location'] = location
                 else:
-                    # TODO attempt to find a location from the parent Thing, if there is one
-                    pass
+                    # if not, try to find location from the parent element
+                    parent = self.graph.value(subject, DCTERMS['isPartOf'])
+                    if parent:
+                        location = self._get_location(parent)
+                        if location:
+                            doc['location'] = location
 
             doc[self.identifier_key] = list(ids)
 
