@@ -253,20 +253,27 @@ class GeoJsonPointsRepresentation(object):
             if result.shape:
                 f = Feature(id=result.id,
                             geometry=wkt_loads(result.shape),
-                            properties={'name': result.name,
-                                        'type_name': result.type_name,
-                                        'type': result.type})
+                            properties=self._get_feature_properties(result))
                 features.append(f)
             elif result.lat and result.lon:
                 # if a result does not have a shape, attempt to
                 # fallback on latitude / longitude
                 f = Feature(id=result.id,
                             geometry=Point(float(result.lat), float(result.lon)),
-                            properties={'name': result.name,
-                                        'type_name': result.type_name,
-                                        'type': result.type})
+                            properties=self._get_feature_properties(result))
                 features.append(f)
         return FeatureCollection(features)
+
+    def _get_feature_properties(self, result):
+        """Get properties from a POI object
+        :param result: POI object
+        :return dict
+        """
+        # only returns the first type atm, was
+        # causing issues with some GeoJSON software
+        return {'name': result.name,
+                'type_name': result.type_name[0],
+                'type': result.type[0]}
 
     def as_json(self):
         return geojson_dumps(self.as_dict())
