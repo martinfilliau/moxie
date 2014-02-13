@@ -78,11 +78,26 @@ class OxpointsImporter(object):
         ids.update(self._get_identifiers_for_subject(subject))
 
         site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
+
         # attempt to merge a Thing and its Site if it has one
         if site:
-            self.merged_things.append(site)
+            primarily_occupied_count = 0
+            for s, p, o in self.graph.triples((None, OxPoints.PRIMARY_PLACE, site)):
+                primarily_occupied_count += 1
+
             main_site_id = 'oxpoints:%s' % self._get_oxpoints_id(site)
-            ids.add(main_site_id)
+            site_title = self.graph.value(subject, DC['title'])
+            if site_title:
+                # TODO add site's name if different
+                pass
+
+            # if the site is primarily occupied by more than one org
+            # do not merge them
+            if primarily_occupied_count > 1:
+                ids.add(main_site_id)
+            else:
+                self.merged_things.append(site)
+
             ids.update(self._get_identifiers_for_subject(site))
             location = self._get_location(site)
             if location:
