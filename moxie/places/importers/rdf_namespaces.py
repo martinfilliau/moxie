@@ -29,6 +29,7 @@ class OxPoints(object):
         URIRef(_BASE+'hasOBNCode'): 'obn',
         URIRef(_BASE+'hasLibraryDataId'): 'librarydata'
     }
+    SHORT_LABEL = URIRef(_BASE+'shortLabel')
 
 
 class Org(object):

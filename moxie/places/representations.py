@@ -33,6 +33,8 @@ class POIRepresentation(Representation):
             'type': self.poi.type,
             'type_name': self.poi.type_name,
         }
+        if self.poi.short_name:
+            values['short_name'] = self.poi.short_name
         if self.poi.collection_times:
             values['collection_times'] = self.poi.collection_times
         if self.poi.opening_hours:
@@ -272,6 +274,7 @@ class GeoJsonPointsRepresentation(object):
         # only returns the first type atm, was
         # causing issues with some GeoJSON software
         return {'name': result.name,
+                'short_name': result.short_name,
                 'type_name': result.type_name[0],
                 'type': result.type[0]}
 

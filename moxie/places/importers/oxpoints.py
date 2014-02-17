@@ -135,6 +135,10 @@ class OxpointsImporter(object):
         if homepage:
             doc['website'] = homepage.toPython()
 
+        short_name = self.graph.value(subject, OxPoints.SHORT_LABEL)
+        if short_name:
+            doc['short_name'] = short_name.toPython()
+
         social_accounts = self._get_values_for_property(subject, FOAF['account'])
         if social_accounts:
             for account in social_accounts:
