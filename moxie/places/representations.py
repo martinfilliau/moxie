@@ -274,9 +274,9 @@ class GeoJsonPointsRepresentation(object):
         # only returns the first type atm, was
         # causing issues with some GeoJSON software
         return {'name': result.name,
-                'short_name': result.short_name,
-                'type_name': result.type_name[0],
-                'type': result.type[0]}
+                'short_name': result.short_name or result.name,     # not ideal but our map software would not be
+                'type_name': result.type_name[0],                   # able to do the "fallback" so it has to
+                'type': result.type[0]}                             # happen here
 
     def as_json(self):
         return geojson_dumps(self.as_dict())
