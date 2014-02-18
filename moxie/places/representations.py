@@ -261,7 +261,8 @@ class GeoJsonPointsRepresentation(object):
                 # if a result does not have a shape, attempt to
                 # fallback on latitude / longitude
                 f = Feature(id=result.id,
-                            geometry=Point(float(result.lat), float(result.lon)),
+                            # Point coordinates are in x, y order (longitude, latitude for geographic coordinates)
+                            geometry=Point(float(result.lon), float(result.lat)),
                             properties=self._get_feature_properties(result))
                 features.append(f)
         return FeatureCollection(features)
