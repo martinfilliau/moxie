@@ -38,14 +38,15 @@ class POIService(Service):
         lat, lon = location
         query = original_query or self.default_search
         query = urllib.quote_plus(query)
-        geo_query = " AND {!geofilt score=distance filter=false sfield=location pt=%s,%s d=10}" % (lat, lon)
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
-             'q.alt': query + geo_query,
-             'qf': 'fts',
-             #'boost': 'recip(score,2,200,20)',  # boost by geodist (linear function: 200/2*x+20)
+             'pf': query,
+             'q': query,
+             'sfield': 'location',
+             'pt': '%s,%s' % (lat, lon),
+             'boost': 'recip(geodist(),2,200,20)',  # boost by geodist (linear function: 200/2*x+20)
              'sort': 'score desc',                  # sort by score
-             'fl': '*,score',
+             'fl': '*,_dist_:geodist()',
              'facet': 'true',
              'facet.field': 'type',
              'facet.sort': 'index',
