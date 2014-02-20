@@ -63,22 +63,33 @@ class PoiDetail(ServiceView):
     def handle_request(self, ident):
         if ident.endswith('/'):
             ident = ident.split('/')[0]
+        idents = ident.split(',')
         poi_service = POIService.from_context()
-        doc = poi_service.get_place_by_identifier(ident)
-        if not doc:
-            raise NotFound()
-        if doc.id != ident:
-            # redirection to the same URL but with the main ID of the doc
-            path = url_for(request.url_rule.endpoint, ident=doc.id)
-            return redirect(path, code=301)
+        if len(idents) == 1:
+            doc = poi_service.get_place_by_identifier(ident)
+            if not doc:
+                raise NotFound()
+            if doc.id != ident:
+                # redirection to the same URL but with the main ID of the doc
+                path = url_for(request.url_rule.endpoint, ident=doc.id)
+                return redirect(path, code=301)
+            else:
+                return doc
         else:
-            return doc
+            documents = poi_service.get_places_by_identifiers(idents)
+            if not documents:
+                raise NotFound()
+            else:
+                return documents
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
         if issubclass(type(response), BaseResponse):
             # to handle 301 redirections and 404
             return response
+        elif type(response) == list:
+            size = len(response)
+            return HALPOIsRepresentation('', response, 0, size, size, 'places.search').as_json()
         else:
             return HALPOIRepresentation(response, request.url_rule.endpoint).as_json()
 
