@@ -63,13 +63,15 @@ class OxpointsImporter(object):
         title = self.graph.value(subject, DC['title'])
         if not title:
             return None
+        else:
+            title = title.toPython()
 
         if subject in self.merged_things:
             logger.debug('Ignoring %s -- merged with Thing already' % subject.toPython())
             return None
 
         doc = {}
-        doc['name'] = title.toPython()
+        doc['name'] = title
         doc['id'] = 'oxpoints:%s' % self._get_oxpoints_id(subject)
         doc['type'] = mapped_type
 
@@ -88,17 +90,15 @@ class OxpointsImporter(object):
             main_site_id = 'oxpoints:%s' % self._get_oxpoints_id(site)
             site_title = self.graph.value(subject, DC['title'])
             if site_title:
-                # TODO add site's name if different
-                pass
+                site_title = site_title.toPython()
 
-            # if the site is primarily occupied by more than one org
-            # do not merge them
-            if primarily_occupied_count > 1:
-                ids.add(main_site_id)
-            else:
-                self.merged_things.append(site)
+                # if the site has the same name that the Thing, then merge
+                # them and do not import the Site by itself
+                if site_title == title:
+                    ids.add(main_site_id)
+                    ids.update(self._get_identifiers_for_subject(site))
+                    self.merged_things.append(site)
 
-            ids.update(self._get_identifiers_for_subject(site))
             location = self._get_location(site)
             if location:
                 doc['location'] = location
