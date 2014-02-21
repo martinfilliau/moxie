@@ -102,12 +102,15 @@ class OxpointsImporter(object):
             location = self._get_location(site)
             if location:
                 doc['location'] = location
-            site_shape = self.graph.value(site, Geometry.EXTENT)
-            if site_shape:
-                doc['shape'] = self.graph.value(site_shape, Geometry.AS_WKT).toPython()
+            shape = self._get_shape(site)
+            if shape:
+                doc['shape'] = shape
         else:
             # else attempt to get a location from the actual thing
             main_site_id = None     # has not be merged with a Site
+            shape = self._get_shape(subject)
+            if shape:
+                doc['shape'] = shape
             location = self._get_location(subject)
             if location:
                 doc['location'] = location
@@ -243,6 +246,13 @@ class OxpointsImporter(object):
         if (subject, Geo.LAT, None) in self.graph and (subject, Geo.LONG, None) in self.graph:
             return "%s,%s" % (self.graph.value(subject, Geo.LAT).toPython(),
                               self.graph.value(subject, Geo.LONG).toPython())
+        else:
+            return None
+
+    def _get_shape(self, subject):
+        shape = self.graph.value(subject, Geometry.EXTENT)
+        if shape:
+            return self.graph.value(shape, Geometry.AS_WKT).toPython()
         else:
             return None
 
