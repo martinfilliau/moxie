@@ -26,6 +26,13 @@ MAPPED_TYPES = [
     (OxPoints.SITE, '/university/site')
 ]
 
+# properties which maps "easily" to our structure
+MAPPED_PROPERTIES = [
+    ('website', FOAF['homepage']),
+    ('short_name', OxPoints.SHORT_LABEL),
+    ('_picture_logo', FOAF['logo']),
+    ('_picture_depiction', FOAF['depiction'])
+]
 
 class OxpointsImporter(object):
 
@@ -140,14 +147,6 @@ class OxpointsImporter(object):
             if address:
                 doc['address'] = address
 
-        homepage = self.graph.value(subject, FOAF['homepage'])
-        if homepage:
-            doc['website'] = homepage.toPython()
-
-        short_name = self.graph.value(subject, OxPoints.SHORT_LABEL)
-        if short_name:
-            doc['short_name'] = short_name.toPython()
-
         social_accounts = self._get_values_for_property(subject, FOAF['account'])
         if social_accounts:
             for account in social_accounts:
@@ -156,13 +155,11 @@ class OxpointsImporter(object):
                 elif 'twitter.com' in account:
                     doc['_social_twitter'] = account
 
-        logo = self.graph.value(subject, FOAF['logo'])
-        if logo:
-            doc['_picture_logo'] = logo.toPython()
-
-        depiction = self.graph.value(subject, FOAF['depiction'])
-        if depiction:
-            doc['_picture_depiction'] = depiction.toPython()
+        # defined properties that matches our structure
+        for prop, rdf_prop in MAPPED_PROPERTIES:
+            val = self.graph.value(subject, rdf_prop)
+            if val:
+                doc[prop] = val.toPython()
 
         parent_of = set()
         parent_of.update(self._find_inverse_relations(subject, Org.SUB_ORGANIZATION_OF))
