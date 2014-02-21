@@ -47,6 +47,11 @@ class OxpointsImporter(object):
         self.indexer.commit()
 
     def process_type(self, rdf_type, defined_type):
+        """Browse the graph for a certain type and process found subjects
+        :param rdf_type: RDF type to find
+        :param defined_type: type defining subjects found
+        :return list of documents
+        """
         objects = []
         for subject in self.graph.subjects(RDF.type, rdf_type):
             try:
