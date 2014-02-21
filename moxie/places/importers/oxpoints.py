@@ -83,11 +83,7 @@ class OxpointsImporter(object):
 
         # attempt to merge a Thing and its Site if it has one
         if site:
-            primarily_occupied_count = 0
-            for s, p, o in self.graph.triples((None, OxPoints.PRIMARY_PLACE, site)):
-                primarily_occupied_count += 1
-
-            main_site_id = 'oxpoints:%s' % self._get_oxpoints_id(site)
+            main_site_id = None
             site_title = self.graph.value(subject, DC['title'])
             if site_title:
                 site_title = site_title.toPython()
@@ -95,6 +91,7 @@ class OxpointsImporter(object):
                 # if the site has the same name that the Thing, then merge
                 # them and do not import the Site by itself
                 if site_title == title:
+                    main_site_id = 'oxpoints:%s' % self._get_oxpoints_id(site)
                     ids.add(main_site_id)
                     ids.update(self._get_identifiers_for_subject(site))
                     self.merged_things.append(site)
