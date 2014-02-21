@@ -89,7 +89,7 @@ class OxpointsImporter(object):
 
         doc = {}
         doc['name'] = title
-        doc['id'] = 'oxpoints:%s' % self._get_oxpoints_id(subject)
+        doc['id'] = self._get_formatted_oxpoints_id(subject)
         doc['type'] = mapped_type
 
         ids = set()
@@ -108,7 +108,7 @@ class OxpointsImporter(object):
                 # if the main_site has the same name that the Thing, then merge
                 # them and do not import the Site by itself
                 if site_title == title:
-                    main_site_id = 'oxpoints:%s' % self._get_oxpoints_id(main_site)
+                    main_site_id = self._get_formatted_oxpoints_id(main_site)
                     ids.add(main_site_id)
                     ids.update(self._get_identifiers_for_subject(main_site))
                     self.merged_things.append(main_site)
@@ -201,7 +201,7 @@ class OxpointsImporter(object):
         """
         relations = []
         for s, p, o in self.graph.triples((subject, rel_type, None)):
-            relations.append('oxpoints:%s' % self._get_oxpoints_id(o))
+            relations.append(self._get_formatted_oxpoints_id(o))
         return relations
 
     def _find_inverse_relations(self, subject, rel_type):
@@ -212,7 +212,7 @@ class OxpointsImporter(object):
         """
         relations = []
         for s, p, o in self.graph.triples((None, rel_type, subject)):
-            relations.append('oxpoints:%s' % self._get_oxpoints_id(s))
+            relations.append(self._get_formatted_oxpoints_id(s))
         return relations
 
     def _get_address_for_subject(self, subject):
@@ -240,12 +240,12 @@ class OxpointsImporter(object):
             values.append(obj.toPython())
         return values
 
-    def _get_oxpoints_id(self, uri_ref):
+    def _get_formatted_oxpoints_id(self, uri_ref):
         """Split an URI to get the OxPoints ID
         :param uri_ref: URIRef object
         :return string representing oxpoints ID
         """
-        return uri_ref.toPython().rsplit('/')[-1]
+        return 'oxpoints:%s' % uri_ref.toPython().rsplit('/')[-1]
 
     def _get_location(self, subject):
         if (subject, Geo.LAT, None) in self.graph and (subject, Geo.LONG, None) in self.graph:
