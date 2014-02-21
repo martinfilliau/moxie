@@ -67,7 +67,7 @@ class OxpointsImporter(object):
             title = title.toPython()
 
         if subject in self.merged_things:
-            logger.debug('Ignoring %s -- merged with Thing already' % subject.toPython())
+            logger.info('Ignoring %s -- merged with Thing already' % subject.toPython())
             return None
 
         doc = {}
@@ -79,32 +79,31 @@ class OxpointsImporter(object):
         ids.add(doc['id'])
         ids.update(self._get_identifiers_for_subject(subject))
 
-        site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
+        main_site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
+        main_site_id = None
 
         # attempt to merge a Thing and its Site if it has one
-        if site:
-            main_site_id = None
-            site_title = self.graph.value(subject, DC['title'])
+        if main_site:
+            site_title = self.graph.value(main_site, DC['title'])
             if site_title:
                 site_title = site_title.toPython()
 
-                # if the site has the same name that the Thing, then merge
+                # if the main_site has the same name that the Thing, then merge
                 # them and do not import the Site by itself
                 if site_title == title:
-                    main_site_id = 'oxpoints:%s' % self._get_oxpoints_id(site)
+                    main_site_id = 'oxpoints:%s' % self._get_oxpoints_id(main_site)
                     ids.add(main_site_id)
-                    ids.update(self._get_identifiers_for_subject(site))
-                    self.merged_things.append(site)
+                    ids.update(self._get_identifiers_for_subject(main_site))
+                    self.merged_things.append(main_site)
 
-            location = self._get_location(site)
+            location = self._get_location(main_site)
             if location:
                 doc['location'] = location
-            shape = self._get_shape(site)
+            shape = self._get_shape(main_site)
             if shape:
                 doc['shape'] = shape
         else:
             # else attempt to get a location from the actual thing
-            main_site_id = None     # has not be merged with a Site
             shape = self._get_shape(subject)
             if shape:
                 doc['shape'] = shape
