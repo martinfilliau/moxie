@@ -10,6 +10,9 @@ from moxie.core.metrics import statsd
 
 logger = logging.getLogger(__name__)
 
+OPERATOR_KEY = "title"
+UNKNOWN_OPERATOR = "unknown"
+
 
 class CloudAmberBusRtiProvider(TransportRTIProvider):
     """
@@ -96,6 +99,16 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
             for row in rows:
                 service, destination, proximity = [row[i].text.encode('utf8').replace('\xc2\xa0', '')
                                                    for i in range(3)]
+
+                # Get the operator e.g. "OBC" this is "title" attr from an
+                # image, if there is an error accessing set to UNKNOWN_OPERATOR
+                try:
+                    operator = row[3][0]
+                    operator = operator.get(OPERATOR_KEY, UNKNOWN_OPERATOR)
+                except IndexError:
+                    # For some reason the operator column is missing
+                    operator = UNKNOWN_OPERATOR
+
                 if proximity.lower() == 'due':
                     diff = 0
                 else:
@@ -103,12 +116,12 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
 
                 if not service in parsed_services:
                     # first departure of this service
-                    parsed_services[service] = (destination, (proximity, diff), [])
+                    parsed_services[service] = (destination, (proximity, diff), [], operator)
                 else:
                     # following departure of this service
                     parsed_services[service][2].append((proximity, diff))
 
-            services = [(s[0], s[1][0], s[1][1], s[1][2]) for s in parsed_services.items()]
+            services = [(s[0], s[1][0], s[1][1], s[1][2], s[1][3]) for s in parsed_services.items()]
             services.sort(key=lambda x: (' '*(5-len(x[0]) + (1 if x[0][-1].isalpha() else 0)) + x[0]))
             services.sort(key=lambda x: x[2][1])
 
@@ -116,6 +129,7 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
                          'destination': s[1],
                          'next': s[2][0],
                          'following': [f[0] for f in s[3]],
+                         'operator': s[4],
                          } for s in services]
 
             # messages that can be displayed (bus stop)
