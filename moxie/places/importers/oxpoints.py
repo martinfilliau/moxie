@@ -158,6 +158,7 @@ class OxpointsImporter(object):
         parent_of = set()
         parent_of.update(self._find_inverse_relations(subject, Org.SUB_ORGANIZATION_OF))
         parent_of.update(self._find_relations(subject, Org.HAS_SITE))
+        parent_of.update(self._find_inverse_relations(subject, DCTERMS['isPartOf']))
         parent_of.discard(main_site_id)
         if parent_of:
             doc['parent_of'] = list(parent_of)
@@ -165,6 +166,7 @@ class OxpointsImporter(object):
         child_of = set()
         child_of.update(self._find_relations(subject, Org.SUB_ORGANIZATION_OF))
         child_of.update(self._find_inverse_relations(subject, Org.HAS_SITE))
+        child_of.update(self._find_relations(subject, DCTERMS['isPartOf']))
         if child_of:
             doc['child_of'] = list(child_of)
 
