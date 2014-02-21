@@ -8,6 +8,24 @@ from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
 
+MAPPED_TYPES = [
+    (OxPoints.UNIVERSITY, '/university'),
+    (OxPoints.COLLEGE, '/university/college'),
+    (OxPoints.DEPARTMENT, '/university/department'),
+    (OxPoints.FACULTY, '/university/department'),
+    (OxPoints.UNIT, '/university/department'),
+    (OxPoints.LIBRARY, '/university/library'),
+    (OxPoints.SUB_LIBRARY, '/university/sub-library'),
+    (OxPoints.DIVISION, '/university/division'),
+    (OxPoints.MUSEUM, '/leisure/museum'),
+    (OxPoints.CAR_PARK, '/transport/car-park/university'),
+    (OxPoints.ROOM, '/university/room'),
+    (OxPoints.HALL, '/university/hall'),
+    (OxPoints.BUILDING, '/university/building'),
+    (OxPoints.SPACE, '/university/space'),
+    (OxPoints.SITE, '/university/site')
+]
+
 
 class OxpointsImporter(object):
 
@@ -23,21 +41,8 @@ class OxpointsImporter(object):
 
     def import_data(self):
         documents = []
-        documents.extend(self.process_type(OxPoints.UNIVERSITY, '/university'))
-        documents.extend(self.process_type(OxPoints.COLLEGE, '/university/college'))
-        documents.extend(self.process_type(OxPoints.DEPARTMENT, '/university/department'))
-        documents.extend(self.process_type(OxPoints.FACULTY, '/university/department'))
-        documents.extend(self.process_type(OxPoints.UNIT, '/university/department'))
-        documents.extend(self.process_type(OxPoints.LIBRARY, '/university/library'))
-        documents.extend(self.process_type(OxPoints.SUB_LIBRARY, '/university/sub-library'))
-        documents.extend(self.process_type(OxPoints.DIVISION, '/university/division'))
-        documents.extend(self.process_type(OxPoints.MUSEUM, '/leisure/museum'))
-        documents.extend(self.process_type(OxPoints.CAR_PARK, '/transport/car-park/university'))
-        documents.extend(self.process_type(OxPoints.ROOM, '/university/room'))
-        documents.extend(self.process_type(OxPoints.HALL, '/university/hall'))
-        documents.extend(self.process_type(OxPoints.BUILDING, '/university/building'))
-        documents.extend(self.process_type(OxPoints.SPACE, '/university/space'))
-        documents.extend(self.process_type(OxPoints.SITE, '/university/site'))
+        for oxpoints_type, mapped_type in MAPPED_TYPES:
+            documents.extend(self.process_type(oxpoints_type, mapped_type))
         self.indexer.index(documents)
         self.indexer.commit()
 
