@@ -7,7 +7,7 @@ and also requires the extension of OxPoints containing shapes of buildings as WK
 The goal of Moxie is to provide a "simplified" view of OxPoints, easier to understand
 from an end-user point of view. The following transformations have been done:
 
-1. College/Hall/Department/Faculty have been merged with their **primary site** in one document
+1. A **Thing** has been merged with its **primary site** if they have the same name (e.g. Colleges)
 2. Some types have been regrouped (see table below)
 
 Types mapping
