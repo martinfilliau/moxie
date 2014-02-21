@@ -9,6 +9,8 @@ from moxie.core.exceptions import ServiceUnavailable
 from moxie.core.metrics import statsd
 
 logger = logging.getLogger(__name__)
+
+OPERATOR_KEY = "title"
 UNKNOWN_OPERATOR = "unknown"
 
 
@@ -102,7 +104,7 @@ class CloudAmberBusRtiProvider(TransportRTIProvider):
                 # image, if there is an error accessing set to UNKNOWN_OPERATOR
                 try:
                     operator = row[3][0]
-                    operator = operator.get('foobar', UNKNOWN_OPERATOR)
+                    operator = operator.get(OPERATOR_KEY, UNKNOWN_OPERATOR)
                 except IndexError:
                     # For some reason the operator column is missing
                     operator = UNKNOWN_OPERATOR
