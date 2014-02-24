@@ -79,8 +79,8 @@ class HALPOIRepresentation(POIRepresentation):
             # Merging all IDs (parent and children) into one set to
             # do only one query to the service
             pois_ids = set(self.poi.children)
-            if self.poi.parent:
-                pois_ids.update(self.poi.parent)
+            pois_ids.update(self.poi.parent)
+
             if pois_ids:
                 pois_objects = poi_service.get_places_by_identifiers(pois_ids)
                 # ease lookup by having a dict with ID as key
