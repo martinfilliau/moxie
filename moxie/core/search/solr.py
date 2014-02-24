@@ -82,7 +82,7 @@ class SolrSearch(object):
             params=params)
         return SolrSearchResponse(results.json())
 
-    def index(self, document, params=None, count_per_page=50):
+    def index(self, document, params=None, count_per_page=200):
         """Index a list of objects, do paging
         :param document: must be a list of objects to index
         :param params: additional parameters to add
@@ -106,7 +106,7 @@ class SolrSearch(object):
         data = json.dumps(document)
         headers = {'Content-Type': self.content_types[self.return_type]}
         self.connection(self.methods['update'], params=params,
-                        data=data, headers=headers, timeout=5)
+                        data=data, headers=headers, timeout=60)
 
     def commit(self):
         return self.connection(self.methods['update'],
