@@ -35,15 +35,15 @@ class POIService(Service):
         :param all_types: (optional) display all types or excludes some types defined in configuration
         :return list of domain objects (POIs), total size of results and facets on type
         """
+        lat, lon = location
         query = original_query or self.default_search
         query = urllib.quote_plus(query)
-        lat, lon = location
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
              'pf': query,
              'q': query,
              'sfield': 'location',
-             'pt': '%s,%s' % (lon, lat),
+             'pt': '%s,%s' % (lat, lon),
              'boost': 'recip(geodist(),2,200,20)',  # boost by geodist (linear function: 200/2*x+20)
              'sort': 'score desc',                  # sort by score
              'fl': '*,_dist_:geodist()',

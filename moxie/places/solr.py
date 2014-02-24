@@ -1,7 +1,7 @@
 from moxie.places.domain import POI
 
 # fields specific to Solr that should be ignored
-SOLR_IGNORE_FIELDS = ['_version_',]
+SOLR_IGNORE_FIELDS = ['_version_', '_dist_']
 
 
 def doc_to_poi(doc, fields_key="_"):
@@ -11,11 +11,13 @@ def doc_to_poi(doc, fields_key="_"):
     """
     poi = POI(doc['id'], doc['name'], doc['type'])
     if 'location' in doc:
-        lon, lat = doc['location'].split(',')
+        lat, lon = doc['location'].split(',')
         poi.lon = lon
         poi.lat = lat
     poi.type_name = doc.get('type_name', None)
+    poi.type = doc.get('type', None)
     poi.identifiers = doc.get('identifiers', [])
+    poi.short_name = doc.get('short_name', None)
     poi.distance = doc.get('_dist_', 0)
     poi.address = doc.get('address', "")
     poi.phone = doc.get('phone', "")
@@ -28,6 +30,8 @@ def doc_to_poi(doc, fields_key="_"):
         poi.parent = doc['child_of'][0]
     if 'alternative_names' in doc:
         poi.alternative_names = doc['alternative_names']
+    if 'shape' in doc:
+        poi.shape = doc['shape']
     for key, val in doc.items():
         if key.startswith(fields_key) and key not in SOLR_IGNORE_FIELDS:
             if not getattr(poi, 'fields', False):

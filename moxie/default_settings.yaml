@@ -6,7 +6,8 @@ flask:
     # Places
     DEFAULT_LOCATION: [51.7531, -1.2584]
     OSM_IMPORT_URL: 'http://download.geofabrik.de/europe/great-britain/england/oxfordshire-latest.osm.bz2'
-    OXPOINTS_IMPORT_URL: 'http://oxpoints.oucs.ox.ac.uk/all.json'
+    OXPOINTS_IMPORT_URL: 'https://source.data.ox.ac.uk/archive/public/oxpoints/latest.rdf'
+    OXPOINTS_SHAPES_URL: 'https://data.ox.ac.uk/graph/oxpoints-extents/data'
     NAPTAN_IMPORT_URL: 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
     # Cache
     CACHE_TYPE: 'redis'

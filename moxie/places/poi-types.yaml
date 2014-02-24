@@ -12,10 +12,9 @@ university:
         library:
           name_singular: Library
           name_plural: Librairies
-          types:
-            sub-library:
-              name_singular: Sub-library
-              name_plural: Sub-librairies
+        sub-library:
+          name_singular: Sub-library
+          name_plural: Sub-librairies
         division:
           name_singular: Division
           name_plural: Divisions
