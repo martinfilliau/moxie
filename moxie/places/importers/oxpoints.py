@@ -96,6 +96,9 @@ class OxpointsImporter(object):
         ids.add(doc['id'])
         ids.update(self._get_identifiers_for_subject(subject))
 
+        parent_of = set()
+        child_of = set()
+
         main_site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
         main_site_id = None
 
@@ -112,6 +115,11 @@ class OxpointsImporter(object):
                     ids.add(main_site_id)
                     ids.update(self._get_identifiers_for_subject(main_site))
                     self.merged_things.append(main_site)
+
+            if not main_site_id:
+                # Thing and its main site haven't been merged
+                # adding a relation between the site and the thing
+                parent_of.add(self._get_formatted_oxpoints_id(main_site))
 
             location = self._get_location(main_site)
             if location:
@@ -161,7 +169,6 @@ class OxpointsImporter(object):
             if val:
                 doc[prop] = val.toPython()
 
-        parent_of = set()
         parent_of.update(self._find_inverse_relations(subject, Org.SUB_ORGANIZATION_OF))
         parent_of.update(self._find_relations(subject, Org.HAS_SITE))
         parent_of.update(self._find_inverse_relations(subject, DCTERMS['isPartOf']))
@@ -169,7 +176,6 @@ class OxpointsImporter(object):
         if parent_of:
             doc['parent_of'] = list(parent_of)
 
-        child_of = set()
         child_of.update(self._find_relations(subject, Org.SUB_ORGANIZATION_OF))
         child_of.update(self._find_inverse_relations(subject, Org.HAS_SITE))
         child_of.update(self._find_relations(subject, DCTERMS['isPartOf']))
