@@ -59,6 +59,7 @@ class OSMHandler(handler.ContentHandler):
         self.indexed_tags = ['cuisine', 'brand', 'brewery', 'operator']
         # We only import element that have one of these key
         self.element_tags = ['amenity', 'shop', 'naptan:AtcoCode']
+        self.pois = []
 
     def startDocument(self):
         self.tags = {}
@@ -167,13 +168,12 @@ class OSMHandler(handler.ContentHandler):
                 result['location'] = "%s,%s" % location
                 search_results = self.indexer.search_for_ids(
                         self.identifier_key, result[self.identifier_key])
-                result = prepare_document(result, search_results, self.precedence)
-                result = [result]
-                self.indexer.index(result)
+                self.pois.append(prepare_document(result, search_results, self.precedence))
         except Exception as e:
             logger.warning("Couldn't index a POI.", exc_info=True)
 
     def endDocument(self):
+        self.indexer.index(self.pois)
         self.indexer.commit()
 
 
