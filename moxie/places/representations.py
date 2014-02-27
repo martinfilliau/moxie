@@ -213,15 +213,23 @@ class TypesRepresentation(Representation):
     def as_json(self):
         return jsonify(self.as_dict())
 
-    def as_dict(self):
+    def as_dict(self, prefix='/'):
+        """Recursively step through the "types" tree, depth-first.
+
+        Prefix is passed as a '/' delimited string of types preceeding the one
+        currently being processed.
+        """
         types = []
         for k, v in self.types.iteritems():
-            values = {'type': k, 'type_name': v['name_singular'],
-                    'type_name_plural': v['name_plural']}
+            values = {'type': k,
+                      'type_name': v['name_singular'],
+                      'type_name_plural': v['name_plural'],
+                      'type_prefixed': prefix + k,
+                      }
             if 'description' in v:
                 values['description'] = v['description']
             if 'types' in v:
-                values.update(TypesRepresentation(v['types']).as_dict())
+                values.update(TypesRepresentation(v['types']).as_dict(prefix=prefix + k + '/'))
             types.append(values)
         return {'types': types}
 
