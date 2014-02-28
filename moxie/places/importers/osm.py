@@ -108,11 +108,7 @@ class OSMHandler(handler.ContentHandler):
                     return
 
             if element_type in ['way', 'node'] and any([x in self.tags for x in self.element_tags]):
-                result = dict([('raw_osm_%s' % k, v) for k, v in self.tags.items()])
-                result['raw_osm_type'] = element_type
-                result['raw_osm_version'] = self.attrs['version']
-
-
+                result = {}
                 osm_id = 'osm:%s' % self.id
                 atco_id = self.tags.get('naptan:AtcoCode', None)
                 result[self.identifier_key] = [osm_id]
