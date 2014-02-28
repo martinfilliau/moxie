@@ -98,8 +98,14 @@ class OSMHandler(handler.ContentHandler):
                 max_ = max(max_[0], lon), max(max_[1], lat)
             location = (min_[0] + max_[0]) / 2, (min_[1] + max_[1]) / 2
         try:
-            if self.tags.get('life_cycle', 'in_use') != 'in_use' or self.tags.get('disused') in ('1', 'yes', 'true'):
+            if self.tags.get('life_cycle', 'in_use') != 'in_use':
                 return
+
+            for key in self.tags.iterkeys():
+                if 'disused' in key:
+                    # e.g. disused:amenity=restaurant
+                    # http://wiki.openstreetmap.org/wiki/Key:disused
+                    return
 
             if element_type in ['way', 'node'] and any([x in self.tags for x in self.element_tags]):
                 result = dict([('raw_osm_%s' % k, v) for k, v in self.tags.items()])
