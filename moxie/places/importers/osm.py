@@ -59,6 +59,7 @@ class OSMHandler(handler.ContentHandler):
         self.indexed_tags = ['cuisine', 'brand', 'brewery', 'operator']
         # We only import element that have one of these key
         self.element_tags = ['amenity', 'shop', 'naptan:AtcoCode']
+        self.pois = []
 
     def startDocument(self):
         self.tags = {}
@@ -72,7 +73,7 @@ class OSMHandler(handler.ContentHandler):
         if name == 'node':
             lon, lat = float(attrs['lon']), float(attrs['lat'])
             id = attrs['id']
-            self.node_location = lon, lat
+            self.node_location = lat, lon
             self.attrs = attrs
             self.id = id
             self.tags = {}
@@ -97,15 +98,17 @@ class OSMHandler(handler.ContentHandler):
                 max_ = max(max_[0], lon), max(max_[1], lat)
             location = (min_[0] + max_[0]) / 2, (min_[1] + max_[1]) / 2
         try:
-            if self.tags.get('life_cycle', 'in_use') != 'in_use' or self.tags.get('disused') in ('1', 'yes', 'true'):
+            if self.tags.get('life_cycle', 'in_use') != 'in_use':
                 return
 
+            for key in self.tags.iterkeys():
+                if 'disused' in key:
+                    # e.g. disused:amenity=restaurant
+                    # http://wiki.openstreetmap.org/wiki/Key:disused
+                    return
+
             if element_type in ['way', 'node'] and any([x in self.tags for x in self.element_tags]):
-                result = dict([('raw_osm_%s' % k, v) for k, v in self.tags.items()])
-                result['raw_osm_type'] = element_type
-                result['raw_osm_version'] = self.attrs['version']
-
-
+                result = {}
                 osm_id = 'osm:%s' % self.id
                 atco_id = self.tags.get('naptan:AtcoCode', None)
                 result[self.identifier_key] = [osm_id]
@@ -167,13 +170,12 @@ class OSMHandler(handler.ContentHandler):
                 result['location'] = "%s,%s" % location
                 search_results = self.indexer.search_for_ids(
                         self.identifier_key, result[self.identifier_key])
-                result = prepare_document(result, search_results, self.precedence)
-                result = [result]
-                self.indexer.index(result)
+                self.pois.append(prepare_document(result, search_results, self.precedence))
         except Exception as e:
             logger.warning("Couldn't index a POI.", exc_info=True)
 
     def endDocument(self):
+        self.indexer.index(self.pois)
         self.indexer.commit()
 
 

@@ -5,8 +5,9 @@ from werkzeug.wrappers import BaseResponse
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import JSON, HAL_JSON
 from moxie.core.exceptions import BadRequest, NotFound
-from moxie.places.representations import (HALPOISearchRepresentation, HALPOIRepresentation,
-                                          HALPOIsRepresentation, HALTypesRepresentation)
+from moxie.places.representations import (HALPOISearchRepresentation, HALPOIsRepresentation,
+                                          HALPOIRepresentation, HALTypesRepresentation,
+                                          GeoJsonPointsRepresentation)
 from .services import POIService
 
 
@@ -55,6 +56,13 @@ class Search(ServiceView):
     def as_hal_json(self, response):
         return HALPOISearchRepresentation(self.query, response, self.start, self.count, self.size,
             request.url_rule.endpoint, types=self.facets, type=self.type, type_exact=self.types_exact).as_json()
+
+
+class GeoJsonSearch(Search):
+
+    @accepts(HAL_JSON, JSON)
+    def as_json(self, response):
+        return GeoJsonPointsRepresentation(response).as_json()
 
 
 class PoiDetail(ServiceView):

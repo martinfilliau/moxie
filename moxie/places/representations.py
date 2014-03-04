@@ -1,6 +1,10 @@
 import logging
 
 from flask import url_for, jsonify
+from shapely.wkt import loads as wkt_loads
+from shapely.geometry import Point
+from geojson import dumps as geojson_dumps
+from geojson import Feature, FeatureCollection
 
 from moxie.core.representations import Representation, HALRepresentation, get_nav_links, RELATIONS_CURIE
 from moxie.places.importers.helpers import find_type_name
@@ -29,6 +33,8 @@ class POIRepresentation(Representation):
             'type': self.poi.type,
             'type_name': self.poi.type_name,
         }
+        if self.poi.short_name:
+            values['short_name'] = self.poi.short_name
         if self.poi.collection_times:
             values['collection_times'] = self.poi.collection_times
         if self.poi.opening_hours:
@@ -44,6 +50,8 @@ class POIRepresentation(Representation):
             values['lat'] = self.poi.lat
         if self.poi.alternative_names:
             values['alternative_names'] = self.poi.alternative_names
+        if self.poi.shape:
+            values['shape'] = self.poi.shape
         if getattr(self.poi, 'fields', False):
             for k, v in self.poi.fields.items():
                 values[k] = v
@@ -231,15 +239,23 @@ class TypesRepresentation(Representation):
     def as_json(self):
         return jsonify(self.as_dict())
 
-    def as_dict(self):
+    def as_dict(self, prefix='/'):
+        """Recursively step through the "types" tree, depth-first.
+
+        Prefix is passed as a '/' delimited string of types preceeding the one
+        currently being processed.
+        """
         types = []
         for k, v in self.types.iteritems():
-            values = {'type': k, 'type_name': v['name_singular'],
-                    'type_name_plural': v['name_plural']}
+            values = {'type': k,
+                      'type_name': v['name_singular'],
+                      'type_name_plural': v['name_plural'],
+                      'type_prefixed': prefix + k,
+                      }
             if 'description' in v:
                 values['description'] = v['description']
             if 'types' in v:
-                values.update(TypesRepresentation(v['types']).as_dict())
+                values.update(TypesRepresentation(v['types']).as_dict(prefix=prefix + k + '/'))
             types.append(values)
         return {'types': types}
 
@@ -260,3 +276,42 @@ class HALTypesRepresentation(TypesRepresentation):
         representation.add_curie('hl', RELATIONS_CURIE)
         representation.add_link('hl:search', url_for('places.search') + "?type={type}")
         return representation.as_dict()
+
+
+class GeoJsonPointsRepresentation(object):
+
+    def __init__(self, results):
+        self.results = results
+
+    def as_dict(self):
+        features = []
+        for result in self.results:
+            if result.shape:
+                f = Feature(id=result.id,
+                            geometry=wkt_loads(result.shape),
+                            properties=self._get_feature_properties(result))
+                features.append(f)
+            elif result.lat and result.lon:
+                # if a result does not have a shape, attempt to
+                # fallback on latitude / longitude
+                f = Feature(id=result.id,
+                            # Point coordinates are in x, y order (longitude, latitude for geographic coordinates)
+                            geometry=Point(float(result.lon), float(result.lat)),
+                            properties=self._get_feature_properties(result))
+                features.append(f)
+        return FeatureCollection(features)
+
+    def _get_feature_properties(self, result):
+        """Get properties from a POI object
+        :param result: POI object
+        :return dict
+        """
+        # only returns the first type atm, was
+        # causing issues with some GeoJSON software
+        return {'name': result.name,
+                'short_name': result.short_name or result.name,     # not ideal but our map software would not be
+                'type_name': result.type_name[0],                   # able to do the "fallback" so it has to
+                'type': result.type[0]}                             # happen here
+
+    def as_json(self):
+        return geojson_dumps(self.as_dict())
