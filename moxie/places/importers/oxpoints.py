@@ -2,6 +2,9 @@ import logging
 import rdflib
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
+from shapely.wkt import loads as wkt_loads
+from shapely.wkt import dumps as wkt_dumps
+from shapely.geometry import MultiPolygon
 
 from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, Vcard, Org
 from moxie.places.importers.helpers import prepare_document
@@ -261,9 +264,18 @@ class OxpointsImporter(object):
             return None
 
     def _get_shape(self, subject):
-        shape = self.graph.value(subject, Geometry.EXTENT)
-        if shape:
-            return self.graph.value(shape, Geometry.AS_WKT).toPython()
+        shapes = []
+        for obj in self.graph.objects(subject, Geometry.EXTENT):
+            shapes.append(self.graph.value(obj, Geometry.AS_WKT).toPython())
+
+        if len(shapes) > 1:
+            wkts = [wkt_loads(s) for s in shapes]
+            multipolygon = MultiPolygon(wkts)
+            dumped = wkt_dumps(multipolygon)
+            logger.info("Subject %s had %s shapes merged as: '%s'" % (subject.toPython(), len(shapes), dumped))
+            return dumped
+        elif len(shapes) == 1:
+            return shapes[0]
         else:
             return None
 
