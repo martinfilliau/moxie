@@ -5,13 +5,21 @@ Endpoint to search and retrieve information about places.
 
 .. http:get:: /places/(string:id)
 
-    Get details of a place by its ID
+    Get details of one or multiple places by their ID
 
     **Example request**:
 
     .. sourcecode:: http
 
 		GET /places/osm:3646652 HTTP/1.1
+		Host: api.m.ox.ac.uk
+		Accept: application/json
+
+    **Example request for multiple POIs**:
+
+    .. sourcecode:: http
+
+		GET /places/osm:3646652,oxpoints:23232392 HTTP/1.1
 		Host: api.m.ox.ac.uk
 		Accept: application/json
 
@@ -31,13 +39,16 @@ Endpoint to search and retrieve information about places.
 			"address": "example"
 		}
 
-    :param id: ID of the resource
+    :param id: ID of the resource, if multiple resources, separated by a comma
     :type id: string
 
     :statuscode 200: resource found
     :statuscode 301: redirection to the resource by its main ID
     :statuscode 404: no resource found
     :statuscode 503: Service not available
+
+    If multiple resources are requested, as much documents as possible will be returned (i.e. if one of
+    the identifier requested is not found, all other documents will be returned).
 
 .. http:get:: /places/search
 
