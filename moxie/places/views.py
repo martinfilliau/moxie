@@ -57,14 +57,16 @@ class Search(ServiceView):
 
 
 class PoiDetail(ServiceView):
-    """Details of one POI
+    """Details of one or multiple POIs separated by a comma
     """
 
     def handle_request(self, ident):
         if ident.endswith('/'):
             ident = ident.split('/')[0]
-        idents = ident.split(',')
         poi_service = POIService.from_context()
+        # split identifiers on comma if there is more than
+        # one identifier requested
+        idents = ident.split(',')
         if len(idents) == 1:
             doc = poi_service.get_place_by_identifier(ident)
             if not doc:
@@ -88,6 +90,7 @@ class PoiDetail(ServiceView):
             # to handle 301 redirections and 404
             return response
         elif type(response) == list:
+            # if more than one POI has been requested
             size = len(response)
             return HALPOIsRepresentation('', response, 0, size, size, 'places.search').as_json()
         else:
