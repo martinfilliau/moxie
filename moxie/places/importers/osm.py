@@ -147,6 +147,7 @@ class OSMHandler(handler.ContentHandler):
 
                 # if the element doesn't have a name, it will be an empty string
                 result['name'] = self.tags.get('name', self.tags.get('operator', ''))
+                result['name_sort'] = result['name']
 
                 address = "{0} {1} {2} {3}".format(self.tags.get("addr:housename", ""), self.tags.get("addr:housenumber", ""),
                         self.tags.get("addr:street", ""), self.tags.get("addr:postcode", ""))

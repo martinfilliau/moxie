@@ -92,6 +92,7 @@ class NaptanXMLHandler(ContentHandler):
             data['location'] = "%s,%s" % (sa.pop('Location_Translation_Latitude'),
                                           sa.pop('Location_Translation_Longitude'))
             data['name'] = sa['Name']
+            data['name_sort'] = data['name']
             data['type'] = "/transport/stop-area"
             self.stop_areas[sa['StopAreaCode']] = data
 
@@ -137,6 +138,7 @@ class NaptanXMLHandler(ContentHandler):
                 data['name'] = "%s %s" % (indicator, sp['Descriptor_CommonName'])
             else:
                 data['name'] = sp['Descriptor_CommonName']
+            data['name_sort'] = data['name']
             self.stop_points[sp['AtcoCode']] = data
 
     def annotate_stop_area_ancestry(self, stop_areas):
