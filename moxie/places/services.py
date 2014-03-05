@@ -53,7 +53,11 @@ class POIService(Service):
             q['boost'] = 'recip(geodist(),2,200,20)'  # boost by geodist (linear function: 200/2*x+20)
             q['sort'] = 'score desc'                  # sort by score
             q['fl'] = '*,_dist_:geodist()'
+        elif original_query:
+            # no location provided but full-text search query provided
+            q['sort'] = 'score desc'
         else:
+            # no full-text query provided, sorting by name
             q['sort'] = 'name_sort asc'
 
         filter_query = None
