@@ -47,10 +47,7 @@ class POIService(Service):
              'facet.mincount': '1',
              }
         if location:
-            print location
             lat, lon = location
-            print lat
-            print lon
             q['sfield'] = 'location'
             q['pt'] = '%s,%s' % (lat, lon)
             q['boost'] = 'recip(geodist(),2,200,20)'  # boost by geodist (linear function: 200/2*x+20)
