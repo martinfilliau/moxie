@@ -18,10 +18,10 @@ class Search(ServiceView):
     def handle_request(self):
         if 'Geo-Position' in request.headers:
             location = request.headers['Geo-Position'].split(';')
+        elif 'lat' in request.args and 'lon' in request.args:
+            location = (request.args['lat'], request.args['lon'])
         else:
-            default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
-            location = (request.args.get('lat', default_lat),
-                        request.args.get('lon', default_lon))
+            location = None
 
         self.query = request.args.get('q', '')
         self.type = request.args.get('type', None)

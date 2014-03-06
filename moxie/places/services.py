@@ -35,23 +35,31 @@ class POIService(Service):
         :param all_types: (optional) display all types or excludes some types defined in configuration
         :return list of domain objects (POIs), total size of results and facets on type
         """
-        lat, lon = location
         query = original_query or self.default_search
         query = urllib.quote_plus(query)
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
              'pf': query,
              'q': query,
-             'sfield': 'location',
-             'pt': '%s,%s' % (lat, lon),
-             'boost': 'recip(geodist(),2,200,20)',  # boost by geodist (linear function: 200/2*x+20)
-             'sort': 'score desc',                  # sort by score
-             'fl': '*,_dist_:geodist()',
              'facet': 'true',
              'facet.field': 'type',
              'facet.sort': 'index',
              'facet.mincount': '1',
              }
+        if location:
+            lat, lon = location
+            q['sfield'] = 'location'
+            q['pt'] = '%s,%s' % (lat, lon)
+            q['boost'] = 'recip(geodist(),2,200,20)'  # boost by geodist (linear function: 200/2*x+20)
+            q['sort'] = 'score desc'                  # sort by score
+            q['fl'] = '*,_dist_:geodist()'
+        elif original_query:
+            # no location provided but full-text search query provided
+            q['sort'] = 'score desc'
+        else:
+            # no full-text query provided, sorting by name
+            q['sort'] = 'name_sort asc'
+
         filter_query = None
         # TODO make a better filter query to handle having type and types_exact at the same time
         if type:

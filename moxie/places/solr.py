@@ -18,6 +18,7 @@ def doc_to_poi(doc, fields_key="_"):
     poi.type = doc.get('type', None)
     poi.identifiers = doc.get('identifiers', [])
     poi.short_name = doc.get('short_name', None)
+    poi.name_sort = doc.get('name_sort', None)
     poi.distance = doc.get('_dist_', 0)
     poi.address = doc.get('address', "")
     poi.phone = doc.get('phone', "")

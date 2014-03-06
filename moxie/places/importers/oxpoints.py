@@ -3,7 +3,7 @@ import rdflib
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
 
-from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, Vcard, Org
+from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, Vcard, Org, OpenVocab
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -91,6 +91,12 @@ class OxpointsImporter(object):
         doc['name'] = title
         doc['id'] = self._get_formatted_oxpoints_id(subject)
         doc['type'] = mapped_type
+
+        sort_label = self.graph.value(subject, OpenVocab.SORT_LABEL)
+        if sort_label:
+            doc['name_sort'] = sort_label.toPython()
+        else:
+            doc['name_sort'] = title
 
         ids = set()
         ids.add(doc['id'])
