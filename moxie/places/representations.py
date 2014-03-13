@@ -163,7 +163,7 @@ class POIsRepresentation(object):
                 'results': [representation(r).as_dict() for r in self.results]}
 
 
-class HALPOIsRepresentation(POIsRepresentation):
+class HALPOISearchRepresentation(POIsRepresentation):
 
     def __init__(self, search, results, start, count, size, endpoint, types=None, type=None, type_exact=None):
         """Represents a list of search result as HAL+JSON
@@ -177,7 +177,7 @@ class HALPOIsRepresentation(POIsRepresentation):
         :param type: (optional) type of the POIs (if search has been restricted to this type)
         :param type_exact: (optional) exact types of the POIs (if search has been restricted to this exact type)
         """
-        super(HALPOIsRepresentation, self).__init__(search, results, size)
+        super(HALPOISearchRepresentation, self).__init__(search, results, size)
         self.start = start
         self.count = count
         self.size = size
@@ -204,6 +204,32 @@ class HALPOIsRepresentation(POIsRepresentation):
             for facet in self.types:
                 representation.update_link('hl:types', url_for(self.endpoint, q=self.search, type=facet),
                     name=facet, title=find_type_name(facet))
+        return representation.as_dict()
+
+
+class HALPOIsRepresentation(POIsRepresentation):
+
+    def __init__(self, results, count, endpoint, pois_ids):
+        """Represents a list of POIs as HAL+JSON
+        :param results: list of results
+        :param count: int as the size of the page
+        :param endpoint: endpoint (URL) to represent the search resource
+        :param pois_ids: list of POIs IDs in the representation
+        """
+        super(HALPOIsRepresentation, self).__init__(None, results, count)
+        self.count = count
+        self.endpoint = endpoint
+        self.pois_ids = pois_ids
+
+    def as_json(self):
+        return jsonify(self.as_dict())
+
+    def as_dict(self):
+        representation = HALRepresentation({
+            'count': self.count,
+        })
+        representation.add_link('self', url_for(self.endpoint, ident=','.join(self.pois_ids)))
+        representation.add_embed('pois', [HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
         return representation.as_dict()
 
 

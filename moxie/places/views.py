@@ -5,7 +5,9 @@ from werkzeug.wrappers import BaseResponse
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import JSON, HAL_JSON
 from moxie.core.exceptions import BadRequest, NotFound
-from moxie.places.representations import (HALPOIsRepresentation, HALPOIRepresentation, HALTypesRepresentation, GeoJsonPointsRepresentation)
+from moxie.places.representations import (HALPOISearchRepresentation, HALPOIsRepresentation,
+                                          HALPOIRepresentation, HALTypesRepresentation,
+                                          GeoJsonPointsRepresentation)
 from .services import POIService
 
 
@@ -52,7 +54,7 @@ class Search(ServiceView):
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
-        return HALPOIsRepresentation(self.query, response, self.start, self.count, self.size,
+        return HALPOISearchRepresentation(self.query, response, self.start, self.count, self.size,
             request.url_rule.endpoint, types=self.facets, type=self.type, type_exact=self.types_exact).as_json()
 
 
@@ -64,28 +66,42 @@ class GeoJsonSearch(Search):
 
 
 class PoiDetail(ServiceView):
-    """Details of one POI
+    """Details of one or multiple POIs separated by a comma
     """
 
     def handle_request(self, ident):
         if ident.endswith('/'):
             ident = ident.split('/')[0]
         poi_service = POIService.from_context()
-        doc = poi_service.get_place_by_identifier(ident)
-        if not doc:
-            raise NotFound()
-        if doc.id != ident:
-            # redirection to the same URL but with the main ID of the doc
-            path = url_for(request.url_rule.endpoint, ident=doc.id)
-            return redirect(path, code=301)
+        # split identifiers on comma if there is more than
+        # one identifier requested
+        self.idents = ident.split(',')
+        if len(self.idents) == 1:
+            doc = poi_service.get_place_by_identifier(ident)
+            if not doc:
+                raise NotFound()
+            if doc.id != ident:
+                # redirection to the same URL but with the main ID of the doc
+                path = url_for(request.url_rule.endpoint, ident=doc.id)
+                return redirect(path, code=301)
+            else:
+                return doc
         else:
-            return doc
+            documents = poi_service.get_places_by_identifiers(self.idents)
+            if not documents:
+                raise NotFound()
+            else:
+                return documents
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
         if issubclass(type(response), BaseResponse):
             # to handle 301 redirections and 404
             return response
+        elif type(response) == list:
+            # if more than one POI has been requested
+            size = len(response)
+            return HALPOIsRepresentation(response, size, request.url_rule.endpoint, self.idents).as_json()
         else:
             return HALPOIRepresentation(response, request.url_rule.endpoint).as_json()
 
