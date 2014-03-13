@@ -60,3 +60,9 @@ class Vcard(object):
     STREET_ADDRESS = URIRef(_BASE+'street-address')
     POSTAL_CODE = URIRef(_BASE+'postal-code')
     ADR = URIRef(_BASE+'adr')
+
+
+class OpenVocab(object):
+
+    _BASE = 'http://open.vocab.org/terms/'
+    SORT_LABEL = URIRef(_BASE+'sortLabel')

@@ -107,6 +107,13 @@ Endpoint to search and retrieve information about places.
     :type start: int
     :query count: number of results to retrieve
     :type count: int
+    :query lat: latitude (as an alternative to the Geo-Position header if spatial search required)
+    :type lat: string
+    :query lon: longitude (as an alternative to the Geo-Position header if spatial search required)
+    :type lon: string
+
+    If no geolocation is passed (either by header or query parameters), and if there is no full-text search (``q`` parameter),
+    the result will be sorted by name (A-Z).
 
     :statuscode 200: query found
     :statuscode 400: Bad request (could happen if some parameters are used in combination e.g. type and type_exact)

@@ -35,6 +35,8 @@ class POIRepresentation(Representation):
         }
         if self.poi.short_name:
             values['short_name'] = self.poi.short_name
+        if self.poi.name_sort:
+            values['name_sort'] = self.poi.name_sort
         if self.poi.collection_times:
             values['collection_times'] = self.poi.collection_times
         if self.poi.opening_hours:
