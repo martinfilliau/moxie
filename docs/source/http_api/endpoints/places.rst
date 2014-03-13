@@ -3,7 +3,7 @@ Places endpoint
 
 Endpoint to search and retrieve information about places.
 
-.. http:get:: /places/(string:id)
+.. http:get:: /places/(string:id)[,(string:id)...]
 
     Get details of one or multiple places by their ID
 
