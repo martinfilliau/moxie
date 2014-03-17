@@ -66,3 +66,29 @@ class OpenVocab(object):
 
     _BASE = 'http://open.vocab.org/terms/'
     SORT_LABEL = URIRef(_BASE+'sortLabel')
+
+
+class Accessibility(object):
+
+    _BASE = 'http://purl.org/net/accessibility/'
+    PARKING_TYPE = URIRef(_BASE+'parkingType')
+    MAIN_ENTRANCE_HAS_LEVEL_ACCESS = URIRef(_BASE+'mainEntranceHasLevelAccess')
+    HAS_LEVEL_ACCESS = URIRef(_BASE+'hasLevelAccess')
+    DOOR_ENTRY_TYPE = URIRef(_BASE+'doorEntryType')
+    FLOORS = URIRef(_BASE+'floors')
+    LIFT_TO_ALL_FLOORS = URIRef(_BASE+'liftsToAllFloors')
+    HAS_HEARING_SYSTEM = URIRef(_BASE+'hasHearingSystem')
+    HAS_QUIET_SPACE = URIRef(_BASE+'hasQuietSpace')
+    HAS_CAFE_REFRESHMENTS = URIRef(_BASE+'hasCafeRefreshments')
+    HAS_ADAPTED_FURNITURE = URIRef(_BASE+'hasAdaptedFurniture')
+    HAS_COMPUTER_ACCESS = URIRef(_BASE+'hasComputerAccess')
+    NUMBER_OF_ACCESSIBLE_TOILETS = URIRef(_BASE+'numberOfAccessibleToilets')
+    FLOORPLAN = URIRef(_BASE+'floorplan')
+
+
+class AdHocDataOx(object):
+
+    _BASE = 'http://vocab.ox.ac.uk/ad-hoc-data-ox/'
+    OPENING_HOURS_TERM_TIME = URIRef(_BASE+'openingHoursTermTime')
+    OPENING_HOURS_VACATION = URIRef(_BASE+'openingHoursVacation')
+    OPENING_HOURS_CLOSED = URIRef(_BASE+'openingHoursClosed')
