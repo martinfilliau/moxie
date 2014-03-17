@@ -4,7 +4,7 @@ from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
 
 from moxie.places.importers.rdf_namespaces import (Geo, Geometry, OxPoints, VCard,
-                                                   Org, OpenVocab, LinkingYou, Accessibility)
+                                                   Org, OpenVocab, LinkingYou, Accessibility, AdHocDataOx)
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -39,6 +39,14 @@ MAPPED_PROPERTIES = [
     ('_accessibility_has_cafe_refreshments', Accessibility.hasCafeRefreshments),
     ('_accessibility_has_adapted_furniture', Accessibility.hasAdaptedFurniture),
     ('_accessibility_has_computer_access', Accessibility.hasComputerAccess),
+    ('_accessibility_has_level_access', Accessibility.hasLevelAccess),
+    ('_accessibility_has_main_entrance_level_access', Accessibility.mainEntranceHasLevelAccess),
+    ('_accessibility_has_lifts_to_all_floors', Accessibility.liftsToAllFloors),
+    ('_accessibility_number_of_accessible_toilets', Accessibility.numberOfAccessibleToilets),
+    ('_accessibility_number_of_floors', Accessibility.numberOfFloors),
+    ('_accessibility_opening_hours_closed', AdHocDataOx.openingHoursClosed),
+    ('_accessibility_opening_hours_term_time', AdHocDataOx.openingHoursTermTime),
+    ('_accessibility_opening_hours_vacation', AdHocDataOx.openingHoursVacation),
 ]
 
 
