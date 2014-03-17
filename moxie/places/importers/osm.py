@@ -71,13 +71,14 @@ class OSMHandler(handler.ContentHandler):
 
     def startElement(self, name, attrs):
         if name == 'node':
-            lon, lat = float(attrs['lon']), float(attrs['lat'])
+            lat = float(attrs['lat'])
+            lon = float(attrs['lon'])
             id = attrs['id']
             self.node_location = lat, lon
             self.attrs = attrs
             self.id = id
             self.tags = {}
-            self.node_locations[id] = lon, lat
+            self.node_locations[id] = lat, lon
         elif name == 'tag':
             self.tags[attrs['k']] = attrs['v']
         elif name == 'way':
@@ -93,9 +94,9 @@ class OSMHandler(handler.ContentHandler):
             location = self.node_location
         elif element_type == 'way':
             min_, max_ = (float('inf'), float('inf')), (float('-inf'), float('-inf'))
-            for lon, lat in [self.node_locations[n] for n in self.nodes]:
-                min_ = min(min_[0], lon), min(min_[1], lat)
-                max_ = max(max_[0], lon), max(max_[1], lat)
+            for lat, lon in [self.node_locations[n] for n in self.nodes]:
+                min_ = min(min_[0], lat), min(min_[1], lon)
+                max_ = max(max_[0], lat), max(max_[1], lon)
             location = (min_[0] + max_[0]) / 2, (min_[1] + max_[1]) / 2
         try:
             if self.tags.get('life_cycle', 'in_use') != 'in_use':
