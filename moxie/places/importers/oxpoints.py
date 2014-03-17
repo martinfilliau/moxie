@@ -182,7 +182,7 @@ class OxpointsImporter(object):
         # defined properties that matches our structure
         for prop, rdf_prop in MAPPED_PROPERTIES:
             val = self.graph.value(subject, rdf_prop)
-            if val:
+            if val is not None:
                 doc[prop] = val.toPython()
 
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
