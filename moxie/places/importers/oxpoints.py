@@ -36,13 +36,14 @@ MAPPED_PROPERTIES = [
 
 class OxpointsImporter(object):
 
-    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, identifier_key='identifiers'):
+    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, accessibility_file, identifier_key='identifiers'):
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
         graph = rdflib.Graph()
         graph.parse(file=oxpoints_file, format="application/rdf+xml")
         graph.parse(file=shapes_file, format="application/rdf+xml")
+        graph.parse(file=accessibility_file, format="application/rdf+xml")
         self.graph = graph
         self.merged_things = []     # list of building/sites merged into departments
 

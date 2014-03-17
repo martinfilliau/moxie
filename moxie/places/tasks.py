@@ -63,6 +63,14 @@ def import_oxpoints(url=None, force_update=False):
         else:
             oxpoints_shape = None
 
+        if 'OXPOINTS_ACCESSIBILITY_URL' in app.config:
+            url_accessibility = app.config['OXPOINTS_ACCESSIBILITY_URL']
+            oxpoints_accessibility = get_resource(url_accessibility,
+                                                  force_update=force_update,
+                                                  media_type='application/rdf+xml')
+        else:
+            oxpoints_accessibility = None
+
         if oxpoints:
             logger.info("OxPoints Downloaded - Stored here: %s" % oxpoints)
             oxpoints = open(oxpoints)
@@ -70,7 +78,11 @@ def import_oxpoints(url=None, force_update=False):
                 shapes = open(oxpoints_shape)
             else:
                 shapes = None
-            importer = OxpointsImporter(searcher, 10, oxpoints, shapes)
+            if oxpoints_accessibility:
+                accessibility = open(oxpoints_accessibility)
+            else:
+                accessibility = None
+            importer = OxpointsImporter(searcher, 10, oxpoints, shapes, accessibility)
             importer.import_data()
         else:
             logger.info("OxPoints hasn't been imported - resource not loaded")
