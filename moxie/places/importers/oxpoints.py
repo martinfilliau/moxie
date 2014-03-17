@@ -3,7 +3,8 @@ import rdflib
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
 
-from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, VCard, Org, OpenVocab
+from moxie.places.importers.rdf_namespaces import (Geo, Geometry, OxPoints, VCard,
+                                                   Org, OpenVocab, LinkingYou, Accessibility)
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -31,8 +32,15 @@ MAPPED_PROPERTIES = [
     ('website', FOAF.homepage),
     ('short_name', OxPoints.shortLabel),
     ('_picture_logo', FOAF.logo),
-    ('_picture_depiction', FOAF.depiction)
+    ('_picture_depiction', FOAF.depiction),
+    ('_accessibility_access_guide_url', LinkingYou['space-accessibility']),
+    ('_accessibility_has_hearing_system', Accessibility.hasHearingSystem),
+    ('_accessibility_has_quiet_space', Accessibility.hasQuietSpace),
+    ('_accessibility_has_cafe_refreshments', Accessibility.hasCafeRefreshments),
+    ('_accessibility_has_adapted_furniture', Accessibility.hasAdaptedFurniture),
+    ('_accessibility_has_computer_access', Accessibility.hasComputerAccess),
 ]
+
 
 OXPOINTS_IDENTIFIERS = {
     OxPoints.hasOUCSCode: 'oucs',
