@@ -3,36 +3,46 @@ import rdflib
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
 
-from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, Vcard, Org, OpenVocab
+from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, VCard, Org, OpenVocab
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
 
 MAPPED_TYPES = [
-    (OxPoints.UNIVERSITY, '/university'),
-    (OxPoints.COLLEGE, '/university/college'),
-    (OxPoints.DEPARTMENT, '/university/department'),
-    (OxPoints.FACULTY, '/university/department'),
-    (OxPoints.UNIT, '/university/department'),
-    (OxPoints.LIBRARY, '/university/library'),
-    (OxPoints.SUB_LIBRARY, '/university/sub-library'),
-    (OxPoints.DIVISION, '/university/division'),
-    (OxPoints.MUSEUM, '/leisure/museum'),
-    (OxPoints.CAR_PARK, '/transport/car-park/university'),
-    (OxPoints.ROOM, '/university/room'),
-    (OxPoints.HALL, '/university/hall'),
-    (OxPoints.BUILDING, '/university/building'),
-    (OxPoints.SPACE, '/university/space'),
-    (OxPoints.SITE, '/university/site')
+    (OxPoints.University, '/university'),
+    (OxPoints.College, '/university/college'),
+    (OxPoints.Department, '/university/department'),
+    (OxPoints.Faculty, '/university/department'),
+    (OxPoints.Unit, '/university/department'),
+    (OxPoints.Library, '/university/library'),
+    (OxPoints.SubLibrary, '/university/sub-library'),
+    (OxPoints.Division, '/university/division'),
+    (OxPoints.Museum, '/leisure/museum'),
+    (OxPoints.CarPark, '/transport/car-park/university'),
+    (OxPoints.Room, '/university/room'),
+    (OxPoints.Hall, '/university/hall'),
+    (OxPoints.Building, '/university/building'),
+    (OxPoints.Space, '/university/space'),
+    (OxPoints.Site, '/university/site')
 ]
 
 # properties which maps "easily" to our structure
 MAPPED_PROPERTIES = [
-    ('website', FOAF['homepage']),
-    ('short_name', OxPoints.SHORT_LABEL),
-    ('_picture_logo', FOAF['logo']),
-    ('_picture_depiction', FOAF['depiction'])
+    ('website', FOAF.homepage),
+    ('short_name', OxPoints.shortLabel),
+    ('_picture_logo', FOAF.logo),
+    ('_picture_depiction', FOAF.depiction)
 ]
+
+OXPOINTS_IDENTIFIERS = {
+    OxPoints.hasOUCSCode: 'oucs',
+    OxPoints.hasOLISCode: 'olis',
+    OxPoints.hasOLISAlephCode: 'olis-aleph',
+    OxPoints.hasOSMIdentifier: 'osm',
+    OxPoints.hasFinanceCode: 'finance',
+    OxPoints.hasOBNCode: 'obn',
+    OxPoints.hasLibraryDataId: 'librarydata'
+}
 
 class OxpointsImporter(object):
 
@@ -78,7 +88,7 @@ class OxpointsImporter(object):
         :param subject: subject URIRef
         :return dict
         """
-        title = self.graph.value(subject, DC['title'])
+        title = self.graph.value(subject, DC.title)
         if not title:
             return None
         else:
@@ -106,12 +116,12 @@ class OxpointsImporter(object):
         parent_of = set()
         child_of = set()
 
-        main_site = self.graph.value(subject, OxPoints.PRIMARY_PLACE)
+        main_site = self.graph.value(subject, OxPoints.primaryPlace)
         main_site_id = None
 
         # attempt to merge a Thing and its Site if it has one
         if main_site:
-            site_title = self.graph.value(main_site, DC['title'])
+            site_title = self.graph.value(main_site, DC.title)
             if site_title:
                 site_title = site_title.toPython()
 
@@ -144,7 +154,7 @@ class OxpointsImporter(object):
                 doc['location'] = location
             else:
                 # if not, try to find location from the parent element
-                parent = self.graph.value(subject, DCTERMS['isPartOf'])
+                parent = self.graph.value(subject, DCTERMS.isPartOf)
                 if parent:
                     location = self._get_location(parent)
                     if location:
@@ -156,13 +166,13 @@ class OxpointsImporter(object):
         if alternative_names:
             doc['alternative_names'] = alternative_names
 
-        address_node = self.graph.value(subject, Vcard.ADR)
+        address_node = self.graph.value(subject, VCard.adr)
         if address_node:
             address = self._get_address_for_subject(address_node)
             if address:
                 doc['address'] = address
 
-        social_accounts = self._get_values_for_property(subject, FOAF['account'])
+        social_accounts = self._get_values_for_property(subject, FOAF.account)
         if social_accounts:
             for account in social_accounts:
                 if 'facebook.com' in account:
@@ -176,16 +186,16 @@ class OxpointsImporter(object):
             if val:
                 doc[prop] = val.toPython()
 
-        parent_of.update(self._find_inverse_relations(subject, Org.SUB_ORGANIZATION_OF))
-        parent_of.update(self._find_relations(subject, Org.HAS_SITE))
-        parent_of.update(self._find_inverse_relations(subject, DCTERMS['isPartOf']))
+        parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
+        parent_of.update(self._find_relations(subject, Org.hasSite))
+        parent_of.update(self._find_inverse_relations(subject, DCTERMS.isPartOf))
         parent_of.discard(main_site_id)
         if parent_of:
             doc['parent_of'] = list(parent_of)
 
-        child_of.update(self._find_relations(subject, Org.SUB_ORGANIZATION_OF))
-        child_of.update(self._find_inverse_relations(subject, Org.HAS_SITE))
-        child_of.update(self._find_relations(subject, DCTERMS['isPartOf']))
+        child_of.update(self._find_relations(subject, Org.subOrganizationOf))
+        child_of.update(self._find_inverse_relations(subject, Org.hasSite))
+        child_of.update(self._find_relations(subject, DCTERMS.isPartOf))
         if child_of:
             doc['child_of'] = list(child_of)
 
@@ -198,7 +208,7 @@ class OxpointsImporter(object):
         :return list of identifiers
         """
         ids = []
-        for oxp_property, identifier in OxPoints.IDENTIFIERS.items():
+        for oxp_property, identifier in OXPOINTS_IDENTIFIERS.items():
             for obj in self.graph.objects(subject, oxp_property):
                 val = obj
                 if identifier == 'osm':
@@ -233,8 +243,8 @@ class OxpointsImporter(object):
         :param subject: URIRef of a subject having VCard properties
         :return formatted string containing address or None
         """
-        street_address = self.graph.value(subject, Vcard.STREET_ADDRESS)
-        postal_code = self.graph.value(subject, Vcard.POSTAL_CODE)
+        street_address = self.graph.value(subject, VCard['street-address'])
+        postal_code = self.graph.value(subject, VCard['postal-code'])
 
         if street_address or postal_code:
             address = "{0} {1}".format(street_address or '', postal_code or '')
@@ -261,23 +271,23 @@ class OxpointsImporter(object):
         return 'oxpoints:%s' % uri_ref.toPython().rsplit('/')[-1]
 
     def _get_location(self, subject):
-        if (subject, Geo.LAT, None) in self.graph and (subject, Geo.LONG, None) in self.graph:
-            return "%s,%s" % (self.graph.value(subject, Geo.LAT).toPython(),
-                              self.graph.value(subject, Geo.LONG).toPython())
+        if (subject, Geo.lat, None) in self.graph and (subject, Geo.long, None) in self.graph:
+            return "%s,%s" % (self.graph.value(subject, Geo.lat).toPython(),
+                              self.graph.value(subject, Geo.long).toPython())
         else:
             return None
 
     def _get_shape(self, subject):
-        shape = self.graph.value(subject, Geometry.EXTENT)
+        shape = self.graph.value(subject, Geometry.extent)
         if shape:
-            return self.graph.value(shape, Geometry.AS_WKT).toPython()
+            return self.graph.value(shape, Geometry.asWKT).toPython()
         else:
             return None
 
     def _get_alternative_names(self, subject):
         alternative_names = set()
-        alternative_names.update(self._get_values_for_property(subject, SKOS['altLabel']))
-        alternative_names.update(self._get_values_for_property(subject, SKOS['hiddenLabel']))
+        alternative_names.update(self._get_values_for_property(subject, SKOS.altLabel))
+        alternative_names.update(self._get_values_for_property(subject, SKOS.hiddenLabel))
         return list(alternative_names)
 
 
