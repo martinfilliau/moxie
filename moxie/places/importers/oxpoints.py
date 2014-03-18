@@ -4,7 +4,8 @@ from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
 
 from moxie.places.importers.rdf_namespaces import (Geo, Geometry, OxPoints, VCard,
-                                                   Org, OpenVocab, LinkingYou, Accessibility, AdHocDataOx)
+                                                   Org, OpenVocab, LinkingYou, Accessibility,
+                                                   AdHocDataOx, DoorEntryType, ParkingType)
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,16 @@ MAPPED_PROPERTIES = [
     ('_accessibility_opening_hours_vacation', AdHocDataOx.openingHoursVacation),
 ]
 
+DOOR_ENTRY_TYPES = {
+    DoorEntryType.Manual: 'Manual',
+    DoorEntryType.Powered: 'Powered',
+    DoorEntryType.Automatic: 'Automatic',
+}
+
+PARKING_TYPES = {
+    ParkingType.BlueBadge: 'Blue Badge',
+    ParkingType.PayAndDisplay: 'Pay and Display'
+}
 
 OXPOINTS_IDENTIFIERS = {
     OxPoints.hasOUCSCode: 'oucs',
@@ -214,6 +225,14 @@ class OxpointsImporter(object):
         child_of.update(self._find_relations(subject, DCTERMS.isPartOf))
         if child_of:
             doc['child_of'] = list(child_of)
+
+        accessibility_door_entry_type = self.graph.value(subject, Accessibility.doorEntryType)
+        if accessibility_door_entry_type:
+            doc['_accessibility_door_entry_type'] = DOOR_ENTRY_TYPES.get(accessibility_door_entry_type)
+
+        accessibility_parking_type = self.graph.value(subject, Accessibility.nearbyParkingType)
+        if accessibility_parking_type:
+            doc['_accessibility_parking_type'] = PARKING_TYPES.get(accessibility_parking_type)
 
         return doc
 

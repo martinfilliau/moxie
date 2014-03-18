@@ -18,3 +18,7 @@ Accessibility = Namespace('http://purl.org/net/accessibility/')
 AdHocDataOx = Namespace('http://vocab.ox.ac.uk/ad-hoc-data-ox/')
 
 LinkingYou = Namespace('http://purl.org/linkingyou/')
+
+DoorEntryType = Namespace('http://purl.org/net/accessibility/doorEntryType/')
+
+ParkingType = Namespace('http://purl.org/net/accessibility/parkingType/')
