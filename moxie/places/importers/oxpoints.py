@@ -48,6 +48,7 @@ MAPPED_PROPERTIES = [
     ('_accessibility_opening_hours_closed', AdHocDataOx.openingHoursClosed),
     ('_accessibility_opening_hours_term_time', AdHocDataOx.openingHoursTermTime),
     ('_accessibility_opening_hours_vacation', AdHocDataOx.openingHoursVacation),
+    ('_accessibility_floorplan', Accessibility.floorplan),
 ]
 
 DOOR_ENTRY_TYPES = {
