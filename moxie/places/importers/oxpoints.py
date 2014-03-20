@@ -1,7 +1,9 @@
 import logging
+#import urlparse
+
 import rdflib
 from rdflib import RDF
-from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
+from rdflib.namespace import DC, SKOS, FOAF, DCTERMS, RDFS
 
 from moxie.places.importers.rdf_namespaces import (Geo, Geometry, OxPoints, VCard,
                                                    Org, OpenVocab, LinkingYou, Accessibility,
@@ -9,6 +11,37 @@ from moxie.places.importers.rdf_namespaces import (Geo, Geometry, OxPoints, VCar
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
+
+
+# # Monkey patch the urlparse module to add scheme
+# # see url_parse.py for capabilities
+# SCHEME_HTTP_LIKE_CAPABILITIES = [
+#     'uses_relative',
+#     'uses_netloc',
+#     'uses_params',
+#     'uses_query',
+#     'uses_fragment',
+# ]
+#
+# EXTRA_SCHEMES = [
+#     ('tel', SCHEME_HTTP_LIKE_CAPABILITIES),
+# ]
+#
+#
+# def add_scheme(scheme, capabilities):
+#     for capability in capabilities:
+#         schemes = getattr(urlparse, capability)
+#         if not scheme in schemes:
+#             schemes.append(scheme)
+#
+#
+# def update_url_parse_schemes():
+#     for (scheme, caps) in EXTRA_SCHEMES:
+#         add_scheme(scheme, caps)
+#
+#
+# update_url_parse_schemes()
+
 
 MAPPED_TYPES = [
     (OxPoints.University, '/university'),
@@ -235,6 +268,19 @@ class OxpointsImporter(object):
         accessibility_parking_type = self.graph.value(subject, Accessibility.nearbyParkingType)
         if accessibility_parking_type:
             doc['_accessibility_parking_type'] = PARKING_TYPES.get(accessibility_parking_type)
+
+        accessibility_contact = self.graph.value(subject, Accessibility.contact)
+        if accessibility_contact:
+            accessibility_contact_name = self.graph.value(accessibility_contact, RDFS.label)
+            if accessibility_contact_name:
+                doc['_accessibility_contact_name'] = accessibility_contact_name.toPython()
+            accessibility_contact_email = self.graph.value(accessibility_contact, VCard.email)
+            if accessibility_contact_email:
+                doc['_accessibility_contact_email'] = accessibility_contact_email.toPython()
+            accessibility_contact_tel = self.graph.value(accessibility_contact, VCard.tel)
+            if accessibility_contact_tel:
+                # TODO urlparse bug? monkey patching doesn't seem to be working..
+                doc['_accessibility_contact_tel'] = accessibility_contact_tel.toPython()
 
         return doc
 
