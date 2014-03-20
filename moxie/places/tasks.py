@@ -2,6 +2,7 @@ import logging
 import bz2
 import zipfile
 
+import requests
 from xml.sax import make_parser
 
 from moxie import create_app
@@ -103,3 +104,15 @@ def import_ox_library_data(url=None, force_update=False):
             importer.run()
         else:
             logger.info("OxLibraryData hasn't been imported - resource not loaded")
+
+
+@celery.task
+def download_file(url, location):
+    """Download a file and store it at location
+    :param url: URL to download the file from
+    :param location: location where to put the file
+    """
+    response = requests.get(url)
+    f = file(location)
+    f.write(response.content)
+    f.close()
