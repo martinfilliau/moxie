@@ -36,21 +36,6 @@ class SolrSearch(object):
         return '<{name} {url}{core}>'.format(name=__name__,
             url=self.server_url, core=self.core)
 
-    def search_nearby(self, query, location, fq=None, start=0, count=10, location_field='location'):
-        # TODO this method is not called anymore. But it should be refactored to handle more
-        # logic from Solr, but being more flexible at the same time
-        lat, lon = location
-        q = {'defType': 'edismax',
-                'spellcheck.collate': 'true',
-                'pf': query,
-                'q': query,
-                'sfield': location_field,
-                'pt': '%s,%s' % (lon, lat),
-                'sort': 'geodist() asc',
-                'fl': '*,_dist_:geodist()',
-                }
-        return self.search(q, fq, start, count)
-
     def search(self, query, fq=None, start=0, count=10):
         query['start'] = str(start)
         query['rows'] = str(count)

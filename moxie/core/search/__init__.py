@@ -59,9 +59,6 @@ class SearchService(Service):
         """
         return self._backend.search(query, fq=fq, start=start, count=count)
 
-    def search_nearby(self, query, location, fq=None, start=0, count=10):
-        return self._backend.search_nearby(query, location, fq=fq, start=start, count=count)
-
     def get_by_ids(self, ids):
         return self._backend.get_by_ids(ids)
 
