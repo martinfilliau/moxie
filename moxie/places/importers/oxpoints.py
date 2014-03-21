@@ -188,8 +188,8 @@ class OxpointsImporter(object):
                 doc[prop] = val.toPython()
 
         images = []
-        images.extend(self._get_images(subject, FOAF.depiction))
-        images.extend(self._get_images(subject, FOAF.logo))
+        images.extend(self._get_files(subject, FOAF.depiction, 'picture'))
+        images.extend(self._get_files(subject, FOAF.logo, 'logo'))
         doc['images'] = images
 
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
@@ -297,11 +297,12 @@ class OxpointsImporter(object):
         alternative_names.update(self._get_values_for_property(subject, SKOS.hiddenLabel))
         return list(alternative_names)
 
-    def _get_files(self, subject, rdf_prop):
+    def _get_files(self, subject, rdf_prop, file_type):
         """Get files for given subject and predicate
         Will download the file and store it
         :param subject: subject
         :param rdf_prop: predicate
+        :param file_type: type of file (string), used in description and URL
         :return list of json strings containing source URL and new location
         """
         # TODO can't import it in the file for some reasons??
@@ -312,13 +313,15 @@ class OxpointsImporter(object):
             url = val.toPython()
             file_name = url.split('/')[-1]
             oxpoints_path = self._get_formatted_oxpoints_id(subject, separator='/')
-            download_location = '{base}{oxpoints_id}/original/{file_name}'.format(base=self.static_files_dir,
-                                                                                  oxpoints_id=oxpoints_path,
-                                                                                  file_name=file_name)
+            download_location = '{base}{oxpoints_id}/{file_type}/original/{file_name}'.format(base=self.static_files_dir,
+                                                                                              oxpoints_id=oxpoints_path,
+                                                                                              file_type=file_type,
+                                                                                              file_name=file_name)
 
             download_file.delay(val.toPython(), download_location)
             image_description = {'location': download_location,
                                  'file_name': file_name,
+                                 'file_type': file_type,
                                  'source_url': url}
             files.append(json.dumps(image_description))
         return files
