@@ -315,13 +315,14 @@ class OxpointsImporter(object):
             url = val.toPython()
             file_name = url.split('/')[-1]
             oxpoints_path = self._get_formatted_oxpoints_id(subject, separator='/')
-            download_location = '{base}{oxpoints_id}/{file_type}/original/{file_name}'.format(base=self.static_files_dir,
-                                                                                              oxpoints_id=oxpoints_path,
-                                                                                              file_type=file_type,
-                                                                                              file_name=file_name)
+            location = '{oxpoints_id}/{file_type}/original/{file_name}'.format(oxpoints_id=oxpoints_path,
+                                                                               file_type=file_type,
+                                                                               file_name=file_name)
+            download_location = '{base}{location}'.format(base=self.static_files_dir,
+                                                          location=location)
 
             download_file.delay(val.toPython(), download_location)
-            image_description = {'location': download_location,
+            image_description = {'location': location,
                                  'file_name': file_name,
                                  'file_type': file_type,
                                  'source_url': url}
