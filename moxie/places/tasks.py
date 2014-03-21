@@ -109,9 +109,9 @@ def import_ox_library_data(url=None, force_update=False):
             logger.info("OxLibraryData hasn't been imported - resource not loaded")
 
 
-# bind=True to give access to self
-@celery.task(bind=True)
-def download_file(self, url, location):
+# (bind=True)  bind=True to give access to self     TODO from celery 3.1
+@celery.task
+def download_file(url, location):
     """Download a file and store it at location
     :param url: URL to download the file from
     :param location: location where to put the file
@@ -122,7 +122,8 @@ def download_file(self, url, location):
         response = requests.get(url)
     except RequestException as re:
         # default behaviour is retry 3 times, every 3 minutes
-        raise self.retry(exc=re)
+        #raise self.retry(exc=re)
+        raise download_file.retry(exc=re)
     else:
         directory_path = '/'.join(location.split('/')[:-1])
         if not os.path.exists(directory_path):
