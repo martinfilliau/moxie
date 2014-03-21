@@ -187,27 +187,9 @@ class OxpointsImporter(object):
             if val is not None:
                 doc[prop] = val.toPython()
 
-        # TODO can't import it in the file for some reasons??
-        from moxie.places.tasks import download_file
-
         images = []
-        for rdf_prop in [FOAF.logo, FOAF.depiction]:
-            val = self.graph.value(subject, rdf_prop)
-            if val is not None:
-                url = val.toPython()
-                file_name = url.split('/')[-1]
-                # oxpoints:1234 --> oxpoints/1234
-                oxpoints_path = '/'.join(doc['id'].split(':'))
-                download_location = '{base}{oxpoints_id}/original/{file_name}'.format(base=self.static_files_dir,
-                                                                                       oxpoints_id=oxpoints_path,
-                                                                                       file_name=file_name)
-
-                download_file.delay(val.toPython(), download_location)
-                image_description = {'location': download_location,
-                               'file_name': file_name,
-                               'source_url': url}
-                images.append(json.dumps(image_description))
-
+        images.extend(self._get_images(subject, FOAF.depiction))
+        images.extend(self._get_images(subject, FOAF.logo))
         doc['images'] = images
 
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
@@ -314,6 +296,32 @@ class OxpointsImporter(object):
         alternative_names.update(self._get_values_for_property(subject, SKOS.altLabel))
         alternative_names.update(self._get_values_for_property(subject, SKOS.hiddenLabel))
         return list(alternative_names)
+
+    def _get_files(self, subject, rdf_prop):
+        """Get files for given subject and predicate
+        Will download the file and store it
+        :param subject: subject
+        :param rdf_prop: predicate
+        :return list of json strings containing source URL and new location
+        """
+        # TODO can't import it in the file for some reasons??
+        from moxie.places.tasks import download_file
+
+        files = []
+        for val in self.graph.objects(subject, rdf_prop):
+            url = val.toPython()
+            file_name = url.split('/')[-1]
+            oxpoints_path = self._get_formatted_oxpoints_id(subject, separator='/')
+            download_location = '{base}{oxpoints_id}/original/{file_name}'.format(base=self.static_files_dir,
+                                                                                  oxpoints_id=oxpoints_path,
+                                                                                  file_name=file_name)
+
+            download_file.delay(val.toPython(), download_location)
+            image_description = {'location': download_location,
+                                 'file_name': file_name,
+                                 'source_url': url}
+            files.append(json.dumps(image_description))
+        return files
 
 
 def main():
