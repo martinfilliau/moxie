@@ -1,6 +1,7 @@
 import logging
 import bz2
 import zipfile
+import os
 
 import requests
 from xml.sax import make_parser
@@ -56,6 +57,7 @@ def import_oxpoints(url=None, force_update=False):
     app = create_app()
     with app.blueprint_context(BLUEPRINT_NAME):
         url = url or app.config['OXPOINTS_IMPORT_URL']
+        static_files_dir = app.config.get('STATIC_FILES_IMPORT_DIRECTORY', None)
         oxpoints = get_resource(url, force_update)
 
         if 'OXPOINTS_SHAPES_URL' in app.config:
@@ -71,7 +73,7 @@ def import_oxpoints(url=None, force_update=False):
                 shapes = open(oxpoints_shape)
             else:
                 shapes = None
-            importer = OxpointsImporter(searcher, 10, oxpoints, shapes)
+            importer = OxpointsImporter(searcher, 10, oxpoints, shapes, static_files_dir)
             importer.import_data()
         else:
             logger.info("OxPoints hasn't been imported - resource not loaded")
@@ -112,7 +114,12 @@ def download_file(url, location):
     :param url: URL to download the file from
     :param location: location where to put the file
     """
+    logger.info('Downloading {url} to {location}'.format(url=url,
+                                                         location=location))
     response = requests.get(url)
-    f = file(location)
+    directory_path = '/'.join(location.split('/')[:-1])
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+    f = file(location, 'w')
     f.write(response.content)
     f.close()
