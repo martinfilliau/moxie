@@ -192,7 +192,7 @@ class OxpointsImporter(object):
             images = []
             images.extend(self._get_files(subject, FOAF.depiction, 'picture'))
             images.extend(self._get_files(subject, FOAF.logo, 'logo'))
-            doc['images'] = images
+            doc['image'] = images
 
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
         parent_of.update(self._find_relations(subject, Org.hasSite))
