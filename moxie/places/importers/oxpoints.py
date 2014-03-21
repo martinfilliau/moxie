@@ -269,6 +269,20 @@ class OxpointsImporter(object):
         if accessibility_parking_type:
             doc['_accessibility_parking_type'] = PARKING_TYPES.get(accessibility_parking_type)
 
+        accessibility_number_of_accessible_toilets = self.graph.value(subject, Accessibility.numberOfAccessibleToilets)
+        if accessibility_number_of_accessible_toilets:
+            number = accessibility_number_of_accessible_toilets.toPython()
+            if number > 0:
+                doc['_accessibility_has_accessible_toilets'] = True
+            else:
+                doc['_accessibility_has_accessible_toilets'] = False
+
+        accessibility_guide_url = self.graph.value(subject, LinkingYou['space-accessibility'])
+        if accessibility_guide_url:
+            doc['_accessibility_has_access_guide_information'] = True
+        else:
+            doc['_accessibility_has_access_guide_information'] = False
+
         accessibility_contact = self.graph.value(subject, Accessibility.contact)
         if accessibility_contact:
             accessibility_contact_name = self.graph.value(accessibility_contact, RDFS.label)
