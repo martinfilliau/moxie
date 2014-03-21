@@ -1,5 +1,6 @@
 import logging
 import rdflib
+import json
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
 
@@ -30,8 +31,6 @@ MAPPED_TYPES = [
 MAPPED_PROPERTIES = [
     ('website', FOAF.homepage),
     ('short_name', OxPoints.shortLabel),
-    ('_picture_logo', FOAF.logo),
-    ('_picture_depiction', FOAF.depiction)
 ]
 
 OXPOINTS_IDENTIFIERS = {
@@ -46,7 +45,7 @@ OXPOINTS_IDENTIFIERS = {
 
 class OxpointsImporter(object):
 
-    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, identifier_key='identifiers'):
+    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, static_files_dir, identifier_key='identifiers'):
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
@@ -55,6 +54,9 @@ class OxpointsImporter(object):
         graph.parse(file=shapes_file, format="application/rdf+xml")
         self.graph = graph
         self.merged_things = []     # list of building/sites merged into departments
+        if not static_files_dir:
+            logger.warning('STATIC_FILES_IMPORT_DIRECTORY not set, images will not be imported')
+        self.static_files_dir = static_files_dir
 
     def import_data(self):
         documents = []
@@ -184,6 +186,29 @@ class OxpointsImporter(object):
             val = self.graph.value(subject, rdf_prop)
             if val is not None:
                 doc[prop] = val.toPython()
+
+        # TODO can't import it in the file for some reasons??
+        from moxie.places.tasks import download_file
+
+        images = []
+        for rdf_prop in [FOAF.logo, FOAF.depiction]:
+            val = self.graph.value(subject, rdf_prop)
+            if val is not None:
+                url = val.toPython()
+                file_name = url.split('/')[-1]
+                # oxpoints:1234 --> oxpoints/1234
+                oxpoints_path = '/'.join(doc['id'].split(':'))
+                download_location = '{base}{oxpoints_id}/original/{file_name}'.format(base=self.static_files_dir,
+                                                                                       oxpoints_id=oxpoints_path,
+                                                                                       file_name=file_name)
+
+                download_file.delay(val.toPython(), download_location)
+                image_description = {'location': download_location,
+                               'file_name': file_name,
+                               'source_url': url}
+                images.append(json.dumps(image_description))
+
+        doc['images'] = images
 
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
         parent_of.update(self._find_relations(subject, Org.hasSite))
