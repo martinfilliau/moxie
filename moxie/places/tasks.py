@@ -127,6 +127,6 @@ def download_file(self, url, location):
         directory_path = '/'.join(location.split('/')[:-1])
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
-        f = file(location, 'w')
+        f = file(location, 'w+')
         f.write(response.content)
         f.close()
