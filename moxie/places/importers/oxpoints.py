@@ -287,12 +287,13 @@ class OxpointsImporter(object):
             values.append(obj.toPython())
         return values
 
-    def _get_formatted_oxpoints_id(self, uri_ref):
+    def _get_formatted_oxpoints_id(self, uri_ref, separator=':'):
         """Split an URI to get the OxPoints ID
         :param uri_ref: URIRef object
         :return string representing oxpoints ID
         """
-        return 'oxpoints:%s' % uri_ref.toPython().rsplit('/')[-1]
+        return 'oxpoints{separator}{ident}'.format(separator=separator,
+                                                   ident=uri_ref.toPython().rsplit('/')[-1])
 
     def _get_location(self, subject):
         if (subject, Geo.lat, None) in self.graph and (subject, Geo.long, None) in self.graph:
