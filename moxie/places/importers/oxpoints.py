@@ -187,10 +187,12 @@ class OxpointsImporter(object):
             if val is not None:
                 doc[prop] = val.toPython()
 
-        images = []
-        images.extend(self._get_files(subject, FOAF.depiction, 'picture'))
-        images.extend(self._get_files(subject, FOAF.logo, 'logo'))
-        doc['images'] = images
+        # only import images if a static files dir has been defined
+        if self.static_files_dir:
+            images = []
+            images.extend(self._get_files(subject, FOAF.depiction, 'picture'))
+            images.extend(self._get_files(subject, FOAF.logo, 'logo'))
+            doc['images'] = images
 
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
         parent_of.update(self._find_relations(subject, Org.hasSite))
