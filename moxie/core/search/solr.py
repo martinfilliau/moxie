@@ -1,4 +1,5 @@
 import logging
+from urllib import urlencode
 import requests
 from requests.exceptions import RequestException
 import json
@@ -41,8 +42,8 @@ class SolrSearch(object):
         query['rows'] = str(count)
         if fq:
             query['fq'] = fq
-        parameters = ["{key}={value}".format(key=k, value=v) for k, v in query.items()]
-        data = "&".join(parameters)
+        # doseq=True will add multiple time the same parameter if there's an array
+        data = urlencode(query, doseq=True)
         headers = {'Content-Type': self.content_types['form']}
         results = self.connection(self.methods['select'],
                 data=data, headers=headers)
