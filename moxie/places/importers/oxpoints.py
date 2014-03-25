@@ -261,40 +261,7 @@ class OxpointsImporter(object):
         if child_of:
             doc['child_of'] = list(child_of)
 
-        accessibility_door_entry_type = self.graph.value(subject, Accessibility.doorEntryType)
-        if accessibility_door_entry_type:
-            doc['_accessibility_door_entry_type'] = DOOR_ENTRY_TYPES.get(accessibility_door_entry_type)
-
-        accessibility_parking_type = self.graph.value(subject, Accessibility.nearbyParkingType)
-        if accessibility_parking_type:
-            doc['_accessibility_parking_type'] = PARKING_TYPES.get(accessibility_parking_type)
-
-        accessibility_number_of_accessible_toilets = self.graph.value(subject, Accessibility.numberOfAccessibleToilets)
-        if accessibility_number_of_accessible_toilets:
-            number = accessibility_number_of_accessible_toilets.toPython()
-            if number > 0:
-                doc['_accessibility_has_accessible_toilets'] = True
-            else:
-                doc['_accessibility_has_accessible_toilets'] = False
-
-        accessibility_guide_url = self.graph.value(subject, LinkingYou['space-accessibility'])
-        if accessibility_guide_url:
-            doc['_accessibility_has_access_guide_information'] = True
-        else:
-            doc['_accessibility_has_access_guide_information'] = False
-
-        accessibility_contact = self.graph.value(subject, Accessibility.contact)
-        if accessibility_contact:
-            accessibility_contact_name = self.graph.value(accessibility_contact, RDFS.label)
-            if accessibility_contact_name:
-                doc['_accessibility_contact_name'] = accessibility_contact_name.toPython()
-            accessibility_contact_email = self.graph.value(accessibility_contact, VCard.email)
-            if accessibility_contact_email:
-                doc['_accessibility_contact_email'] = accessibility_contact_email.toPython()
-            accessibility_contact_tel = self.graph.value(accessibility_contact, VCard.tel)
-            if accessibility_contact_tel:
-                # TODO urlparse bug? monkey patching doesn't seem to be working..
-                doc['_accessibility_contact_tel'] = accessibility_contact_tel.toPython()
+        doc.update(self._handle_accessibility_data(subject))
 
         return doc
 
@@ -388,6 +355,46 @@ class OxpointsImporter(object):
         alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingName))
         alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingContents))
         return list(alternative_names)
+
+    def _handle_accessibility_data(self, subject):
+        """Handle data from the accessibility guide
+        """
+        values = {}
+        accessibility_door_entry_type = self.graph.value(subject, Accessibility.doorEntryType)
+        if accessibility_door_entry_type:
+            values['_accessibility_door_entry_type'] = DOOR_ENTRY_TYPES.get(accessibility_door_entry_type)
+
+        accessibility_parking_type = self.graph.value(subject, Accessibility.nearbyParkingType)
+        if accessibility_parking_type:
+            values['_accessibility_parking_type'] = PARKING_TYPES.get(accessibility_parking_type)
+
+        accessibility_number_of_accessible_toilets = self.graph.value(subject, Accessibility.numberOfAccessibleToilets)
+        if accessibility_number_of_accessible_toilets:
+            number = accessibility_number_of_accessible_toilets.toPython()
+            if number > 0:
+                values['_accessibility_has_accessible_toilets'] = True
+            else:
+                values['_accessibility_has_accessible_toilets'] = False
+
+        accessibility_guide_url = self.graph.value(subject, LinkingYou['space-accessibility'])
+        if accessibility_guide_url:
+            values['_accessibility_has_access_guide_information'] = True
+        else:
+            values['_accessibility_has_access_guide_information'] = False
+
+        accessibility_contact = self.graph.value(subject, Accessibility.contact)
+        if accessibility_contact:
+            accessibility_contact_name = self.graph.value(accessibility_contact, RDFS.label)
+            if accessibility_contact_name:
+                values['_accessibility_contact_name'] = accessibility_contact_name.toPython()
+            accessibility_contact_email = self.graph.value(accessibility_contact, VCard.email)
+            if accessibility_contact_email:
+                values['_accessibility_contact_email'] = accessibility_contact_email.toPython()
+            accessibility_contact_tel = self.graph.value(accessibility_contact, VCard.tel)
+            if accessibility_contact_tel:
+                # TODO urlparse bug? monkey patching doesn't seem to be working..
+                values['_accessibility_contact_tel'] = accessibility_contact_tel.toPython()
+        return values
 
 
 def main():
