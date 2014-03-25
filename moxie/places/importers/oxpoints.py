@@ -6,7 +6,8 @@ from rdflib.namespace import DC, SKOS, FOAF, DCTERMS, RDFS
 
 from moxie.places.importers.rdf_namespaces import (Geo, Geometry, OxPoints, VCard,
                                                    Org, OpenVocab, LinkingYou, Accessibility,
-                                                   AdHocDataOx, DoorEntryType, ParkingType)
+                                                   AdHocDataOx, EntranceOpeningType, ParkingType,
+                                                   Rooms, Levelness)
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -43,22 +44,27 @@ MAPPED_PROPERTIES = [
     ('_accessibility_has_cafe_refreshments', Accessibility.hasCafeRefreshments),
     ('_accessibility_has_adapted_furniture', Accessibility.hasAdaptedFurniture),
     ('_accessibility_has_computer_access', Accessibility.hasComputerAccess),
-    ('_accessibility_has_accessible_access', Accessibility.hasLevelAccess),
     ('_accessibility_has_lifts_to_all_floors', Accessibility.liftsToAllFloors),
     ('_accessibility_number_of_accessible_toilets', Accessibility.numberOfAccessibleToilets),
     ('_accessibility_number_of_floors', Accessibility.numberOfFloors),
     ('_accessibility_opening_hours_closed', AdHocDataOx.openingHoursClosed),
     ('_accessibility_opening_hours_term_time', AdHocDataOx.openingHoursTermTime),
     ('_accessibility_opening_hours_vacation', AdHocDataOx.openingHoursVacation),
-    ('_accessibility_main_entrance_access', Accessibility.mainEntranceHasLevelAccess),
     ('_accessibility_floorplan', Accessibility.floorplan),
     ('_accessibility_building_image', AdHocDataOx.accessGuideImage),
 ]
 
-DOOR_ENTRY_TYPES = {
-    DoorEntryType.Manual: 'Manual',
-    DoorEntryType.Powered: 'Powered',
-    DoorEntryType.Automatic: 'Automatic',
+ENTRANCE_OPENING_TYPES = {
+    EntranceOpeningType.ManualDoor: 'Manual door',
+    EntranceOpeningType.PoweredDoor: 'Powered door',
+    EntranceOpeningType.AutomaticDoor: 'Automatic door',
+}
+
+ENTRANCE_LEVEL_TYPES = {
+    Levelness.Level: 'Level',
+    Levelness.NotLevel: 'Not level',
+    Levelness.PlatformLift: 'Platform lift',
+    Levelness.StairLift: 'Stair lift'
 }
 
 PARKING_TYPES = {
@@ -318,9 +324,6 @@ class OxpointsImporter(object):
         """Handle data from the accessibility guide
         """
         values = {}
-        accessibility_door_entry_type = self.graph.value(subject, Accessibility.doorEntryType)
-        if accessibility_door_entry_type:
-            values['_accessibility_door_entry_type'] = DOOR_ENTRY_TYPES.get(accessibility_door_entry_type)
 
         accessibility_parking_type = self.graph.value(subject, Accessibility.nearbyParkingType)
         if accessibility_parking_type:
@@ -351,6 +354,16 @@ class OxpointsImporter(object):
             accessibility_contact_tel = self.graph.value(accessibility_contact, VCard.tel)
             if accessibility_contact_tel:
                 values['_accessibility_contact_tel'] = accessibility_contact_tel.toPython()
+
+        primary_entrance = self.graph.value(subject, Rooms.primaryEntrance)
+        if primary_entrance:
+            entrance_opening_type = self.graph.value(primary_entrance, Accessibility.entranceOpeningType)
+            if entrance_opening_type:
+                values['_accessibility_primary_entrance_opening_type'] = ENTRANCE_OPENING_TYPES.get(entrance_opening_type)
+            levelness = self.graph.value(primary_entrance, Accessibility.levelness)
+            if levelness:
+                values['_accessibility_primary_entrance_levelness'] = ENTRANCE_LEVEL_TYPES.get(levelness)
+
         return values
 
     def _handle_social_accounts(self, subject):
