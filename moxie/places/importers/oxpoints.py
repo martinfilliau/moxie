@@ -200,27 +200,18 @@ class OxpointsImporter(object):
                 # adding a relation between the site and the thing
                 parent_of.add(self._get_formatted_oxpoints_id(main_site))
 
-            location = self._get_location(main_site)
-            if location:
-                doc['location'] = location
-            shape = self._get_shape(main_site)
-            if shape:
-                doc['shape'] = shape
+            doc.update(self._handle_location(main_site))
+            doc.update(self._handle_shape(main_site))
         else:
             # else attempt to get a location from the actual thing
-            shape = self._get_shape(subject)
-            if shape:
-                doc['shape'] = shape
-            location = self._get_location(subject)
-            if location:
-                doc['location'] = location
-            else:
-                # if not, try to find location from the parent element
+            doc.update(self._handle_shape(subject))
+            doc.update(self._handle_location(subject))
+
+            if 'location' not in doc:
+                # try to find location from the parent element
                 parent = self.graph.value(subject, DCTERMS.isPartOf)
                 if parent:
-                    location = self._get_location(parent)
-                    if location:
-                        doc['location'] = location
+                    doc.update(self._handle_location(parent))
 
         doc[self.identifier_key] = list(ids)
 
@@ -318,19 +309,20 @@ class OxpointsImporter(object):
         """
         return 'oxpoints:%s' % uri_ref.toPython().rsplit('/')[-1]
 
-    def _get_location(self, subject):
+    def _handle_location(self, subject):
         if (subject, Geo.lat, None) in self.graph and (subject, Geo.long, None) in self.graph:
-            return "%s,%s" % (self.graph.value(subject, Geo.lat).toPython(),
-                              self.graph.value(subject, Geo.long).toPython())
+            lat = self.graph.value(subject, Geo.lat).toPython()
+            lon = self.graph.value(subject, Geo.long).toPython()
+            return {'location': "{lat},{lon}".format(lat=lat, lon=lon)}
         else:
-            return None
+            return {}
 
-    def _get_shape(self, subject):
+    def _handle_shape(self, subject):
         shape = self.graph.value(subject, Geometry.extent)
         if shape:
-            return self.graph.value(shape, Geometry.asWKT).toPython()
+            return {'shape': self.graph.value(shape, Geometry.asWKT).toPython()}
         else:
-            return None
+            return {}
 
     def _handle_alternative_names(self, subject):
         alternative_names = set()
