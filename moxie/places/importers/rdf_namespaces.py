@@ -22,3 +22,5 @@ LinkingYou = Namespace('http://purl.org/linkingyou/')
 DoorEntryType = Namespace('http://purl.org/net/accessibility/doorEntryType/')
 
 ParkingType = Namespace('http://purl.org/net/accessibility/parkingType/')
+
+Rooms = Namespace('http://vocab.deri.ie/rooms#')
