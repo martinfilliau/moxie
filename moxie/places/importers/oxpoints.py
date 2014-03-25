@@ -224,29 +224,15 @@ class OxpointsImporter(object):
 
         doc[self.identifier_key] = list(ids)
 
-        alternative_names = self._get_alternative_names(subject)
-        if alternative_names:
-            doc['alternative_names'] = alternative_names
+        doc.update(self._handle_alternative_names(subject))
 
-        address_node = self.graph.value(subject, VCard.adr)
-        if address_node:
-            address = self._get_address_for_subject(address_node)
-            if address:
-                doc['address'] = address
+        doc.update(self._handle_address_data(subject))
 
-        social_accounts = self._get_values_for_property(subject, FOAF.account)
-        if social_accounts:
-            for account in social_accounts:
-                if 'facebook.com' in account:
-                    doc['_social_facebook'] = account
-                elif 'twitter.com' in account:
-                    doc['_social_twitter'] = account
+        doc.update(self._handle_social_accounts(subject))
 
-        # defined properties that matches our structure
-        for prop, rdf_prop in MAPPED_PROPERTIES:
-            val = self.graph.value(subject, rdf_prop)
-            if val is not None:
-                doc[prop] = val.toPython()
+        doc.update(self._handle_mapped_properties(subject))
+
+        doc.update(self._handle_accessibility_data(subject))
 
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
         parent_of.update(self._find_relations(subject, Org.hasSite))
@@ -260,8 +246,6 @@ class OxpointsImporter(object):
         child_of.update(self._find_relations(subject, DCTERMS.isPartOf))
         if child_of:
             doc['child_of'] = list(child_of)
-
-        doc.update(self._handle_accessibility_data(subject))
 
         return doc
 
@@ -348,13 +332,17 @@ class OxpointsImporter(object):
         else:
             return None
 
-    def _get_alternative_names(self, subject):
+    def _handle_alternative_names(self, subject):
         alternative_names = set()
         alternative_names.update(self._get_values_for_property(subject, SKOS.altLabel))
         alternative_names.update(self._get_values_for_property(subject, SKOS.hiddenLabel))
         alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingName))
         alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingContents))
-        return list(alternative_names)
+        alt_names = list(alternative_names)
+        if alt_names:
+            return {'alternative_names': alt_names}
+        else:
+            return {}
 
     def _handle_accessibility_data(self, subject):
         """Handle data from the accessibility guide
@@ -394,6 +382,34 @@ class OxpointsImporter(object):
             if accessibility_contact_tel:
                 # TODO urlparse bug? monkey patching doesn't seem to be working..
                 values['_accessibility_contact_tel'] = accessibility_contact_tel.toPython()
+        return values
+
+    def _handle_social_accounts(self, subject):
+        doc = {}
+        social_accounts = self._get_values_for_property(subject, FOAF.account)
+        if social_accounts:
+            for account in social_accounts:
+                if 'facebook.com' in account:
+                    doc['_social_facebook'] = account
+                elif 'twitter.com' in account:
+                    doc['_social_twitter'] = account
+        return doc
+
+    def _handle_address_data(self, subject):
+        address_node = self.graph.value(subject, VCard.adr)
+        if address_node:
+            address = self._get_address_for_subject(address_node)
+            if address:
+                return {'address': address}
+        return {}
+
+    def _handle_mapped_properties(self, subject):
+        values = {}
+        # defined properties that matches our structure
+        for prop, rdf_prop in MAPPED_PROPERTIES:
+            val = self.graph.value(subject, rdf_prop)
+            if val is not None:
+                values[prop] = val.toPython()
         return values
 
 
