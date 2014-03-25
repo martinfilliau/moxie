@@ -53,13 +53,14 @@ def import_osm(url=None, force_update=False):
 @celery.task
 def import_oxpoints(url=None, force_update=False):
     app = create_app()
+    RDF_MEDIA_TYPE = 'text/turtle'  # default RDF serialization
     with app.blueprint_context(BLUEPRINT_NAME):
         url = url or app.config['OXPOINTS_IMPORT_URL']
-        oxpoints = get_resource(url, force_update)
+        oxpoints = get_resource(url, force_update, media_type=RDF_MEDIA_TYPE)
 
         if 'OXPOINTS_SHAPES_URL' in app.config:
             url_shapes = app.config['OXPOINTS_SHAPES_URL']
-            oxpoints_shape = get_resource(url_shapes, force_update, media_type='application/rdf+xml')
+            oxpoints_shape = get_resource(url_shapes, force_update, media_type=RDF_MEDIA_TYPE)
         else:
             oxpoints_shape = None
 
@@ -67,7 +68,7 @@ def import_oxpoints(url=None, force_update=False):
             url_accessibility = app.config['OXPOINTS_ACCESSIBILITY_URL']
             oxpoints_accessibility = get_resource(url_accessibility,
                                                   force_update=force_update,
-                                                  media_type='application/rdf+xml')
+                                                  media_type=RDF_MEDIA_TYPE)
         else:
             oxpoints_accessibility = None
 

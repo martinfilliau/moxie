@@ -1,5 +1,4 @@
 import logging
-#import urlparse
 
 import rdflib
 from rdflib import RDF
@@ -12,35 +11,6 @@ from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
 
-
-# # Monkey patch the urlparse module to add scheme
-# # see url_parse.py for capabilities
-# SCHEME_HTTP_LIKE_CAPABILITIES = [
-#     'uses_relative',
-#     'uses_netloc',
-#     'uses_params',
-#     'uses_query',
-#     'uses_fragment',
-# ]
-#
-# EXTRA_SCHEMES = [
-#     ('tel', SCHEME_HTTP_LIKE_CAPABILITIES),
-# ]
-#
-#
-# def add_scheme(scheme, capabilities):
-#     for capability in capabilities:
-#         schemes = getattr(urlparse, capability)
-#         if not scheme in schemes:
-#             schemes.append(scheme)
-#
-#
-# def update_url_parse_schemes():
-#     for (scheme, caps) in EXTRA_SCHEMES:
-#         add_scheme(scheme, caps)
-#
-#
-# update_url_parse_schemes()
 
 
 MAPPED_TYPES = [
@@ -113,9 +83,10 @@ class OxpointsImporter(object):
         self.precedence = precedence
         self.identifier_key = identifier_key
         graph = rdflib.Graph()
-        graph.parse(file=oxpoints_file, format="application/rdf+xml")
-        graph.parse(file=shapes_file, format="application/rdf+xml")
-        graph.parse(file=accessibility_file, format="application/rdf+xml")
+        RDF_MEDIA_TYPE = 'text/turtle'  # default RDF serialization
+        graph.parse(oxpoints_file, format=RDF_MEDIA_TYPE)
+        graph.parse(shapes_file, format=RDF_MEDIA_TYPE)
+        graph.parse(accessibility_file, format=RDF_MEDIA_TYPE)
         self.graph = graph
         self.merged_things = []     # list of building/sites merged into departments
 
@@ -379,7 +350,6 @@ class OxpointsImporter(object):
                 values['_accessibility_contact_email'] = accessibility_contact_email.toPython()
             accessibility_contact_tel = self.graph.value(accessibility_contact, VCard.tel)
             if accessibility_contact_tel:
-                # TODO urlparse bug? monkey patching doesn't seem to be working..
                 values['_accessibility_contact_tel'] = accessibility_contact_tel.toPython()
         return values
 
