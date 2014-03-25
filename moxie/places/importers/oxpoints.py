@@ -128,7 +128,7 @@ class OxpointsImporter(object):
             title = title.toPython()
 
         if subject in self.merged_things:
-            logger.info('Ignoring {subject} -- merged with Thing already', subject=subject.toPython())
+            logger.info('Ignoring {subject} -- merged with Thing already'.format(subject=subject.toPython()))
             return None
 
         doc = {}
