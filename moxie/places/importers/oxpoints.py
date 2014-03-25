@@ -194,6 +194,11 @@ class OxpointsImporter(object):
                     ids.add(main_site_id)
                     ids.update(self._get_identifiers_for_subject(main_site))
                     self.merged_things.append(main_site)
+                    # adding accessibility data of the site to the doc
+                    # this happens when a building == an organisation
+                    # e.g. Sackler Library -- makes sense to merge accessibility data
+                    doc.update(self._handle_accessibility_data(main_site))
+                    doc.update(self._handle_mapped_properties(main_site))
 
             if not main_site_id:
                 # Thing and its main site haven't been merged
@@ -223,7 +228,9 @@ class OxpointsImporter(object):
 
         doc.update(self._handle_mapped_properties(subject))
 
-        doc.update(self._handle_accessibility_data(subject))
+        if '_accessibility_has_access_guide_information' not in doc:
+            # no access info from main site, attempt to get from the thing directly
+            doc.update(self._handle_accessibility_data(subject))
 
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
         parent_of.update(self._find_relations(subject, Org.hasSite))
