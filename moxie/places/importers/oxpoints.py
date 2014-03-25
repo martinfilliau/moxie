@@ -385,6 +385,8 @@ class OxpointsImporter(object):
         alternative_names = set()
         alternative_names.update(self._get_values_for_property(subject, SKOS.altLabel))
         alternative_names.update(self._get_values_for_property(subject, SKOS.hiddenLabel))
+        alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingName))
+        alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingContents))
         return list(alternative_names)
 
 
