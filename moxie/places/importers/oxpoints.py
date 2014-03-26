@@ -359,10 +359,18 @@ class OxpointsImporter(object):
         if primary_entrance:
             entrance_opening_type = self.graph.value(primary_entrance, Accessibility.entranceOpeningType)
             if entrance_opening_type:
-                values['_accessibility_primary_entrance_opening_type'] = ENTRANCE_OPENING_TYPES.get(entrance_opening_type)
+                entrance_value = ENTRANCE_OPENING_TYPES.get(entrance_opening_type)
+                if not entrance_value:
+                    logger.warning('No entrance opening type value found for {entrance_type}'.format(entrance_type=entrance_opening_type.toPython()))
+                else:
+                    values['_accessibility_primary_entrance_opening_type'] = entrance_value
             levelness = self.graph.value(primary_entrance, Accessibility.levelness)
             if levelness:
-                values['_accessibility_primary_entrance_levelness'] = ENTRANCE_LEVEL_TYPES.get(levelness)
+                levelness_value = ENTRANCE_LEVEL_TYPES.get(levelness)
+                if not levelness_value:
+                    logger.warning('No entrance level type value found for {entrance_type}'.format(entrance_type=levelness.toPython()))
+                else:
+                    values['_accessibility_primary_entrance_levelness'] = levelness_value
 
         return values
 
