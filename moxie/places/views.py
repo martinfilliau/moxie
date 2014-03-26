@@ -32,6 +32,8 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
 
+        additional_filters = ['{key}:{value}'.format(key=k, value=v) for k, v in arguments.iteritems()]
+
         if self.query:
             self.query = self.query.encode('utf8')
 
@@ -50,7 +52,7 @@ class Search(ServiceView):
                 self.facets = None
                 return unique_doc
         results, self.size, self.facets = poi_service.get_results(self.query, location,
-            self.start, self.count, type=self.type, types_exact=self.types_exact)
+            self.start, self.count, type=self.type, types_exact=self.types_exact, filter_queries=additional_filters)
         return results
 
     @accepts(HAL_JSON, JSON)

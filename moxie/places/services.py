@@ -22,7 +22,7 @@ class POIService(Service):
         self.prefix_keys = prefix_keys
 
     def get_results(self, original_query, location, start, count, type=None,
-            types_exact=[]):
+                    types_exact=None, filter_queries=None):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
@@ -32,6 +32,7 @@ class POIService(Service):
         :param types_exact (optional) exact types to search for (cannot be used in combination of type atm)
         :return list of domain objects (POIs), total size of results and facets on type
         """
+        filter_queries = filter_queries or []
         query = original_query or self.default_search
         query = urllib.quote_plus(query)
         q = {'defType': 'edismax',
@@ -57,17 +58,16 @@ class POIService(Service):
             # no full-text query provided, sorting by name
             q['sort'] = 'name_sort asc'
 
-        filter_query = None
         # TODO make a better filter query to handle having type and types_exact at the same time
         if type:
             # filter on one specific type (and its subtypes)
             q['facet.prefix'] = type + "/"  # we only want to display sub-types as the facet
-            filter_query = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
+            filter_queries.append('type_exact:{type}*'.format(type=type.replace('/', '\/')))
         elif types_exact:
             # filter by a list of specific types (exact match)
-            filter_query = 'type_exact:({types})'.format(types=" OR ".join('"{type}"'.format(type=t) for t in types_exact))
+            filter_queries.append('type_exact:({types})'.format(types=" OR ".join('"{type}"'.format(type=t) for t in types_exact)))
 
-        response = searcher.search(q, fq=filter_query, start=start, count=count)
+        response = searcher.search(q, fq=filter_queries, start=start, count=count)
 
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
