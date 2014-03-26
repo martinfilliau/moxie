@@ -340,8 +340,6 @@ class OxpointsImporter(object):
         accessibility_guide_url = self.graph.value(subject, LinkingYou['space-accessibility'])
         if accessibility_guide_url:
             values['_accessibility_has_access_guide_information'] = True
-        else:
-            values['_accessibility_has_access_guide_information'] = False
 
         accessibility_contact = self.graph.value(subject, Accessibility.contact)
         if accessibility_contact:
