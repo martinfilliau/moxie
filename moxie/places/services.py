@@ -34,7 +34,6 @@ class POIService(Service):
         """
         filter_queries = filter_queries or []
         query = original_query or self.default_search
-        query = urllib.quote_plus(query)
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
              'pf': query,
