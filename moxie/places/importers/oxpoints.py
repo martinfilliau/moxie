@@ -370,6 +370,14 @@ class OxpointsImporter(object):
                 else:
                     values['_accessibility_primary_entrance_levelness'] = levelness_value
 
+        accessible_entrance = self.graph.value(subject, Rooms.entrance)
+        if accessible_entrance:
+            accessible_entrance_node = self.graph.value(accessible_entrance, Rooms.Entrance)
+            if accessible_entrance_node:
+                accessible_levelness = self.graph.value(accessible_entrance_node, Accessibility.levelness)
+                if accessible_levelness and accessible_levelness == Levelness.Level:
+                    values['_accessibility_has_accessible_access'] = True
+
         return values
 
     def _handle_social_accounts(self, subject):
