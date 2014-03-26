@@ -21,14 +21,14 @@ class POIService(Service):
         """
         self.prefix_keys = prefix_keys
 
-    def get_results(self, original_query, location, start, count, type=None,
+    def get_results(self, original_query, location, start, count, pois_type=None,
                     types_exact=None, filter_queries=None):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
         :param start: index of the first result of the page
         :param count: number of results for the page
-        :param type: (optional) type from the hierarchy of types to look for
+        :param pois_type: (optional) type from the hierarchy of types to look for
         :param types_exact (optional) exact types to search for (cannot be used in combination of type atm)
         :return list of domain objects (POIs), total size of results and facets on type
         """
@@ -59,13 +59,14 @@ class POIService(Service):
             q['sort'] = 'name_sort asc'
 
         # TODO make a better filter query to handle having type and types_exact at the same time
-        if type:
+        if pois_type:
             # filter on one specific type (and its subtypes)
-            q['facet.prefix'] = type + "/"  # we only want to display sub-types as the facet
-            filter_queries.append('type_exact:{type}*'.format(type=type.replace('/', '\/')))
+            q['facet.prefix'] = pois_type + "/"  # we only want to display sub-types as the facet
+            filter_queries.append('type_exact:{pois_type}*'.format(pois_type=pois_type.replace('/', '\/')))
         elif types_exact:
             # filter by a list of specific types (exact match)
-            filter_queries.append('type_exact:({types})'.format(types=" OR ".join('"{type}"'.format(type=t) for t in types_exact)))
+            filter_queries.append('type_exact:({types})'.format(types=" OR ".join('"{t}"'.format(t=t)
+                                                                                  for t in types_exact)))
 
         response = searcher.search(q, fq=filter_queries, start=start, count=count)
 
@@ -74,7 +75,7 @@ class POIService(Service):
             if response.query_suggestion:
                 suggestion = response.query_suggestion
                 return self.get_results(suggestion, location, start, count,
-                        type=type, types_exact=types_exact)
+                                        pois_type=pois_type, types_exact=types_exact)
             else:
                 return [], 0, None
         if response.facets:

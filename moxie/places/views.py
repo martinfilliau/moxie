@@ -51,14 +51,19 @@ class Search(ServiceView):
                 self.size = 1
                 self.facets = None
                 return unique_doc
+
         results, self.size, self.facets = poi_service.get_results(self.query, location,
-            self.start, self.count, type=self.type, types_exact=self.types_exact, filter_queries=additional_filters)
+                                                                  self.start, self.count,
+                                                                  pois_type=self.type,
+                                                                  types_exact=self.types_exact,
+                                                                  filter_queries=additional_filters)
         return results
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
         return HALPOISearchRepresentation(self.query, response, self.start, self.count, self.size,
-            request.url_rule.endpoint, types=self.facets, type=self.type, type_exact=self.types_exact).as_json()
+                                          request.url_rule.endpoint, types=self.facets, type=self.type,
+                                          type_exact=self.types_exact).as_json()
 
 
 class GeoJsonSearch(Search):
