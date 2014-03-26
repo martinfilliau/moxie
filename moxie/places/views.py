@@ -18,18 +18,20 @@ class Search(ServiceView):
     cors_allow_headers = 'geo-position'
 
     def handle_request(self):
+        arguments = request.args.copy()
         if 'Geo-Position' in request.headers:
             location = request.headers['Geo-Position'].split(';')
-        elif 'lat' in request.args and 'lon' in request.args:
-            location = (request.args['lat'], request.args['lon'])
+        elif 'lat' in arguments and 'lon' in arguments:
+            location = (arguments.pop('lat'), arguments.pop('lon'))
         else:
             location = None
 
-        self.query = request.args.get('q', '')
-        self.type = request.args.get('type', None)
-        self.types_exact = request.args.getlist('type_exact')
-        self.start = request.args.get('start', 0)
-        self.count = request.args.get('count', 35)
+        self.query = arguments.pop('q', '')
+        self.type = arguments.pop('type', None)
+        self.types_exact = arguments.poplist('type_exact')
+        self.start = arguments.pop('start', 0)
+        self.count = arguments.pop('count', 35)
+
         all_types = False
         if self.query:
             all_types = True
