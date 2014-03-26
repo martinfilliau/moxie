@@ -11,6 +11,9 @@ from moxie.places.representations import (HALPOISearchRepresentation, HALPOIsRep
 from .services import POIService
 
 
+ADDITIONAL_FILTERS_KEYS = [('accessibility', '_accessibility')]
+
+
 class Search(ServiceView):
     """Search query for full-text search and context-aware search (geo-position)
     """
@@ -32,7 +35,16 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
 
-        additional_filters = ['{key}:{value}'.format(key=k, value=v) for k, v in arguments.iteritems()]
+        # for remaining arguments, if the key starts with one of the authorised
+        # key defined in ADDITIONAL_FILTERS_KEYS, then replace it (eventually)
+        # by its internal representation
+        additional_filters = []
+        for k, v in arguments.iteritems():
+            for acceptable_key, transformed_key in ADDITIONAL_FILTERS_KEYS:
+                if k.startswith(acceptable_key):
+                    additional_filters.append('{key}:{value}'.format(key=k.replace(acceptable_key, transformed_key),
+                                                                     value=v))
+                    break
 
         if self.query:
             self.query = self.query.encode('utf8')
