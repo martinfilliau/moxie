@@ -1,5 +1,5 @@
 from datetime import timedelta
-from flask import request, current_app, url_for, redirect
+from flask import request, url_for, redirect
 from werkzeug.wrappers import BaseResponse
 
 from moxie.core.views import ServiceView, accepts
