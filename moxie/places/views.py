@@ -32,10 +32,9 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
 
-        all_types = False
         if self.query:
-            all_types = True
             self.query = self.query.encode('utf8')
+
         if self.type and self.types_exact:
             raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
 
@@ -51,7 +50,7 @@ class Search(ServiceView):
                 self.facets = None
                 return unique_doc
         results, self.size, self.facets = poi_service.get_results(self.query, location,
-            self.start, self.count, type=self.type, types_exact=self.types_exact, all_types=all_types)
+            self.start, self.count, type=self.type, types_exact=self.types_exact)
         return results
 
     @accepts(HAL_JSON, JSON)
