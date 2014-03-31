@@ -15,28 +15,25 @@ logger = logging.getLogger(__name__)
 class POIService(Service):
     default_search = '*:*'
 
-    def __init__(self, nearby_excludes=None, prefix_keys="_"):
+    def __init__(self, prefix_keys="_"):
         """POI service
-        :param nearby_excludes: list of types to exclude in a nearby search
         :param prefix_keys: prefix used for keys not being in the schema of the search engine
         """
-        self.nearby_excludes = nearby_excludes or []
         self.prefix_keys = prefix_keys
 
-    def get_results(self, original_query, location, start, count, type=None,
-            types_exact=[], all_types=False):
+    def get_results(self, original_query, location, start, count, pois_type=None,
+                    types_exact=None, filter_queries=None):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
         :param start: index of the first result of the page
         :param count: number of results for the page
-        :param type: (optional) type from the hierarchy of types to look for
+        :param pois_type: (optional) type from the hierarchy of types to look for
         :param types_exact (optional) exact types to search for (cannot be used in combination of type atm)
-        :param all_types: (optional) display all types or excludes some types defined in configuration
         :return list of domain objects (POIs), total size of results and facets on type
         """
+        filter_queries = filter_queries or []
         query = original_query or self.default_search
-        query = urllib.quote_plus(query)
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
              'pf': query,
@@ -60,27 +57,24 @@ class POIService(Service):
             # no full-text query provided, sorting by name
             q['sort'] = 'name_sort asc'
 
-        filter_query = None
         # TODO make a better filter query to handle having type and types_exact at the same time
-        if type:
+        if pois_type:
             # filter on one specific type (and its subtypes)
-            q['facet.prefix'] = type + "/"  # we only want to display sub-types as the facet
-            filter_query = 'type_exact:{type}*'.format(type=type.replace('/', '\/'))
+            q['facet.prefix'] = pois_type + "/"  # we only want to display sub-types as the facet
+            filter_queries.append('type_exact:{pois_type}*'.format(pois_type=pois_type.replace('/', '\/')))
         elif types_exact:
             # filter by a list of specific types (exact match)
-            filter_query = 'type_exact:({types})'.format(types=" OR ".join('"{type}"'.format(type=t) for t in types_exact))
-        elif not all_types and len(self.nearby_excludes) > 0:
-            # exclude some types based on configuration
-            filter_query = "-type_exact:({types})".format(types=' OR '.join('"{type}"'.format(type=t) for t in self.nearby_excludes))
+            filter_queries.append('type_exact:({types})'.format(types=" OR ".join('"{t}"'.format(t=t)
+                                                                                  for t in types_exact)))
 
-        response = searcher.search(q, fq=filter_query, start=start, count=count)
+        response = searcher.search(q, fq=filter_queries, start=start, count=count)
 
         # if no results, try to use spellcheck suggestion to make a new request
         if not response.results:
             if response.query_suggestion:
                 suggestion = response.query_suggestion
                 return self.get_results(suggestion, location, start, count,
-                        type=type, types_exact=types_exact, all_types=all_types)
+                                        pois_type=pois_type, types_exact=types_exact)
             else:
                 return [], 0, None
         if response.facets:

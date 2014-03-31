@@ -53,15 +53,24 @@ def import_osm(url=None, force_update=False):
 @celery.task
 def import_oxpoints(url=None, force_update=False):
     app = create_app()
+    RDF_MEDIA_TYPE = 'text/turtle'  # default RDF serialization
     with app.blueprint_context(BLUEPRINT_NAME):
         url = url or app.config['OXPOINTS_IMPORT_URL']
-        oxpoints = get_resource(url, force_update)
+        oxpoints = get_resource(url, force_update, media_type=RDF_MEDIA_TYPE)
 
         if 'OXPOINTS_SHAPES_URL' in app.config:
             url_shapes = app.config['OXPOINTS_SHAPES_URL']
-            oxpoints_shape = get_resource(url_shapes, force_update, media_type='application/rdf+xml')
+            oxpoints_shape = get_resource(url_shapes, force_update, media_type=RDF_MEDIA_TYPE)
         else:
             oxpoints_shape = None
+
+        if 'OXPOINTS_ACCESSIBILITY_URL' in app.config:
+            url_accessibility = app.config['OXPOINTS_ACCESSIBILITY_URL']
+            oxpoints_accessibility = get_resource(url_accessibility,
+                                                  force_update=force_update,
+                                                  media_type=RDF_MEDIA_TYPE)
+        else:
+            oxpoints_accessibility = None
 
         if oxpoints:
             logger.info("OxPoints Downloaded - Stored here: %s" % oxpoints)
@@ -70,7 +79,11 @@ def import_oxpoints(url=None, force_update=False):
                 shapes = open(oxpoints_shape)
             else:
                 shapes = None
-            importer = OxpointsImporter(searcher, 10, oxpoints, shapes)
+            if oxpoints_accessibility:
+                accessibility = open(oxpoints_accessibility)
+            else:
+                accessibility = None
+            importer = OxpointsImporter(searcher, 10, oxpoints, shapes, accessibility)
             importer.import_data()
         else:
             logger.info("OxPoints hasn't been imported - resource not loaded")
