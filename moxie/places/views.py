@@ -69,17 +69,20 @@ class Search(ServiceView):
                                           type_exact=self.types_exact).as_json()
 
     @staticmethod
-    def _get_additional_filters(values, acceptable_values):
+    def _get_additional_filters(arguments, acceptable_values, default_value='true'):
         """Check if the key starts with one of the authorized key defined in acceptable_values,
         then replace it (eventually) by its internal representation
-        :param values: dictionary of key/values as arguments from an HTTP request
+        :param arguments: dictionary of key/values as arguments from an HTTP request
         :param acceptable_values: list of tuples of acceptable values (key starts with, to be replaced)
-        :return list of filters
+        :param default_value: value to set for a filter if there is no value
+        :return list of filters (as string)
         """
         additional_filters = []
-        for k, v in values.iteritems():
+        for k, v in arguments.iteritems():
             for acceptable_key, transformed_key in acceptable_values:
                 if k.startswith(acceptable_key):
+                    if not v:
+                        v = default_value
                     additional_filters.append('{key}:{value}'.format(key=k.replace(acceptable_key, transformed_key),
                                                                      value=v))
                     break
