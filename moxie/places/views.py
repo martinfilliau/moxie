@@ -35,16 +35,7 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
 
-        # for remaining arguments, if the key starts with one of the authorised
-        # key defined in ADDITIONAL_FILTERS_KEYS, then replace it (eventually)
-        # by its internal representation
-        additional_filters = []
-        for k, v in arguments.iteritems():
-            for acceptable_key, transformed_key in ADDITIONAL_FILTERS_KEYS:
-                if k.startswith(acceptable_key):
-                    additional_filters.append('{key}:{value}'.format(key=k.replace(acceptable_key, transformed_key),
-                                                                     value=v))
-                    break
+        additional_filters = self._get_additional_filters(arguments, ADDITIONAL_FILTERS_KEYS)
 
         if self.query:
             self.query = self.query.encode('utf8')
@@ -76,6 +67,23 @@ class Search(ServiceView):
         return HALPOISearchRepresentation(self.query, response, self.start, self.count, self.size,
                                           request.url_rule.endpoint, types=self.facets, type=self.type,
                                           type_exact=self.types_exact).as_json()
+
+    @staticmethod
+    def _get_additional_filters(values, acceptable_values):
+        """Check if the key starts with one of the authorized key defined in acceptable_values,
+        then replace it (eventually) by its internal representation
+        :param values: dictionary of key/values as arguments from an HTTP request
+        :param acceptable_values: list of tuples of acceptable values (key starts with, to be replaced)
+        :return list of filters
+        """
+        additional_filters = []
+        for k, v in values.iteritems():
+            for acceptable_key, transformed_key in acceptable_values:
+                if k.startswith(acceptable_key):
+                    additional_filters.append('{key}:{value}'.format(key=k.replace(acceptable_key, transformed_key),
+                                                                     value=v))
+                    break
+        return additional_filters
 
 
 class GeoJsonSearch(Search):
