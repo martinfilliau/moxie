@@ -11,6 +11,8 @@ from moxie.places.solr import doc_to_poi
 
 logger = logging.getLogger(__name__)
 
+TYPE_FACET = 'type'
+
 
 class POIService(Service):
     default_search = '*:*'
@@ -21,15 +23,17 @@ class POIService(Service):
         """
         self.prefix_keys = prefix_keys
 
-    def get_results(self, original_query, location, start, count, pois_type=None,
-                    types_exact=None, filter_queries=None):
+    def get_results(self, original_query, location, start, count,
+                    pois_type=None, types_exact=None, filter_queries=None,
+                    facets=(TYPE_FACET,)):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
         :param start: index of the first result of the page
         :param count: number of results for the page
         :param pois_type: (optional) type from the hierarchy of types to look for
-        :param types_exact (optional) exact types to search for (cannot be used in combination of type atm)
+        :param types_exact: (optional) exact types to search for (cannot be used in combination of type atm)
+        :param facets: (optional) list of fields to be returned as facets defaults to the `type` facet.
         :return list of domain objects (POIs), total size of results and facets on type
         """
         filter_queries = filter_queries or []
@@ -38,11 +42,12 @@ class POIService(Service):
              'spellcheck.collate': 'true',
              'pf': query,
              'q': query,
-             'facet': 'true',
-             'facet.field': 'type',
-             'facet.sort': 'index',
-             'facet.mincount': '1',
              }
+        if facets:
+            q.update({'facet': 'true',
+                      'facet.sort': 'index',
+                      'facet.mincount': '1',
+                      'facet.field': facets})
         if location:
             lat, lon = location
             q['sfield'] = 'location'
@@ -78,12 +83,17 @@ class POIService(Service):
             else:
                 return [], 0, None
         if response.facets:
-            facets_values = response.facets['facet_fields']['type']
-            i = iter(facets_values)
-            facets = dict(izip(i, i))
+            facet_values = {}
+            for facet_field in facets:
+                vals = response.facets['facet_fields'].get(facet_field, None)
+                if vals:
+                    # Place in iterator so zip steps through vals
+                    vals = iter(vals)
+                    vals = dict(zip(vals, vals))
+                    facet_values[facet_field] = vals
         else:
-            facets = None
-        return [doc_to_poi(r, self.prefix_keys) for r in response.results], response.size, facets
+            facet_values = None
+        return [doc_to_poi(r, self.prefix_keys) for r in response.results], response.size, facet_values
 
     def get_place_by_identifier(self, ident):
         """Get place by identifier
