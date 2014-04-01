@@ -29,16 +29,13 @@ class Search(ServiceView):
         else:
             location = None
 
-        self.query = arguments.pop('q', '')
+        self.query = arguments.pop('q', '').encode('utf8')
         self.type = arguments.pop('type', None)
         self.types_exact = arguments.poplist('type_exact')
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
 
         additional_filters = self._get_additional_filters(arguments, ADDITIONAL_FILTERS_KEYS)
-
-        if self.query:
-            self.query = self.query.encode('utf8')
 
         if self.type and self.types_exact:
             raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
