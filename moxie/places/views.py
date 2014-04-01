@@ -34,17 +34,19 @@ class Search(ServiceView):
         self.types_exact = arguments.poplist('type_exact')
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
+        self.facet_fields = arguments.poplist('facet')
 
-        additional_filters = self._get_additional_filters(arguments, ADDITIONAL_FILTERS_KEYS)
+        additional_filters = self._get_additional_filters(
+            arguments, ADDITIONAL_FILTERS_KEYS)
 
         if self.type and self.types_exact:
             raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
 
         poi_service = POIService.from_context()
+
         # Try to match the query to identifiers if it's a one word query,
         # useful when querying for bus stop naptan number
         # TODO pass the location to have the distance from the point
-
         if ' ' not in self.query:
             unique_doc = poi_service.search_places_by_identifiers(['*:{id}'.format(id=self.query)])
             if unique_doc:
@@ -52,17 +54,23 @@ class Search(ServiceView):
                 self.facets = None
                 return unique_doc
 
-        results, self.size, self.facets = poi_service.get_results(self.query, location,
-                                                                  self.start, self.count,
-                                                                  pois_type=self.type,
-                                                                  types_exact=self.types_exact,
-                                                                  filter_queries=additional_filters)
+        kwargs = {
+            'pois_type': self.type,
+            'types_exact': self.types_exact,
+            'filter_queries': additional_filters
+        }
+
+        # Only pass `facets` if we have user-speciified facets
+        if self.facet_fields:
+            kwargs['facets'] = self.facet_fields
+        results, self.size, self.facets = poi_service.get_results(
+            self.query, location, self.start, self.count, **kwargs)
         return results
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
         return HALPOISearchRepresentation(self.query, response, self.start, self.count, self.size,
-                                          request.url_rule.endpoint, types=self.facets, type=self.type,
+                                          request.url_rule.endpoint, facets=self.facets, type=self.type,
                                           type_exact=self.types_exact).as_json()
 
     @staticmethod
