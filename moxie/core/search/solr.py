@@ -1,9 +1,10 @@
 import logging
-from urllib import urlencode
 import requests
-from requests.exceptions import RequestException
 import json
 import time
+
+from urllib import urlencode
+from requests.exceptions import RequestException
 
 from moxie.core.search import SearchResponse, SearchServerException
 from moxie.core.metrics import statsd
