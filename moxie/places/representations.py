@@ -18,6 +18,9 @@ RTI_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/rti.html#{type}"
 
 KEYS_STRUCTURE = [('accessibility_', 'accessibility')]
 
+FACET_RENAME = {'type': 'types'}
+FACET_BY_TYPE = ['type', 'type_exact']
+
 
 class POIRepresentation(Representation):
 
@@ -174,7 +177,8 @@ class POIsRepresentation(object):
 
 class HALPOISearchRepresentation(POIsRepresentation):
 
-    def __init__(self, search, results, start, count, size, endpoint, types=None, type=None, type_exact=None):
+    def __init__(self, search, results, start, count, size, endpoint,
+                 facets=None, type=None, type_exact=None):
         """Represents a list of search result as HAL+JSON
         :param search: search query
         :param results: list of results
@@ -191,7 +195,7 @@ class HALPOISearchRepresentation(POIsRepresentation):
         self.count = count
         self.size = size
         self.endpoint = endpoint
-        self.types = types
+        self.facets = facets
         self.type = type
         self.type_exact = type_exact
 
@@ -208,11 +212,19 @@ class HALPOISearchRepresentation(POIsRepresentation):
         representation.add_links(get_nav_links(self.endpoint, self.start, self.count, self.size,
             q=self.search, type=self.type, type_exact=self.type_exact))
         representation.add_embed('pois', [HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
-        if self.types:
-            # add faceting links for types
-            for facet in self.types:
-                representation.update_link('hl:types', url_for(self.endpoint, q=self.search, type=facet),
-                    name=facet, title=find_type_name(facet))
+        if self.facets:
+            for field_name, facet_counts in self.facets.items():
+                friendly_name = field_name
+                if field_name in FACET_RENAME:
+                    friendly_name = FACET_RENAME[field_name]
+                for val, count in facet_counts.items():
+                    kwargs = {'name': val}
+                    if field_name in FACET_BY_TYPE:
+                        kwargs['title'] = find_type_name(val)
+                    representation.update_link(
+                        'hl:%s' % friendly_name,
+                        url_for(self.endpoint, q=self.search, **{field_name: val}),
+                        **kwargs)
         return representation.as_dict()
 
 
