@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 RTI_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/rti.html#{type}"
 
+KEYS_STRUCTURE = [('accessibility_', 'accessibility')]
+
 
 class POIRepresentation(Representation):
 
@@ -54,9 +56,16 @@ class POIRepresentation(Representation):
             values['alternative_names'] = self.poi.alternative_names
         if self.poi.shape:
             values['shape'] = self.poi.shape
-        if getattr(self.poi, 'fields', False):
+        if hasattr(self.poi, 'fields'):
             for k, v in self.poi.fields.items():
-                values[k] = v
+                for key_starts_with, new_key in KEYS_STRUCTURE:
+                    if k.startswith(key_starts_with):
+                        if new_key not in values:
+                            values[new_key] = {}
+                        values[new_key][k.replace(key_starts_with, '', 1)] = v
+                        break
+                else:
+                    values[k] = v
         return values
 
 

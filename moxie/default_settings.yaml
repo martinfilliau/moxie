@@ -5,8 +5,9 @@ flask:
         - 'http://localhost'
     # Places
     OSM_IMPORT_URL: 'http://download.geofabrik.de/europe/great-britain/england/oxfordshire-latest.osm.bz2'
-    OXPOINTS_IMPORT_URL: 'https://source.data.ox.ac.uk/archive/public/oxpoints/latest.rdf'
+    OXPOINTS_IMPORT_URL: 'https://data.ox.ac.uk/graph/oxpoints/data'
     OXPOINTS_SHAPES_URL: 'https://data.ox.ac.uk/graph/oxpoints-extents/data'
+    OXPOINTS_ACCESSIBILITY_URL: 'https://data.ox.ac.uk/graph/access-guide/at-a-glance'
     NAPTAN_IMPORT_URL: 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
     # Cache
     CACHE_TYPE: 'redis'
@@ -19,8 +20,7 @@ blueprints:
 
 services:
     places:
-        POIService:
-            nearby_excludes: ['/university/library/sub-library', '/university/room']
+        POIService: {}
         TransportService:
             providers:
                 moxie.transport.providers.cloudamber.CloudAmberBusRtiProvider:

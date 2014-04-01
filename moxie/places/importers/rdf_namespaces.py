@@ -1,6 +1,8 @@
 from rdflib.namespace import Namespace
 
 
+PURL_ACCESSIBILITY = 'http://purl.org/net/accessibility/'
+
 OxPoints = Namespace('http://ns.ox.ac.uk/namespace/oxpoints/2009/02/owl#')
 
 Org = Namespace('http://www.w3.org/ns/org#')
@@ -13,6 +15,16 @@ VCard = Namespace('http://www.w3.org/2006/vcard/ns#')
 
 OpenVocab = Namespace('http://open.vocab.org/terms/')
 
-Accessibility = Namespace('http://purl.org/net/accessibility/')
+Accessibility = Namespace(PURL_ACCESSIBILITY)
 
 AdHocDataOx = Namespace('http://vocab.ox.ac.uk/ad-hoc-data-ox/')
+
+LinkingYou = Namespace('http://purl.org/linkingyou/')
+
+Rooms = Namespace('http://vocab.deri.ie/rooms#')
+
+EntranceOpeningType = Namespace(PURL_ACCESSIBILITY+'entranceOpeningType/')
+
+ParkingType = Namespace(PURL_ACCESSIBILITY+'parkingType/')
+
+Levelness = Namespace(PURL_ACCESSIBILITY+'levelness/')

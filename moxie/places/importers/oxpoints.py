@@ -1,13 +1,19 @@
 import logging
+
 import rdflib
 import json
 from rdflib import RDF
-from rdflib.namespace import DC, SKOS, FOAF, DCTERMS
+from rdflib.namespace import DC, SKOS, FOAF, DCTERMS, RDFS
 
-from moxie.places.importers.rdf_namespaces import Geo, Geometry, OxPoints, VCard, Org, OpenVocab
+from moxie.places.importers.rdf_namespaces import (Geo, Geometry, OxPoints, VCard,
+                                                   Org, OpenVocab, LinkingYou, Accessibility,
+                                                   AdHocDataOx, EntranceOpeningType, ParkingType,
+                                                   Rooms, Levelness)
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
+
+
 
 MAPPED_TYPES = [
     (OxPoints.University, '/university'),
@@ -31,7 +37,41 @@ MAPPED_TYPES = [
 MAPPED_PROPERTIES = [
     ('website', FOAF.homepage),
     ('short_name', OxPoints.shortLabel),
+    ('_picture_logo', FOAF.logo),
+    ('_picture_depiction', FOAF.depiction),
+    ('_accessibility_access_guide_url', LinkingYou['space-accessibility']),
+    ('_accessibility_has_hearing_system', Accessibility.hasHearingSystem),
+    ('_accessibility_has_quiet_space', Accessibility.hasQuietSpace),
+    ('_accessibility_has_cafe_refreshments', Accessibility.hasCafeRefreshments),
+    ('_accessibility_has_adapted_furniture', Accessibility.hasAdaptedFurniture),
+    ('_accessibility_has_computer_access', Accessibility.hasComputerAccess),
+    ('_accessibility_has_lifts_to_all_floors', Accessibility.liftsToAllFloors),
+    ('_accessibility_number_of_accessible_toilets', Accessibility.numberOfAccessibleToilets),
+    ('_accessibility_number_of_floors', Accessibility.numberOfFloors),
+    ('_accessibility_opening_hours_closed', AdHocDataOx.openingHoursClosed),
+    ('_accessibility_opening_hours_term_time', AdHocDataOx.openingHoursTermTime),
+    ('_accessibility_opening_hours_vacation', AdHocDataOx.openingHoursVacation),
+    ('_accessibility_floorplan', Accessibility.floorplan),
+    ('_accessibility_building_image', AdHocDataOx.accessGuideImage),
 ]
+
+ENTRANCE_OPENING_TYPES = {
+    EntranceOpeningType.ManualDoor: 'Manual door',
+    EntranceOpeningType.PoweredDoor: 'Powered door',
+    EntranceOpeningType.AutomaticDoor: 'Automatic door',
+}
+
+ENTRANCE_LEVEL_TYPES = {
+    Levelness.Level: 'Level',
+    Levelness.NotLevel: 'Not level',
+    Levelness.PlatformLift: 'Platform lift',
+    Levelness.StairLift: 'Stair lift'
+}
+
+PARKING_TYPES = {
+    ParkingType.BlueBadge: 'Blue Badge',
+    ParkingType.PayAndDisplay: 'Pay and Display'
+}
 
 OXPOINTS_IDENTIFIERS = {
     OxPoints.hasOUCSCode: 'oucs',
@@ -45,13 +85,16 @@ OXPOINTS_IDENTIFIERS = {
 
 class OxpointsImporter(object):
 
-    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, static_files_dir, identifier_key='identifiers'):
+
+    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, accessibility_file, static_files_dir, identifier_key='identifiers'):
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
         graph = rdflib.Graph()
-        graph.parse(file=oxpoints_file, format="application/rdf+xml")
-        graph.parse(file=shapes_file, format="application/rdf+xml")
+        RDF_MEDIA_TYPE = 'text/turtle'  # default RDF serialization
+        graph.parse(oxpoints_file, format=RDF_MEDIA_TYPE)
+        graph.parse(shapes_file, format=RDF_MEDIA_TYPE)
+        graph.parse(accessibility_file, format=RDF_MEDIA_TYPE)
         self.graph = graph
         self.merged_things = []     # list of building/sites merged into departments
         if not static_files_dir:
@@ -96,7 +139,7 @@ class OxpointsImporter(object):
             title = title.toPython()
 
         if subject in self.merged_things:
-            logger.info('Ignoring %s -- merged with Thing already' % subject.toPython())
+            logger.info('Ignoring {subject} -- merged with Thing already'.format(subject=subject.toPython()))
             return None
 
         doc = {}
@@ -133,59 +176,43 @@ class OxpointsImporter(object):
                     ids.add(main_site_id)
                     ids.update(self._get_identifiers_for_subject(main_site))
                     self.merged_things.append(main_site)
+                    # adding accessibility data of the site to the doc
+                    # this happens when a building == an organisation
+                    # e.g. Sackler Library -- makes sense to merge accessibility data
+                    doc.update(self._handle_accessibility_data(main_site))
+                    doc.update(self._handle_mapped_properties(main_site))
 
             if not main_site_id:
                 # Thing and its main site haven't been merged
                 # adding a relation between the site and the thing
                 parent_of.add(self._get_formatted_oxpoints_id(main_site))
 
-            location = self._get_location(main_site)
-            if location:
-                doc['location'] = location
-            shape = self._get_shape(main_site)
-            if shape:
-                doc['shape'] = shape
+            doc.update(self._handle_location(main_site))
+            doc.update(self._handle_shape(main_site))
         else:
             # else attempt to get a location from the actual thing
-            shape = self._get_shape(subject)
-            if shape:
-                doc['shape'] = shape
-            location = self._get_location(subject)
-            if location:
-                doc['location'] = location
-            else:
-                # if not, try to find location from the parent element
+            doc.update(self._handle_shape(subject))
+            doc.update(self._handle_location(subject))
+
+            if 'location' not in doc:
+                # try to find location from the parent element
                 parent = self.graph.value(subject, DCTERMS.isPartOf)
                 if parent:
-                    location = self._get_location(parent)
-                    if location:
-                        doc['location'] = location
+                    doc.update(self._handle_location(parent))
 
         doc[self.identifier_key] = list(ids)
 
-        alternative_names = self._get_alternative_names(subject)
-        if alternative_names:
-            doc['alternative_names'] = alternative_names
+        doc.update(self._handle_alternative_names(subject))
 
-        address_node = self.graph.value(subject, VCard.adr)
-        if address_node:
-            address = self._get_address_for_subject(address_node)
-            if address:
-                doc['address'] = address
+        doc.update(self._handle_address_data(subject))
 
-        social_accounts = self._get_values_for_property(subject, FOAF.account)
-        if social_accounts:
-            for account in social_accounts:
-                if 'facebook.com' in account:
-                    doc['_social_facebook'] = account
-                elif 'twitter.com' in account:
-                    doc['_social_twitter'] = account
+        doc.update(self._handle_social_accounts(subject))
 
-        # defined properties that matches our structure
-        for prop, rdf_prop in MAPPED_PROPERTIES:
-            val = self.graph.value(subject, rdf_prop)
-            if val is not None:
-                doc[prop] = val.toPython()
+        doc.update(self._handle_mapped_properties(subject))
+
+        if '_accessibility_has_access_guide_information' not in doc:
+            # no access info from main site, attempt to get from the thing directly
+            doc.update(self._handle_accessibility_data(subject))
 
         # only import images if a static files dir has been defined
         if self.static_files_dir:
@@ -279,25 +306,120 @@ class OxpointsImporter(object):
         return 'oxpoints{separator}{ident}'.format(separator=separator,
                                                    ident=uri_ref.toPython().rsplit('/')[-1])
 
-    def _get_location(self, subject):
+    def _handle_location(self, subject):
         if (subject, Geo.lat, None) in self.graph and (subject, Geo.long, None) in self.graph:
-            return "%s,%s" % (self.graph.value(subject, Geo.lat).toPython(),
-                              self.graph.value(subject, Geo.long).toPython())
+            lat = self.graph.value(subject, Geo.lat).toPython()
+            lon = self.graph.value(subject, Geo.long).toPython()
+            return {'location': "{lat},{lon}".format(lat=lat, lon=lon)}
         else:
-            return None
+            return {}
 
-    def _get_shape(self, subject):
+    def _handle_shape(self, subject):
         shape = self.graph.value(subject, Geometry.extent)
         if shape:
-            return self.graph.value(shape, Geometry.asWKT).toPython()
+            return {'shape': self.graph.value(shape, Geometry.asWKT).toPython()}
         else:
-            return None
+            return {}
 
-    def _get_alternative_names(self, subject):
+    def _handle_alternative_names(self, subject):
         alternative_names = set()
         alternative_names.update(self._get_values_for_property(subject, SKOS.altLabel))
         alternative_names.update(self._get_values_for_property(subject, SKOS.hiddenLabel))
-        return list(alternative_names)
+        alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingName))
+        alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingContents))
+        alt_names = list(alternative_names)
+        if alt_names:
+            return {'alternative_names': alt_names}
+        else:
+            return {}
+
+    def _handle_accessibility_data(self, subject):
+        """Handle data from the accessibility guide
+        """
+        values = {}
+
+        accessibility_parking_type = self.graph.value(subject, Accessibility.nearbyParkingType)
+        if accessibility_parking_type:
+            values['_accessibility_parking_type'] = PARKING_TYPES.get(accessibility_parking_type)
+
+        accessibility_number_of_accessible_toilets = self.graph.value(subject, Accessibility.numberOfAccessibleToilets)
+        if accessibility_number_of_accessible_toilets:
+            number = accessibility_number_of_accessible_toilets.toPython()
+            if number > 0:
+                values['_accessibility_has_accessible_toilets'] = True
+            else:
+                values['_accessibility_has_accessible_toilets'] = False
+
+        accessibility_guide_url = self.graph.value(subject, LinkingYou['space-accessibility'])
+        if accessibility_guide_url:
+            values['_accessibility_has_access_guide_information'] = True
+
+        accessibility_contact = self.graph.value(subject, Accessibility.contact)
+        if accessibility_contact:
+            accessibility_contact_name = self.graph.value(accessibility_contact, RDFS.label)
+            if accessibility_contact_name:
+                values['_accessibility_contact_name'] = accessibility_contact_name.toPython()
+            accessibility_contact_email = self.graph.value(accessibility_contact, VCard.email)
+            if accessibility_contact_email:
+                values['_accessibility_contact_email'] = accessibility_contact_email.toPython()
+            accessibility_contact_tel = self.graph.value(accessibility_contact, VCard.tel)
+            if accessibility_contact_tel:
+                values['_accessibility_contact_tel'] = accessibility_contact_tel.toPython()
+
+        primary_entrance = self.graph.value(subject, Rooms.primaryEntrance)
+        if primary_entrance:
+            entrance_opening_type = self.graph.value(primary_entrance, Accessibility.entranceOpeningType)
+            if entrance_opening_type:
+                entrance_value = ENTRANCE_OPENING_TYPES.get(entrance_opening_type)
+                if not entrance_value:
+                    logger.warning('No entrance opening type value found for {entrance_type}'.format(entrance_type=entrance_opening_type.toPython()))
+                else:
+                    values['_accessibility_primary_entrance_opening_type'] = entrance_value
+            levelness = self.graph.value(primary_entrance, Accessibility.levelness)
+            if levelness:
+                levelness_value = ENTRANCE_LEVEL_TYPES.get(levelness)
+                if not levelness_value:
+                    logger.warning('No entrance level type value found for {entrance_type}'.format(entrance_type=levelness.toPython()))
+                else:
+                    values['_accessibility_primary_entrance_levelness'] = levelness_value
+
+        accessible_entrance = self.graph.value(subject, Rooms.entrance)
+        if accessible_entrance:
+            accessible_entrance_node = self.graph.value(accessible_entrance, Rooms.Entrance)
+            if accessible_entrance_node:
+                accessible_levelness = self.graph.value(accessible_entrance_node, Accessibility.levelness)
+                if accessible_levelness and accessible_levelness == Levelness.Level:
+                    values['_accessibility_has_accessible_access'] = True
+
+        return values
+
+    def _handle_social_accounts(self, subject):
+        doc = {}
+        social_accounts = self._get_values_for_property(subject, FOAF.account)
+        if social_accounts:
+            for account in social_accounts:
+                if 'facebook.com' in account:
+                    doc['_social_facebook'] = account
+                elif 'twitter.com' in account:
+                    doc['_social_twitter'] = account
+        return doc
+
+    def _handle_address_data(self, subject):
+        address_node = self.graph.value(subject, VCard.adr)
+        if address_node:
+            address = self._get_address_for_subject(address_node)
+            if address:
+                return {'address': address}
+        return {}
+
+    def _handle_mapped_properties(self, subject):
+        values = {}
+        # defined properties that matches our structure
+        for prop, rdf_prop in MAPPED_PROPERTIES:
+            val = self.graph.value(subject, rdf_prop)
+            if val is not None:
+                values[prop] = val.toPython()
+        return values
 
     def _get_files(self, subject, rdf_prop, file_type):
         """Get files for given subject and predicate
