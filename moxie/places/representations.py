@@ -18,7 +18,8 @@ RTI_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/rti.html#{type}"
 
 KEYS_STRUCTURE = [('accessibility_', 'accessibility')]
 
-FACET_RENAME = {'type': 'types'}
+FACET_CURIE = 'facet'
+FACET_RENAME = {'type': ('hl', 'types')}
 FACET_BY_TYPE = ['type', 'type_exact']
 
 
@@ -214,15 +215,18 @@ class HALPOISearchRepresentation(POIsRepresentation):
         representation.add_embed('pois', [HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
         if self.facets:
             for field_name, facet_counts in self.facets.items():
+                curie = FACET_CURIE
                 friendly_name = field_name
                 if field_name in FACET_RENAME:
-                    friendly_name = FACET_RENAME[field_name]
+                    curie, friendly_name = FACET_RENAME[field_name]
                 for val, count in facet_counts.items():
-                    kwargs = {'name': val}
+                    kwargs = {'value': val,
+                              'count': count}
                     if field_name in FACET_BY_TYPE:
                         kwargs['title'] = find_type_name(val)
+                        kwargs['name'] = val
                     representation.update_link(
-                        'hl:%s' % friendly_name,
+                        '%s:%s' % (curie, friendly_name),
                         url_for(self.endpoint, q=self.search, **{field_name: val}),
                         **kwargs)
         return representation.as_dict()
