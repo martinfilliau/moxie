@@ -2,6 +2,7 @@ import logging
 import urllib
 
 from itertools import izip
+from functools import partial
 
 from moxie.core.service import Service
 from moxie.core.search import searcher
@@ -11,7 +12,13 @@ from moxie.places.solr import doc_to_poi
 
 logger = logging.getLogger(__name__)
 
+
 TYPE_FACET = 'type'
+
+# (friendly_name, internal_name) pairs of key prefixes
+KEY_TRANSFORMS = [('accessibility', '_accessibility')]
+INBOUND = 1
+OUTBOUND = 2
 
 
 class POIService(Service):
@@ -22,6 +29,23 @@ class POIService(Service):
         :param prefix_keys: prefix used for keys not being in the schema of the search engine
         """
         self.prefix_keys = prefix_keys
+
+    def _transform_arg(self, arg, direction=INBOUND):
+        for transform in KEY_TRANSFORMS:
+            before, after = transform
+            if direction is OUTBOUND:
+                before, after = after, before
+            if arg.startswith(before):
+                return arg.replace(before, after, 1)
+        return arg
+
+    def _args_to_internal(self, args):
+        transformer = partial(self._transform_arg, direction=INBOUND)
+        return map(transformer, args)
+
+    def _args_to_friendly(self, args):
+        transformer = partial(self._transform_arg, direction=OUTBOUND)
+        return map(transformer, args)
 
     def get_results(self, original_query, location, start, count,
                     pois_type=None, types_exact=None, filter_queries=None,
@@ -37,17 +61,20 @@ class POIService(Service):
         :return list of domain objects (POIs), total size of results and facets on type
         """
         filter_queries = filter_queries or []
+        filter_queries = self._args_to_internal(filter_queries)
         query = original_query or self.default_search
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
              'pf': query,
              'q': query,
              }
+        internal_facets = []
         if facets:
+            internal_facets = self._args_to_internal(facets)
             q.update({'facet': 'true',
                       'facet.sort': 'index',
                       'facet.mincount': '1',
-                      'facet.field': facets})
+                      'facet.field': internal_facets})
         if location:
             lat, lon = location
             q['sfield'] = 'location'
@@ -84,13 +111,13 @@ class POIService(Service):
                 return [], 0, None
         if response.facets:
             facet_values = {}
-            for facet_field in facets:
-                vals = response.facets['facet_fields'].get(facet_field, None)
+            for internal_name, friendly_name in zip(internal_facets, facets):
+                vals = response.facets['facet_fields'].get(internal_name, None)
                 if vals:
                     # Place in iterator so zip steps through vals
                     vals = iter(vals)
                     vals = dict(zip(vals, vals))
-                    facet_values[facet_field] = vals
+                    facet_values[friendly_name] = vals
         else:
             facet_values = None
         return [doc_to_poi(r, self.prefix_keys) for r in response.results], response.size, facet_values
