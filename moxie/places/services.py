@@ -15,14 +15,17 @@ logger = logging.getLogger(__name__)
 
 TYPE_FACET = 'type'
 
-# (friendly_name, internal_name) pairs of key prefixes
-KEY_TRANSFORMS = [('accessibility', '_accessibility')]
-INBOUND = 1
-OUTBOUND = 2
-
 
 class POIService(Service):
+
     default_search = '*:*'
+    # (friendly_name, internal_name) pairs of key prefixes
+    key_transforms = [
+        ('accessibility', '_accessibility'),
+        ('library', '_library'),
+    ]
+    INBOUND = 1
+    OUTBOUND = 2
 
     def __init__(self, prefix_keys="_"):
         """POI service
@@ -30,21 +33,21 @@ class POIService(Service):
         """
         self.prefix_keys = prefix_keys
 
-    def _transform_arg(self, arg, direction=INBOUND):
-        for transform in KEY_TRANSFORMS:
+    def _transform_arg(self, arg, direction=1):
+        for transform in self.key_transforms:
             before, after = transform
-            if direction is OUTBOUND:
+            if direction is self.OUTBOUND:
                 before, after = after, before
             if arg.startswith(before):
                 return arg.replace(before, after, 1)
         return arg
 
     def _args_to_internal(self, args):
-        transformer = partial(self._transform_arg, direction=INBOUND)
+        transformer = partial(self._transform_arg, direction=self.INBOUND)
         return map(transformer, args)
 
     def _args_to_friendly(self, args):
-        transformer = partial(self._transform_arg, direction=OUTBOUND)
+        transformer = partial(self._transform_arg, direction=self.OUTBOUND)
         return map(transformer, args)
 
     def get_results(self, original_query, location, start, count,
