@@ -32,6 +32,7 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
         self.facet_fields = arguments.poplist('facet')
+        self.other_args = arguments
 
         additional_filters = ["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems()]
 
@@ -65,9 +66,11 @@ class Search(ServiceView):
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
-        return HALPOISearchRepresentation(self.query, response, self.start, self.count, self.size,
-                                          request.url_rule.endpoint, facets=self.facets, type=self.type,
-                                          type_exact=self.types_exact).as_json()
+        return HALPOISearchRepresentation(
+            self.query, response, self.start, self.count, self.size,
+            request.url_rule.endpoint, facets=self.facets, type=self.type,
+            type_exact=self.types_exact,
+            other_args=self.other_args).as_json()
 
 
 class GeoJsonSearch(Search):
