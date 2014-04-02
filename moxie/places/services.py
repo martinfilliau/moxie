@@ -65,7 +65,7 @@ class POIService(Service):
         # TODO make a better filter query to handle having type and types_exact at the same time
         if pois_type:
             # filter on one specific type (and its subtypes)
-            q['facet.prefix'] = pois_type + "/"  # we only want to display sub-types as the facet
+            q['f.type.facet.prefix'] = pois_type + "/"  # we only want to display sub-types as the facet
             filter_queries.append('type_exact:{pois_type}*'.format(pois_type=pois_type.replace('/', '\/')))
         elif types_exact:
             # filter by a list of specific types (exact match)
