@@ -11,9 +11,6 @@ from moxie.places.representations import (HALPOISearchRepresentation, HALPOIsRep
 from .services import POIService
 
 
-ADDITIONAL_FILTERS_KEYS = [('accessibility', '_accessibility')]
-
-
 class Search(ServiceView):
     """Search query for full-text search and context-aware search (geo-position)
     """
@@ -36,8 +33,7 @@ class Search(ServiceView):
         self.count = arguments.pop('count', 35)
         self.facet_fields = arguments.poplist('facet')
 
-        additional_filters = self._get_additional_filters(
-            arguments, ADDITIONAL_FILTERS_KEYS)
+        additional_filters = ["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems()]
 
         if self.type and self.types_exact:
             raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
@@ -72,26 +68,6 @@ class Search(ServiceView):
         return HALPOISearchRepresentation(self.query, response, self.start, self.count, self.size,
                                           request.url_rule.endpoint, facets=self.facets, type=self.type,
                                           type_exact=self.types_exact).as_json()
-
-    @staticmethod
-    def _get_additional_filters(arguments, acceptable_values, default_value='true'):
-        """Check if the key starts with one of the authorized key defined in acceptable_values,
-        then replace it (eventually) by its internal representation
-        :param arguments: dictionary of key/values as arguments from an HTTP request
-        :param acceptable_values: list of tuples of acceptable values (key starts with, to be replaced)
-        :param default_value: value to set for a filter if there is no value
-        :return list of filters (as string)
-        """
-        additional_filters = []
-        for k, v in arguments.iteritems():
-            for acceptable_key, transformed_key in acceptable_values:
-                if k.startswith(acceptable_key):
-                    if not v:
-                        v = default_value
-                    additional_filters.append('{key}:{value}'.format(key=k.replace(acceptable_key, transformed_key),
-                                                                     value=v))
-                    break
-        return additional_filters
 
 
 class GeoJsonSearch(Search):
