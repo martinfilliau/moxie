@@ -179,7 +179,7 @@ class POIsRepresentation(object):
 class HALPOISearchRepresentation(POIsRepresentation):
 
     def __init__(self, search, results, start, count, size, endpoint,
-                 facets=None, type=None, type_exact=None):
+                 facets=None, type=None, type_exact=None, other_args=None):
         """Represents a list of search result as HAL+JSON
         :param search: search query
         :param results: list of results
@@ -199,6 +199,7 @@ class HALPOISearchRepresentation(POIsRepresentation):
         self.facets = facets
         self.type = type
         self.type_exact = type_exact
+        self.other_args = other_args
 
     def as_json(self):
         return jsonify(self.as_dict())
@@ -208,11 +209,25 @@ class HALPOISearchRepresentation(POIsRepresentation):
             'query': self.search,
             'size': self.size,
         })
-        representation.add_link('self', url_for(self.endpoint, q=self.search, type=self.type, type_exact=self.type_exact,
-            start=self.start, count=self.count))
-        representation.add_links(get_nav_links(self.endpoint, self.start, self.count, self.size,
-            q=self.search, type=self.type, type_exact=self.type_exact))
-        representation.add_embed('pois', [HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
+        url_kwargs = {}
+        if self.search:
+            url_kwargs['q'] = self.search
+        if self.type:
+            url_kwargs['type'] = self.type
+        if self.type_exact:
+            url_kwargs['type_exact'] = self.type_exact
+        if self.facets:
+            url_kwargs['facet'] = self.facets.keys()
+        if self.other_args:
+            url_kwargs.update(self.other_args)
+
+        representation.add_link('self', url_for(
+            self.endpoint, start=self.start, count=self.count, **url_kwargs))
+        representation.add_links(get_nav_links(self.endpoint, self.start,
+                                               self.count, self.size,
+                                               **url_kwargs))
+        representation.add_embed(
+            'pois', [HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
         if self.facets:
             for field_name, facet_counts in self.facets.items():
                 curie = FACET_CURIE
@@ -225,10 +240,12 @@ class HALPOISearchRepresentation(POIsRepresentation):
                     if field_name in FACET_BY_TYPE:
                         kwargs['title'] = find_type_name(val)
                         kwargs['name'] = val
+                    url_kwargs[field_name] = val
                     representation.update_link(
                         '%s:%s' % (curie, friendly_name),
-                        url_for(self.endpoint, q=self.search, **{field_name: val}),
+                        url_for(self.endpoint, **url_kwargs),
                         **kwargs)
+                    del url_kwargs[field_name]
         return representation.as_dict()
 
 
