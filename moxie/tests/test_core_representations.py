@@ -65,18 +65,30 @@ class RepresentationsTestCase(unittest.TestCase):
             self.assertEqual(links['hl:next']['href'], '/?count=10&start=10')
             self.assertEqual(links['hl:last']['href'], '/?count=10&start=10')
             self.assertFalse('hl:prev' in links)
-            self.assertEqual(links['curie']['name'], 'hl')
+            self.assertEqual(len(links['curies']), 1)
+            self.assertEqual(links['curies'][0]['name'], 'hl')
 
             links2 = get_nav_links('a', 20, 10, 30)
             self.assertEqual(links2['hl:first']['href'], '/?count=10')
             self.assertEqual(links2['hl:prev']['href'], '/?count=10&start=10')
             self.assertEqual(links2['hl:last']['href'], '/?count=10&start=20')
             self.assertFalse('hl:next' in links2)
-            self.assertEqual(links2['curie']['name'], 'hl')
+            self.assertEqual(len(links['curies']), 1)
+            self.assertEqual(links2['curies'][0]['name'], 'hl')
 
             links3 = get_nav_links('a', 0, 10, 5)
             self.assertEqual(links3['hl:first']['href'], '/?count=10')
             self.assertEqual(links3['hl:last']['href'], '/?count=10')
             self.assertFalse('hl:next' in links3)
             self.assertFalse('hl:prev' in links3)
-            self.assertEqual(links3['curie']['name'], 'hl')
+            self.assertEqual(len(links['curies']), 1)
+            self.assertEqual(links3['curies'][0]['name'], 'hl')
+
+    def test_nav_links_with_facet(self):
+        app.add_url_rule('/', endpoint='a')
+        with app.test_request_context():
+            links = get_nav_links('a', 0, 10, 20, facet=['this'])
+            self.assertEqual(len(links['curies']), 2)
+            curie_names = set([c['name'] for c in links['curies']])
+            self.assertTrue('facet' in curie_names)
+            self.assertTrue('hl' in curie_names)
