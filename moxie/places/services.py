@@ -2,6 +2,7 @@ import logging
 import urllib
 
 from itertools import izip
+from functools import partial
 
 from moxie.core.service import Service
 from moxie.core.search import searcher
@@ -12,8 +13,19 @@ from moxie.places.solr import doc_to_poi
 logger = logging.getLogger(__name__)
 
 
+TYPE_FACET = 'type'
+
+
 class POIService(Service):
+
     default_search = '*:*'
+    # (friendly_name, internal_name) pairs of key prefixes
+    key_transforms = [
+        ('accessibility', '_accessibility'),
+        ('library', '_library'),
+    ]
+    INBOUND = 1
+    OUTBOUND = 2
 
     def __init__(self, prefix_keys="_"):
         """POI service
@@ -21,28 +33,51 @@ class POIService(Service):
         """
         self.prefix_keys = prefix_keys
 
-    def get_results(self, original_query, location, start, count, pois_type=None,
-                    types_exact=None, filter_queries=None):
+    def _transform_arg(self, arg, direction=1):
+        for transform in self.key_transforms:
+            before, after = transform
+            if direction is self.OUTBOUND:
+                before, after = after, before
+            if arg.startswith(before):
+                return arg.replace(before, after, 1)
+        return arg
+
+    def _args_to_internal(self, args):
+        transformer = partial(self._transform_arg, direction=self.INBOUND)
+        return map(transformer, args)
+
+    def _args_to_friendly(self, args):
+        transformer = partial(self._transform_arg, direction=self.OUTBOUND)
+        return map(transformer, args)
+
+    def get_results(self, original_query, location, start, count,
+                    pois_type=None, types_exact=None, filter_queries=None,
+                    facets=(TYPE_FACET,)):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
         :param start: index of the first result of the page
         :param count: number of results for the page
         :param pois_type: (optional) type from the hierarchy of types to look for
-        :param types_exact (optional) exact types to search for (cannot be used in combination of type atm)
+        :param types_exact: (optional) exact types to search for (cannot be used in combination of type atm)
+        :param facets: (optional) list of fields to be returned as facets defaults to the `type` facet.
         :return list of domain objects (POIs), total size of results and facets on type
         """
         filter_queries = filter_queries or []
+        filter_queries = self._args_to_internal(filter_queries)
         query = original_query or self.default_search
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
              'pf': query,
              'q': query,
-             'facet': 'true',
-             'facet.field': 'type',
-             'facet.sort': 'index',
-             'facet.mincount': '1',
              }
+        internal_facets = []
+        if facets:
+            internal_facets = self._args_to_internal(facets)
+            q.update({'facet': 'true',
+                      'facet.sort': 'index',
+                      'facet.mincount': '1',
+                      'facet.field': internal_facets})
         if location:
             lat, lon = location
             q['sfield'] = 'location'
@@ -60,7 +95,7 @@ class POIService(Service):
         # TODO make a better filter query to handle having type and types_exact at the same time
         if pois_type:
             # filter on one specific type (and its subtypes)
-            q['facet.prefix'] = pois_type + "/"  # we only want to display sub-types as the facet
+            q['f.type.facet.prefix'] = pois_type + "/"  # we only want to display sub-types as the facet
             filter_queries.append('type_exact:{pois_type}*'.format(pois_type=pois_type.replace('/', '\/')))
         elif types_exact:
             # filter by a list of specific types (exact match)
@@ -78,12 +113,17 @@ class POIService(Service):
             else:
                 return [], 0, None
         if response.facets:
-            facets_values = response.facets['facet_fields']['type']
-            i = iter(facets_values)
-            facets = dict(izip(i, i))
+            facet_values = {}
+            for internal_name, friendly_name in zip(internal_facets, facets):
+                vals = response.facets['facet_fields'].get(internal_name, None)
+                if vals:
+                    # Place in iterator so zip steps through vals
+                    vals = iter(vals)
+                    vals = dict(zip(vals, vals))
+                    facet_values[friendly_name] = vals
         else:
-            facets = None
-        return [doc_to_poi(r, self.prefix_keys) for r in response.results], response.size, facets
+            facet_values = None
+        return [doc_to_poi(r, self.prefix_keys) for r in response.results], response.size, facet_values
 
     def get_place_by_identifier(self, ident):
         """Get place by identifier

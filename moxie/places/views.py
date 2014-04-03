@@ -11,9 +11,6 @@ from moxie.places.representations import (HALPOISearchRepresentation, HALPOIsRep
 from .services import POIService
 
 
-ADDITIONAL_FILTERS_KEYS = [('accessibility', '_accessibility')]
-
-
 class Search(ServiceView):
     """Search query for full-text search and context-aware search (geo-position)
     """
@@ -29,25 +26,24 @@ class Search(ServiceView):
         else:
             location = None
 
-        self.query = arguments.pop('q', '')
+        self.query = arguments.pop('q', '').encode('utf8')
         self.type = arguments.pop('type', None)
         self.types_exact = arguments.poplist('type_exact')
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
+        self.facet_fields = arguments.poplist('facet')
+        self.other_args = arguments
 
-        additional_filters = self._get_additional_filters(arguments, ADDITIONAL_FILTERS_KEYS)
-
-        if self.query:
-            self.query = self.query.encode('utf8')
+        additional_filters = ["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems()]
 
         if self.type and self.types_exact:
             raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
 
         poi_service = POIService.from_context()
+
         # Try to match the query to identifiers if it's a one word query,
         # useful when querying for bus stop naptan number
         # TODO pass the location to have the distance from the point
-
         if ' ' not in self.query:
             unique_doc = poi_service.search_places_by_identifiers(['*:{id}'.format(id=self.query)])
             if unique_doc:
@@ -55,38 +51,26 @@ class Search(ServiceView):
                 self.facets = None
                 return unique_doc
 
-        results, self.size, self.facets = poi_service.get_results(self.query, location,
-                                                                  self.start, self.count,
-                                                                  pois_type=self.type,
-                                                                  types_exact=self.types_exact,
-                                                                  filter_queries=additional_filters)
+        kwargs = {
+            'pois_type': self.type,
+            'types_exact': self.types_exact,
+            'filter_queries': additional_filters
+        }
+
+        # Only pass `facets` if we have user-speciified facets
+        if self.facet_fields:
+            kwargs['facets'] = self.facet_fields
+        results, self.size, self.facets = poi_service.get_results(
+            self.query, location, self.start, self.count, **kwargs)
         return results
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
-        return HALPOISearchRepresentation(self.query, response, self.start, self.count, self.size,
-                                          request.url_rule.endpoint, types=self.facets, type=self.type,
-                                          type_exact=self.types_exact).as_json()
-
-    @staticmethod
-    def _get_additional_filters(arguments, acceptable_values, default_value='true'):
-        """Check if the key starts with one of the authorized key defined in acceptable_values,
-        then replace it (eventually) by its internal representation
-        :param arguments: dictionary of key/values as arguments from an HTTP request
-        :param acceptable_values: list of tuples of acceptable values (key starts with, to be replaced)
-        :param default_value: value to set for a filter if there is no value
-        :return list of filters (as string)
-        """
-        additional_filters = []
-        for k, v in arguments.iteritems():
-            for acceptable_key, transformed_key in acceptable_values:
-                if k.startswith(acceptable_key):
-                    if not v:
-                        v = default_value
-                    additional_filters.append('{key}:{value}'.format(key=k.replace(acceptable_key, transformed_key),
-                                                                     value=v))
-                    break
-        return additional_filters
+        return HALPOISearchRepresentation(
+            self.query, response, self.start, self.count, self.size,
+            request.url_rule.endpoint, facets=self.facets, type=self.type,
+            type_exact=self.types_exact,
+            other_args=self.other_args).as_json()
 
 
 class GeoJsonSearch(Search):

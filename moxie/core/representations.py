@@ -6,6 +6,7 @@ JSON = "application/json"
 HAL_JSON = "application/hal+json"
 
 RELATIONS_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/relations/{rel}.html"
+FACET_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/relations/facet.html"
 
 
 class Representation(object):
@@ -106,12 +107,18 @@ def get_nav_links(endpoint, start, count, size, **kwargs):
     :return dict of navigation links
     """
     start, count, size = int(start), int(count), int(size)
-    nav = {'curie': {
+    nav = {'curies': [{
         'name': 'hl',
         'href': RELATIONS_CURIE,
         'templated': True,
-        },
+        }],
     }
+
+    if 'facet' in kwargs:
+        nav['curies'].append({
+            'name': 'facet',
+            'href': FACET_CURIE,
+        })
 
     if size-count > 0:
         nav['hl:last'] = {

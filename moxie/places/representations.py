@@ -18,6 +18,10 @@ RTI_CURIE = "http://moxie.readthedocs.org/en/latest/http_api/rti.html#{type}"
 
 KEYS_STRUCTURE = [('accessibility_', 'accessibility')]
 
+FACET_CURIE = 'facet'
+FACET_RENAME = {'type': ('hl', 'types')}
+FACET_BY_TYPE = ['type', 'type_exact']
+
 
 class POIRepresentation(Representation):
 
@@ -174,7 +178,8 @@ class POIsRepresentation(object):
 
 class HALPOISearchRepresentation(POIsRepresentation):
 
-    def __init__(self, search, results, start, count, size, endpoint, types=None, type=None, type_exact=None):
+    def __init__(self, search, results, start, count, size, endpoint,
+                 facets=None, type=None, type_exact=None, other_args=None):
         """Represents a list of search result as HAL+JSON
         :param search: search query
         :param results: list of results
@@ -182,18 +187,23 @@ class HALPOISearchRepresentation(POIsRepresentation):
         :param count: int as the size of the page
         :param size: int as total size of results
         :param endpoint: endpoint (URL) to represent the search resource
-        :param types: (optional) types of the POIs, used for faceting
-        :param type: (optional) type of the POIs (if search has been restricted to this type)
-        :param type_exact: (optional) exact types of the POIs (if search has been restricted to this exact type)
+        :param facets: (optional) set of facets returned from the search
+        :param type: (optional) type of the POIs (if search has been restricted
+                     to this type)
+        :param type_exact: (optional) exact types of the POIs (if search has
+                           been restricted to this exact type)
+        :param other_args: (optional) other query parameters (e.g. possible
+                           filter queries) used to generate accurate urls
         """
         super(HALPOISearchRepresentation, self).__init__(search, results, size)
         self.start = start
         self.count = count
         self.size = size
         self.endpoint = endpoint
-        self.types = types
+        self.facets = facets
         self.type = type
         self.type_exact = type_exact
+        self.other_args = other_args
 
     def as_json(self):
         return jsonify(self.as_dict())
@@ -203,16 +213,43 @@ class HALPOISearchRepresentation(POIsRepresentation):
             'query': self.search,
             'size': self.size,
         })
-        representation.add_link('self', url_for(self.endpoint, q=self.search, type=self.type, type_exact=self.type_exact,
-            start=self.start, count=self.count))
-        representation.add_links(get_nav_links(self.endpoint, self.start, self.count, self.size,
-            q=self.search, type=self.type, type_exact=self.type_exact))
-        representation.add_embed('pois', [HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
-        if self.types:
-            # add faceting links for types
-            for facet in self.types:
-                representation.update_link('hl:types', url_for(self.endpoint, q=self.search, type=facet),
-                    name=facet, title=find_type_name(facet))
+        url_kwargs = {}
+        if self.search:
+            url_kwargs['q'] = self.search
+        if self.type:
+            url_kwargs['type'] = self.type
+        if self.type_exact:
+            url_kwargs['type_exact'] = self.type_exact
+        if self.facets:
+            url_kwargs['facet'] = self.facets.keys()
+        if self.other_args:
+            url_kwargs.update(self.other_args)
+
+        representation.add_link('self', url_for(
+            self.endpoint, start=self.start, count=self.count, **url_kwargs))
+        representation.add_links(get_nav_links(self.endpoint, self.start,
+                                               self.count, self.size,
+                                               **url_kwargs))
+        representation.add_embed(
+            'pois', [HALPOIRepresentation(r, 'places.poidetail').as_dict() for r in self.results])
+        if self.facets:
+            for field_name, facet_counts in self.facets.items():
+                curie = FACET_CURIE
+                friendly_name = field_name
+                if field_name in FACET_RENAME:
+                    curie, friendly_name = FACET_RENAME[field_name]
+                for val, count in facet_counts.items():
+                    kwargs = {'value': val,
+                              'count': count}
+                    if field_name in FACET_BY_TYPE:
+                        kwargs['title'] = find_type_name(val)
+                        kwargs['name'] = val
+                    url_kwargs[field_name] = val
+                    representation.update_link(
+                        '%s:%s' % (curie, friendly_name),
+                        url_for(self.endpoint, **url_kwargs),
+                        **kwargs)
+                    del url_kwargs[field_name]
         return representation.as_dict()
 
 
