@@ -11,10 +11,10 @@ university:
           name_plural: Departments
         library:
           name_singular: Library
-          name_plural: Librairies
+          name_plural: Libraries
         sub-library:
           name_singular: Sub-library
-          name_plural: Sub-librairies
+          name_plural: Sub-libraries
         division:
           name_singular: Division
           name_plural: Divisions
