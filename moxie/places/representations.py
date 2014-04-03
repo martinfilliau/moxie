@@ -187,9 +187,13 @@ class HALPOISearchRepresentation(POIsRepresentation):
         :param count: int as the size of the page
         :param size: int as total size of results
         :param endpoint: endpoint (URL) to represent the search resource
-        :param types: (optional) types of the POIs, used for faceting
-        :param type: (optional) type of the POIs (if search has been restricted to this type)
-        :param type_exact: (optional) exact types of the POIs (if search has been restricted to this exact type)
+        :param facets: (optional) set of facets returned from the search
+        :param type: (optional) type of the POIs (if search has been restricted
+                     to this type)
+        :param type_exact: (optional) exact types of the POIs (if search has
+                           been restricted to this exact type)
+        :param other_args: (optional) other query parameters (e.g. possible
+                           filter queries) used to generate accurate urls
         """
         super(HALPOISearchRepresentation, self).__init__(search, results, size)
         self.start = start
