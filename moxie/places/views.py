@@ -19,10 +19,14 @@ class Search(ServiceView):
 
     def handle_request(self):
         arguments = request.args.copy()
+
+        # Always remove lat lon from arguments so they are not accidentally
+        # passed to POIService.get_results in other_args
+        lat, lon = arguments.pop('lat', None), arguments.pop('lon', None)
         if 'Geo-Position' in request.headers:
             location = request.headers['Geo-Position'].split(';')
-        elif 'lat' in arguments and 'lon' in arguments:
-            location = (arguments.pop('lat'), arguments.pop('lon'))
+        elif lat and lon:
+            location = (lat, lon)
         else:
             location = None
 
