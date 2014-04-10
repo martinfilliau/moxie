@@ -72,6 +72,17 @@ def staging():
     env.additional_requirements = '/srv/moxie/requirements.txt'
 
 
+@task
+def server(host):
+#    host = os.getenv('APP_SERVER_HOST')     # expects hostname:port
+    env.host = ["{host}:22".format(host=host)]
+    env.user = 'moxie'
+    env.remote_install_dir_api = '/srv/moxie/{host}'.format(host=host.split(':')[0])
+    env.remote_git_checkout_api = '/srv/moxie/moxie-api'
+    env.additional_requirements = '/srv/moxie/requirements.txt'
+
+
+
 """
 Methods
 """
@@ -98,12 +109,32 @@ def deploy_api(version):
         install_moxie()
         run('rm -f %s' % env.remote_install_dir_api)
         run('ln -s %s %s' % (versioned_path, env.remote_install_dir_api))
-        run('circusctl stop moxie-celerybeat')
-        run('circusctl start moxie-celerybeat')
-        run('circusctl stop moxie-celery')
-        run('circusctl start moxie-celery')
-        run('circusctl stop moxie-uwsgi')
-        run('circusctl start moxie-uwsgi')
+        run('supervisorctl restart moxie-uwsgi')
+
+
+@task
+def deploy_tasks(version):
+    """
+    Deploy mobileoxford (with given version - tag or branch) on defined
+    environment in a virtual env
+    """
+    require('user', provided_by=ENVIRONMENTS)
+
+    if not version:
+        utils.abort('You must specify a version (whether branch or tag).')
+
+    git_hash = git_branch(env.remote_git_checkout_api, MOXIE_REPO, version)
+
+    versioned_path = '/srv/%s/api-%s-%s' % (env.user, datetime.now().strftime('%Y%m%d%H%M')
+            , git_hash)
+
+    createvirtualenv(versioned_path)
+    with prefix('source %s' % os.path.join(versioned_path, 'bin', 'activate')):
+        install_moxie()
+        run('rm -f %s' % env.remote_install_dir_api)
+        run('ln -s %s %s' % (versioned_path, env.remote_install_dir_api))
+        run('supervisorctl restart moxie-celerybeat')
+        run('supervisorctl restart moxie-celery')
 
 
 @task
