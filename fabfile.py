@@ -78,9 +78,9 @@ def server(host):
     env.host = ["{host}:22".format(host=host)]
     env.user = 'moxie'
     env.remote_install_dir_api = '/srv/moxie/{host}'.format(host=host.split(':')[0])
+    env.restart_app_server = '/srv/moxie/reload-app-server'
     env.remote_git_checkout_api = '/srv/moxie/moxie-api'
     env.additional_requirements = '/srv/moxie/requirements.txt'
-
 
 
 """
@@ -109,7 +109,7 @@ def deploy_api(version):
         install_moxie()
         run('rm -f %s' % env.remote_install_dir_api)
         run('ln -s %s %s' % (versioned_path, env.remote_install_dir_api))
-        run('supervisorctl restart moxie-uwsgi')
+        run('touch {reload_path}'.format(reload_path=env.restart_app_server))
 
 
 @task
