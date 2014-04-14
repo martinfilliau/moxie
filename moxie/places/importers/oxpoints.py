@@ -325,6 +325,14 @@ class OxpointsImporter(object):
         """
         values = {}
 
+        accessGuideBuildingName = self.graph.value(subject, AdHocDataOx.accessGuideBuildingName)
+        if accessGuideBuildingName:
+            values['_accessibility_access_guide_name'] = accessGuideBuildingName.toPython()
+
+        accessGuideBuildingContents = self.graph.value(subject, AdHocDataOx.accessGuideBuildingContents)
+        if accessGuideBuildingContents:
+            values['_accessibility_access_guide_contents'] = accessGuideBuildingContents.toPython()
+
         accessibility_parking_type = self.graph.value(subject, Accessibility.nearbyParkingType)
         if accessibility_parking_type:
             values['_accessibility_parking_type'] = PARKING_TYPES.get(accessibility_parking_type)
