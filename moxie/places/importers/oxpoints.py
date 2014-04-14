@@ -1,13 +1,14 @@
 import logging
 
 import rdflib
+import json
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS, RDFS
 
-from moxie.places.importers.rdf_namespaces import (Geo, Geometry, OxPoints, VCard,
-                                                   Org, OpenVocab, LinkingYou, Accessibility,
-                                                   AdHocDataOx, EntranceOpeningType, ParkingType,
-                                                   Rooms, Levelness)
+from moxie.core.tasks import download_file
+from moxie.places.importers.rdf_namespaces import (
+    Geo, Geometry, OxPoints, VCard, Org, OpenVocab, LinkingYou, Accessibility,
+    AdHocDataOx, EntranceOpeningType, ParkingType, Rooms, Levelness)
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -84,7 +85,8 @@ OXPOINTS_IDENTIFIERS = {
 
 class OxpointsImporter(object):
 
-    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, accessibility_file, identifier_key='identifiers'):
+
+    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, accessibility_file, static_files_dir, identifier_key='identifiers'):
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
@@ -95,6 +97,9 @@ class OxpointsImporter(object):
         graph.parse(accessibility_file, format=RDF_MEDIA_TYPE)
         self.graph = graph
         self.merged_things = []     # list of building/sites merged into departments
+        if not static_files_dir:
+            logger.warning('STATIC_FILES_IMPORT_DIRECTORY not set, images will not be imported')
+        self.static_files_dir = static_files_dir
 
     def import_data(self):
         documents = []
@@ -209,6 +214,13 @@ class OxpointsImporter(object):
             # no access info from main site, attempt to get from the thing directly
             doc.update(self._handle_accessibility_data(subject))
 
+        # only import images if a static files dir has been defined
+        if self.static_files_dir:
+            images = []
+            images.extend(self._get_files(subject, FOAF.depiction, 'picture'))
+            images.extend(self._get_files(subject, FOAF.logo, 'logo'))
+            doc['image'] = images
+
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
         parent_of.update(self._find_relations(subject, Org.hasSite))
         parent_of.update(self._find_inverse_relations(subject, DCTERMS.isPartOf))
@@ -286,12 +298,13 @@ class OxpointsImporter(object):
             values.append(obj.toPython())
         return values
 
-    def _get_formatted_oxpoints_id(self, uri_ref):
+    def _get_formatted_oxpoints_id(self, uri_ref, separator=':'):
         """Split an URI to get the OxPoints ID
         :param uri_ref: URIRef object
         :return string representing oxpoints ID
         """
-        return 'oxpoints:%s' % uri_ref.toPython().rsplit('/')[-1]
+        return 'oxpoints{separator}{ident}'.format(separator=separator,
+                                                   ident=uri_ref.toPython().rsplit('/')[-1])
 
     def _handle_location(self, subject):
         if (subject, Geo.lat, None) in self.graph and (subject, Geo.long, None) in self.graph:
@@ -415,6 +428,33 @@ class OxpointsImporter(object):
             if val is not None:
                 values[prop] = val.toPython()
         return values
+
+    def _get_files(self, subject, rdf_prop, file_type):
+        """Get files for given subject and predicate
+        Will download the file and store it
+        :param subject: subject
+        :param rdf_prop: predicate
+        :param file_type: type of file (string), used in description and URL
+        :return list of json strings containing source URL and new location
+        """
+        files = []
+        for val in self.graph.objects(subject, rdf_prop):
+            url = val.toPython()
+            file_name = url.split('/')[-1]
+            oxpoints_path = self._get_formatted_oxpoints_id(subject, separator='/')
+            location = '{oxpoints_id}/{file_type}/original/{file_name}'.format(oxpoints_id=oxpoints_path,
+                                                                               file_type=file_type,
+                                                                               file_name=file_name)
+            download_location = '{base}{location}'.format(base=self.static_files_dir,
+                                                          location=location)
+
+            download_file.delay(val.toPython(), download_location)
+            image_description = {'location': location,
+                                 'file_name': file_name,
+                                 'file_type': file_type,
+                                 'source_url': url}
+            files.append(json.dumps(image_description))
+        return files
 
 
 def main():
