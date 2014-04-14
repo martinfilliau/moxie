@@ -61,10 +61,10 @@ ENTRANCE_OPENING_TYPES = {
 }
 
 ENTRANCE_LEVEL_TYPES = {
-    Levelness.Level: 'Level',
+    Levelness.NotAccessible: 'Not accessible',
+    Levelness.Accessible: 'Accessible',
     Levelness.NotLevel: 'Not level',
-    Levelness.PlatformLift: 'Platform lift',
-    Levelness.StairLift: 'Stair lift'
+    Levelness.Level: 'Level'
 }
 
 PARKING_TYPES = {
