@@ -1,11 +1,8 @@
 import logging
 import bz2
 import zipfile
-import os
 
-import requests
 from xml.sax import make_parser
-from requests.exceptions import RequestException
 
 from moxie import create_app
 from moxie.worker import celery
@@ -122,27 +119,3 @@ def import_ox_library_data(url=None, force_update=False):
             importer.run()
         else:
             logger.info("OxLibraryData hasn't been imported - resource not loaded")
-
-
-# (bind=True)  bind=True to give access to self     TODO from celery 3.1
-@celery.task
-def download_file(url, location):
-    """Download a file and store it at location
-    :param url: URL to download the file from
-    :param location: location where to put the file
-    """
-    logger.info('Downloading {url} to {location}'.format(url=url,
-                                                         location=location))
-    try:
-        response = requests.get(url)
-    except RequestException as re:
-        # default behaviour is retry 3 times, every 3 minutes
-        #raise self.retry(exc=re)
-        raise download_file.retry(exc=re)
-    else:
-        directory_path = '/'.join(location.split('/')[:-1])
-        if not os.path.exists(directory_path):
-            os.makedirs(directory_path)
-        f = file(location, 'w+')
-        f.write(response.content)
-        f.close()

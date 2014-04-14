@@ -5,10 +5,10 @@ import json
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS, RDFS
 
-from moxie.places.importers.rdf_namespaces import (Geo, Geometry, OxPoints, VCard,
-                                                   Org, OpenVocab, LinkingYou, Accessibility,
-                                                   AdHocDataOx, EntranceOpeningType, ParkingType,
-                                                   Rooms, Levelness)
+from moxie.core.tasks import download_file
+from moxie.places.importers.rdf_namespaces import (
+    Geo, Geometry, OxPoints, VCard, Org, OpenVocab, LinkingYou, Accessibility,
+    AdHocDataOx, EntranceOpeningType, ParkingType, Rooms, Levelness)
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -429,9 +429,6 @@ class OxpointsImporter(object):
         :param file_type: type of file (string), used in description and URL
         :return list of json strings containing source URL and new location
         """
-        # TODO can't import it in the file for some reasons??
-        from moxie.places.tasks import download_file
-
         files = []
         for val in self.graph.objects(subject, rdf_prop):
             url = val.toPython()
