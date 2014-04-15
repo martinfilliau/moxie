@@ -56,6 +56,8 @@ def import_oxpoints(url=None, force_update=False):
     RDF_MEDIA_TYPE = 'text/turtle'  # default RDF serialization
     with app.blueprint_context(BLUEPRINT_NAME):
         url = url or app.config['OXPOINTS_IMPORT_URL']
+
+        static_files_dir = app.config.get('STATIC_FILES_IMPORT_DIRECTORY', None)
         oxpoints = get_resource(url, force_update, media_type=RDF_MEDIA_TYPE)
 
         if 'OXPOINTS_SHAPES_URL' in app.config:
@@ -79,11 +81,12 @@ def import_oxpoints(url=None, force_update=False):
                 shapes = open(oxpoints_shape)
             else:
                 shapes = None
+
             if oxpoints_accessibility:
                 accessibility = open(oxpoints_accessibility)
             else:
                 accessibility = None
-            importer = OxpointsImporter(searcher, 10, oxpoints, shapes, accessibility)
+            importer = OxpointsImporter(searcher, 10, oxpoints, shapes, accessibility, static_files_dir)
             importer.import_data()
         else:
             logger.info("OxPoints hasn't been imported - resource not loaded")
