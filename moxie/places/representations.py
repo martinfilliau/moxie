@@ -84,12 +84,14 @@ class FileRepresentation(Representation):
     def as_dict(self):
         values = {
             'type': self.file.file_type,
-            'location': self.file.file_location
+            'location': self.file.location
         }
+        if self.file.primary:
+            values['primary'] = True
         ctx = _app_ctx_stack.top
         base_url = ctx.app.config.get('STATIC_FILES_URL', None)
         if base_url:
-            values['url'] = base_url + self.file.file_location
+            values['url'] = base_url + self.file.location
         return values
 
 
@@ -116,7 +118,7 @@ class HALPOIRepresentation(POIRepresentation):
         representation.add_link('self', url_for(self.endpoint, ident=self.poi.id))
         if self.poi.files:
             reps = [FileRepresentation(r).as_dict() for r in self.poi.files]
-            representation.add_embed('images', reps)
+            representation.add_embed('files', reps)
 
         try:
             poi_service = POIService.from_context()

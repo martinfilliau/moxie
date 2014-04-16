@@ -35,10 +35,10 @@ def doc_to_poi(doc, fields_key="_"):
         poi.alternative_names = doc['alternative_names']
     if 'shape' in doc:
         poi.shape = doc['shape']
-    if 'image' in doc:
-        for image_json in doc['image']:
-            image = json.loads(image_json)
-            poi.files.append(File(image['file_type'], image['location']))
+    if 'files' in doc:
+        for fileJSON in doc['files']:
+            fileData = json.loads(fileJSON)
+            poi.files.append(File(**fileData))
     for key, val in doc.items():
         if key.startswith(fields_key) and key not in SOLR_IGNORE_FIELDS:
             if not getattr(poi, 'fields', False):
