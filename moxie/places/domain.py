@@ -27,6 +27,13 @@ class POI(object):
 
 class File(object):
 
-    def __init__(self, file_type, file_location):
+    DEPICTION = 'depiction'
+    FLOORPLAN = 'floorplan'
+    LOGO = 'logo'
+
+    def __init__(self, file_name, file_type, location, source_url,
+                 primary=False):
         self.file_type = file_type
-        self.file_location = file_location
+        self.location = location
+        self.source_url = source_url
+        self.primary = primary

@@ -6,6 +6,7 @@ from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS, RDFS
 
 from moxie.core.tasks import download_file
+from moxie.places.domain import File
 from moxie.places.importers.rdf_namespaces import (
     Geo, Geometry, OxPoints, VCard, Org, OpenVocab, LinkingYou, Accessibility,
     AdHocDataOx, EntranceOpeningType, ParkingType, Rooms, Levelness)
@@ -37,8 +38,6 @@ MAPPED_TYPES = [
 MAPPED_PROPERTIES = [
     ('website', FOAF.homepage),
     ('short_name', OxPoints.shortLabel),
-    ('_picture_logo', FOAF.logo),
-    ('_picture_depiction', FOAF.depiction),
     ('_accessibility_access_guide_url', LinkingYou['space-accessibility']),
     ('_accessibility_has_hearing_system', Accessibility.hasHearingSystem),
     ('_accessibility_has_quiet_space', Accessibility.hasQuietSpace),
@@ -51,8 +50,6 @@ MAPPED_PROPERTIES = [
     ('_accessibility_opening_hours_closed', AdHocDataOx.openingHoursClosed),
     ('_accessibility_opening_hours_term_time', AdHocDataOx.openingHoursTermTime),
     ('_accessibility_opening_hours_vacation', AdHocDataOx.openingHoursVacation),
-    ('_accessibility_floorplan', Accessibility.floorplan),
-    ('_accessibility_building_image', AdHocDataOx.accessGuideImage),
 ]
 
 ENTRANCE_OPENING_TYPES = {
@@ -82,6 +79,7 @@ OXPOINTS_IDENTIFIERS = {
     OxPoints.hasOBNCode: 'obn',
     OxPoints.hasLibraryDataId: 'librarydata'
 }
+
 
 class OxpointsImporter(object):
 
@@ -181,6 +179,7 @@ class OxpointsImporter(object):
                     # e.g. Sackler Library -- makes sense to merge accessibility data
                     doc.update(self._handle_accessibility_data(main_site))
                     doc.update(self._handle_mapped_properties(main_site))
+                    doc['files'] = self._handle_files(main_site)
 
             if not main_site_id:
                 # Thing and its main site haven't been merged
@@ -216,10 +215,10 @@ class OxpointsImporter(object):
 
         # only import images if a static files dir has been defined
         if self.static_files_dir:
-            images = []
-            images.extend(self._get_files(subject, FOAF.depiction, 'picture'))
-            images.extend(self._get_files(subject, FOAF.logo, 'logo'))
-            doc['image'] = images
+            if 'files' in doc:
+                doc['files'].extend(self._handle_files(subject))
+            else:
+                doc['files'] = self._handle_files(subject)
 
         parent_of.update(self._find_inverse_relations(subject, Org.subOrganizationOf))
         parent_of.update(self._find_relations(subject, Org.hasSite))
@@ -429,7 +428,18 @@ class OxpointsImporter(object):
                 values[prop] = val.toPython()
         return values
 
-    def _get_files(self, subject, rdf_prop, file_type):
+    def _handle_files(self, subject):
+        files = []
+        files.extend(self._get_files(subject, FOAF.depiction, File.DEPICTION))
+        files.extend(self._get_files(subject, FOAF.logo, File.LOGO))
+        # Accessibility files
+        files.extend(self._get_files(subject, AdHocDataOx.accessGuideImage,
+                                     File.DEPICTION, primary=True))
+        files.extend(self._get_files(subject, Accessibility.floorplan,
+                                     File.FLOORPLAN))
+        return files
+
+    def _get_files(self, subject, rdf_prop, file_type, primary=False):
         """Get files for given subject and predicate
         Will download the file and store it
         :param subject: subject
@@ -452,6 +462,7 @@ class OxpointsImporter(object):
             image_description = {'location': location,
                                  'file_name': file_name,
                                  'file_type': file_type,
+                                 'primary': primary,
                                  'source_url': url}
             files.append(json.dumps(image_description))
         return files
