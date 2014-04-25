@@ -1,10 +1,11 @@
 import logging
+import json
 import requests
 from lxml import etree
 from requests.exceptions import RequestException
 from datetime import datetime
 
-from moxie.core.cache import cache
+from moxie.core.kv import kv_store
 from moxie.core.service import ProviderException
 from . import TransportRTIProvider
 
@@ -67,17 +68,17 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
             raise ProviderException
         else:
             data = self.parse_html(response.text)
-            cache.set(CACHE_KEY, data)
-            cache.set(CACHE_KEY_UPDATE, datetime.now().isoformat())
+            kv_store.set(CACHE_KEY, json.dumps(data))
+            kv_store.set(CACHE_KEY_UPDATE, datetime.now().isoformat())
 
     def get_data(self):
         """
         Requests the URL and parses the page
         :return dictionary of park and rides availability information
         """
-        data = cache.get(CACHE_KEY)
+        data = kv_store.get(CACHE_KEY)
         if data:
-            return data
+            return json.loads(data)
         else:
             raise ProviderException
 

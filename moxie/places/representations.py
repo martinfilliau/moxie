@@ -1,6 +1,6 @@
 import logging
 
-from flask import url_for, jsonify
+from flask import url_for, jsonify, _app_ctx_stack
 from shapely.wkt import loads as wkt_loads
 from shapely.geometry import Point
 from geojson import dumps as geojson_dumps
@@ -73,6 +73,28 @@ class POIRepresentation(Representation):
         return values
 
 
+class FileRepresentation(Representation):
+
+    def __init__(self, f):
+        self.file = f
+
+    def as_json(self):
+        return jsonify(self.as_dict())
+
+    def as_dict(self):
+        values = {
+            'type': self.file.file_type,
+            'location': self.file.location
+        }
+        if self.file.primary:
+            values['primary'] = True
+        ctx = _app_ctx_stack.top
+        base_url = ctx.app.config.get('STATIC_FILES_URL', None)
+        if base_url:
+            values['url'] = base_url + self.file.location
+        return values
+
+
 class HALPOIRepresentation(POIRepresentation):
 
     def __init__(self, poi, endpoint, add_parent_children_links=True):
@@ -83,6 +105,7 @@ class HALPOIRepresentation(POIRepresentation):
         :return HALRepresentation
         """
         super(HALPOIRepresentation, self).__init__(poi)
+        self.poi = poi
         self.endpoint = endpoint
         self.add_parent_children_links = add_parent_children_links
 
@@ -93,7 +116,10 @@ class HALPOIRepresentation(POIRepresentation):
         base = super(HALPOIRepresentation, self).as_dict()
         representation = HALRepresentation(base)
         representation.add_link('self', url_for(self.endpoint, ident=self.poi.id))
-        
+        if self.poi.files:
+            reps = [FileRepresentation(r).as_dict() for r in self.poi.files]
+            representation.add_embed('files', reps)
+
         try:
             poi_service = POIService.from_context()
         except NoConfiguredService:

@@ -1,4 +1,6 @@
-from moxie.places.domain import POI
+import json
+
+from moxie.places.domain import POI, File
 
 # fields specific to Solr that should be ignored
 SOLR_IGNORE_FIELDS = ['_version_', '_dist_', '_accessibility_has_access_guide_information']
@@ -33,6 +35,10 @@ def doc_to_poi(doc, fields_key="_"):
         poi.alternative_names = doc['alternative_names']
     if 'shape' in doc:
         poi.shape = doc['shape']
+    if 'files' in doc:
+        for fileJSON in doc['files']:
+            fileData = json.loads(fileJSON)
+            poi.files.append(File(**fileData))
     for key, val in doc.items():
         if key.startswith(fields_key) and key not in SOLR_IGNORE_FIELDS:
             if not getattr(poi, 'fields', False):
