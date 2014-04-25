@@ -198,4 +198,5 @@ def git_branch(git_checkout, git_repo, name):
     with cd(git_checkout):
         run('git fetch origin')
         run('git checkout origin/%s' % name)
+        run('git submodule update --init')
         return run('git rev-parse --short HEAD')
