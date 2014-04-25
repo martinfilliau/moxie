@@ -1,7 +1,9 @@
 import logging
 import bz2
 import zipfile
+import requests
 
+from celery import group
 from xml.sax import make_parser
 
 from moxie import create_app
@@ -21,10 +23,41 @@ BLUEPRINT_NAME = 'places'
 def import_all(force_update_all=False):
     app = create_app()
     with app.blueprint_context(BLUEPRINT_NAME):
-        import_osm.delay(force_update=force_update_all)
-        import_oxpoints.delay(force_update=force_update_all)
-        import_naptan.delay(force_update=force_update_all)
-        import_ox_library_data.delay(force_update=force_update_all)
+
+        solr_server = 'http://mox-solr.vm:8080/solr'
+
+        staging_core = 'places_staging'
+        production_core = 'places_production'
+
+        staging_core_url = '{server}/{core}/update'.format(server=solr_server, core=staging_core)
+        production_core_url = '{server}/{core}/update'.format(server=solr_server, core=production_core)
+
+        delete_response = requests.post(staging_core_url, '<delete><query>*:*</query></delete>', headers={'Content-type': 'text/xml'})
+        commit_response = requests.post(staging_core_url, '<commit/>', headers={'Content-type': 'text/xml'})
+
+        if delete_response.ok and commit_response.ok:
+            logger.info("Deleted all documents from staging, launching importers")
+            res = group([import_osm.s(force_update=force_update_all),
+                         import_oxpoints.s(force_update=force_update_all),
+                         import_naptan.s(force_update=force_update_all),
+                         import_ox_library_data.s(force_update=force_update_all)])()
+            results = res.get()
+
+            all_true = True
+
+            for r in results:
+                if not r:
+                    all_true = False
+
+            if all_true:
+                swap_response = requests.get("{server}/admin/cores?action=SWAP&core={new}&other={old}".format(server=solr_server,
+                                                                                                          new=production_core,
+                                                                                                          old=staging_core))
+                logger.info(swap_response.response_code)
+            else:
+                logger.warning("Didn't swap cores because some errors happened")
+        else:
+            logger.info("Staging core not deleted correctly")
 
 
 @celery.task
@@ -48,6 +81,7 @@ def import_osm(url=None, force_update=False):
             parser.close()
         else:
             logger.info("OSM hasn't been imported - resource not loaded")
+    return True
 
 
 @celery.task
@@ -90,6 +124,7 @@ def import_oxpoints(url=None, force_update=False):
             importer.import_data()
         else:
             logger.info("OxPoints hasn't been imported - resource not loaded")
+    return True
 
 
 @celery.task
@@ -105,6 +140,7 @@ def import_naptan(url=None, force_update=False):
             naptan.run()
         else:
             logger.info("Naptan hasn't been imported - resource not loaded")
+    return True
 
 
 @celery.task
@@ -119,3 +155,4 @@ def import_ox_library_data(url=None, force_update=False):
             importer.run()
         else:
             logger.info("OxLibraryData hasn't been imported - resource not loaded")
+    return True
