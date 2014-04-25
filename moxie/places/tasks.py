@@ -43,21 +43,18 @@ def import_all(force_update_all=False):
                          import_ox_library_data.s(force_update=force_update_all)])()
             results = res.get()
 
-            all_true = True
-
-            for r in results:
-                if not r:
-                    all_true = False
-
-            if all_true:
+            if all(results):    # if all results are True
                 swap_response = requests.get("{server}/admin/cores?action=SWAP&core={new}&other={old}".format(server=solr_server,
-                                                                                                          new=production_core,
-                                                                                                          old=staging_core))
-                logger.info(swap_response.response_code)
+                                                                                                              new=production_core,
+                                                                                                              old=staging_core))
+                if swap_response.ok:
+                    logger.info("Cores swapped")
+                else:
+                    logger.warning("Error when swapping core {response}".format(response=swap_response.status_code))
             else:
                 logger.warning("Didn't swap cores because some errors happened")
         else:
-            logger.info("Staging core not deleted correctly")
+            logger.warning("Staging core not deleted correctly, aborting")
 
 
 @celery.task
