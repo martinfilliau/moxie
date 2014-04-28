@@ -24,13 +24,12 @@ def import_all(force_update_all=False):
     app = create_app()
     with app.blueprint_context(BLUEPRINT_NAME):
 
-        solr_server = 'http://mox-solr.vm:8080/solr'
+        solr_server = app.config['PLACES_SOLR_SERVER']
 
-        staging_core = 'places_staging'
-        production_core = 'places_production'
+        staging_core = app.config['PLACES_SOLR_CORE_STAGING']
+        production_core = app.config['PLACES_SOLR_CORE_PRODUCTION']
 
         staging_core_url = '{server}/{core}/update'.format(server=solr_server, core=staging_core)
-        production_core_url = '{server}/{core}/update'.format(server=solr_server, core=production_core)
 
         delete_response = requests.post(staging_core_url, '<delete><query>*:*</query></delete>', headers={'Content-type': 'text/xml'})
         commit_response = requests.post(staging_core_url, '<commit/>', headers={'Content-type': 'text/xml'})
