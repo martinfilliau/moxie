@@ -98,7 +98,7 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
                 identifier = self._CARPARKS.get(name, None)
 
                 if not identifier:
-                    break
+                    continue
 
                 if tr[6].text == 'Faulty':
                     spaces = 0
