@@ -126,5 +126,5 @@ class OxfordParkAndRideProvider(TransportRTIProvider):
 
 if __name__ == '__main__':
     provider = OxfordParkAndRideProvider()
-    carparks = provider.get_data()
-    print carparks
+    response = requests.get(provider.url, timeout=provider.timeout)
+    print provider.parse_html(response.text)
