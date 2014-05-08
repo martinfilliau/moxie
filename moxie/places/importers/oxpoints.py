@@ -179,7 +179,8 @@ class OxpointsImporter(object):
                     # e.g. Sackler Library -- makes sense to merge accessibility data
                     doc.update(self._handle_accessibility_data(main_site))
                     doc.update(self._handle_mapped_properties(main_site))
-                    doc['files'] = self._handle_files(main_site)
+                    if self.static_files_dir:
+                        doc['files'] = self._handle_files(main_site)
 
             if not main_site_id:
                 # Thing and its main site haven't been merged
