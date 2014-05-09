@@ -25,8 +25,8 @@ env.remote_install_dir_api = '/srv/moxie/python-env'
 env.remote_install_dir_front = '/srv/moxie/moxie-front'
 env.restart_app_server = '/srv/moxie/reload-app-server'
 env.remote_git_checkout_api = '/srv/moxie/moxie-api'
+env.remote_git_checkout_front = '/srv/moxie/source-moxie-js'
 env.additional_requirements = '/srv/moxie/requirements.txt'
-
 
 """
 Methods
@@ -97,10 +97,8 @@ def deploy_front(version):
             run('ln -s %s %s' % (file[0].format(path=versioned_path),
                                  file[1].format(path=versioned_path, version=git_hash)))
 
-        if env.environment in ['staging', 'production']:
-            run('ln -s %s %s' % ('index-prod.html', 'index.html'))
-        else:
-            run('ln -s %s %s' % ('index-dev.html', 'index.html'))
+        run('ln -s %s %s' % ('index-prod.html', 'index.html'))
+
     # Pre GZip static (html, css, js) files
     run('sh {0}/gzip_static_files.sh {1}'.format(
         env.remote_git_checkout_front, versioned_path))
@@ -110,7 +108,7 @@ def deploy_front(version):
 
 @task
 def delete_index(core):
-    """Delete all documents from a Solr index 
+    """Delete all documents from a Solr index
     """
     if not core:
         utils.abort('You must specify the core')
