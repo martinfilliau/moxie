@@ -43,7 +43,7 @@ def import_all(force_update_all=False):
                          import_ox_library_data.s(force_update=force_update_all))()
             res.get()
             results = res.collect()
-            logger.warning("Results: %s" % results)
+            logger.warning("Results: %s & %s" % (list(results), all(results)))
 
             if all(results):    # if all results are True
                 swap_response = requests.get("{server}/admin/cores?action=SWAP&core={new}&other={old}".format(server=solr_server,
