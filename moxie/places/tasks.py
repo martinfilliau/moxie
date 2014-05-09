@@ -37,13 +37,12 @@ def import_all(force_update_all=False):
         if delete_response.ok and commit_response.ok:
             logger.info("Deleted all documents from staging, launching importers")
             # Using a chain (seq) so tasks execute in order
-            res = chain([import_osm.s(force_update=force_update_all),
+            res = chain(import_osm.s(force_update=force_update_all),
                          import_oxpoints.s(force_update=force_update_all),
                          import_naptan.s(force_update=force_update_all),
-                         import_ox_library_data.s(force_update=force_update_all)])()
-            results = res.get()
-
-            if all(results):    # if all results are True
+                         import_ox_library_data.s(force_update=force_update_all))()
+            res.get() # Get will block until all tasks complete
+            if all([r[1] for r in res.collect()]):    # if all results are True
                 swap_response = requests.get("{server}/admin/cores?action=SWAP&core={new}&other={old}".format(server=solr_server,
                                                                                                               new=production_core,
                                                                                                               old=staging_core))
@@ -58,7 +57,9 @@ def import_all(force_update_all=False):
 
 
 @celery.task
-def import_osm(url=None, force_update=False):
+def import_osm(previous_result=None, url=None, force_update=False):
+    if previous_result not in [None, True]:
+        return False
     app = create_app()
     with app.blueprint_context(BLUEPRINT_NAME):
         url = url or app.config['OSM_IMPORT_URL']
@@ -82,7 +83,9 @@ def import_osm(url=None, force_update=False):
 
 
 @celery.task
-def import_oxpoints(url=None, force_update=False):
+def import_oxpoints(previous_result=None, url=None, force_update=False):
+    if previous_result not in [None, True]:
+        return False
     app = create_app()
     RDF_MEDIA_TYPE = 'text/turtle'  # default RDF serialization
     with app.blueprint_context(BLUEPRINT_NAME):
@@ -125,7 +128,9 @@ def import_oxpoints(url=None, force_update=False):
 
 
 @celery.task
-def import_naptan(url=None, force_update=False):
+def import_naptan(previous_result=None, url=None, force_update=False):
+    if previous_result not in [None, True]:
+        return False
     app = create_app()
     with app.blueprint_context(BLUEPRINT_NAME):
         url = url or app.config['NAPTAN_IMPORT_URL']
@@ -141,7 +146,9 @@ def import_naptan(url=None, force_update=False):
 
 
 @celery.task
-def import_ox_library_data(url=None, force_update=False):
+def import_ox_library_data(previous_result=None, url=None, force_update=False):
+    if previous_result not in [None, True]:
+        return False
     app = create_app()
     with app.blueprint_context(BLUEPRINT_NAME):
         url = url or app.config['LIBRARY_DATA_IMPORT_URL']
