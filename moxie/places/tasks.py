@@ -3,7 +3,7 @@ import bz2
 import zipfile
 import requests
 
-from celery import group
+from celery import chain
 from xml.sax import make_parser
 
 from moxie import create_app
@@ -36,7 +36,8 @@ def import_all(force_update_all=False):
 
         if delete_response.ok and commit_response.ok:
             logger.info("Deleted all documents from staging, launching importers")
-            res = group([import_osm.s(force_update=force_update_all),
+            # Using a chain (seq) so tasks execute in order
+            res = chain([import_osm.s(force_update=force_update_all),
                          import_oxpoints.s(force_update=force_update_all),
                          import_naptan.s(force_update=force_update_all),
                          import_ox_library_data.s(force_update=force_update_all)])()
