@@ -20,77 +20,29 @@ This script has to be used as follow:
     )
 """
 
-"""
-Environments
-"""
-
-ENVIRONMENTS = ('dev', 'staging', 'production')
-
-
-@task
-def dev():
-    """
-    Configuration for Vagrant VMs (provisioned w/ Puppet)
-    """
-    env.environment = 'dev'
-    env.hosts = ['new-mox.vm']
-    env.user = 'moxie'
-    env.remote_install_dir_api = '/srv/moxie/api.mox'
-    env.remote_git_checkout_api = '/srv/moxie/source-moxie'
-    env.remote_install_dir_front = '/srv/moxie/js.mox'
-    env.remote_git_checkout_front = '/srv/moxie/source-moxie-js'
-    env.additional_requirements = '/srv/moxie/requirements.txt'
-
-
-@task
-def production():
-    """
-    Configuration for api.m.ox.ac.uk
-    """
-    env.environment = 'production'
-    env.hosts = ['api.m.ox.ac.uk']
-    env.user = 'moxie'
-    env.remote_install_dir_api = '/srv/moxie/api.m.ox.ac.uk'
-    env.remote_git_checkout_api = '/srv/moxie/moxie-api'
-    env.remote_install_dir_front = '/srv/moxie/new.m.ox.ac.uk'
-    env.remote_git_checkout_front = '/srv/moxie/moxie-js'
-    env.additional_requirements = '/srv/moxie/requirements.txt'
-
-
-@task
-def staging():
-    """
-    Configuration for new-mox-staging.oucs.ox.ac.uk
-    """
-    env.environment = 'staging'
-    env.hosts = ['new-mox-staging.oucs.ox.ac.uk']
-    env.user = 'moxie'
-    env.remote_install_dir_api = '/srv/moxie/api-mox-staging.oucs.ox.ac.uk'
-    env.remote_git_checkout_api = '/srv/moxie/moxie-api'
-    env.remote_install_dir_front = '/srv/moxie/new-mox-staging.oucs.ox.ac.uk'
-    env.remote_git_checkout_front = '/srv/moxie/moxie-js'
-    env.additional_requirements = '/srv/moxie/requirements.txt'
-
+env.user = 'moxie'
+env.remote_install_dir_api = '/srv/moxie/python-env'
+env.remote_install_dir_front = '/srv/moxie/moxie-front'
+env.restart_app_server = '/srv/moxie/reload-app-server'
+env.remote_git_checkout_api = '/srv/moxie/moxie-api'
+env.remote_git_checkout_front = '/srv/moxie/source-moxie-js'
+env.additional_requirements = '/srv/moxie/requirements.txt'
 
 """
 Methods
 """
 
-
-@task
-def deploy_api(version):
+def deploy_moxie_py(version):
     """
     Deploy mobileoxford (with given version - tag or branch) on defined
     environment in a virtual env
     """
-    require('user', provided_by=ENVIRONMENTS)
-
     if not version:
         utils.abort('You must specify a version (whether branch or tag).')
 
     git_hash = git_branch(env.remote_git_checkout_api, MOXIE_REPO, version)
 
-    versioned_path = '/srv/%s/api-%s-%s' % (env.user, datetime.now().strftime('%Y%m%d%H%M')
+    versioned_path = '/srv/%s/moxie-%s-%s' % (env.user, datetime.now().strftime('%Y%m%d%H%M')
             , git_hash)
 
     createvirtualenv(versioned_path)
@@ -98,12 +50,19 @@ def deploy_api(version):
         install_moxie()
         run('rm -f %s' % env.remote_install_dir_api)
         run('ln -s %s %s' % (versioned_path, env.remote_install_dir_api))
-        run('circusctl stop moxie-celerybeat')
-        run('circusctl start moxie-celerybeat')
-        run('circusctl stop moxie-celery')
-        run('circusctl start moxie-celery')
-        run('circusctl stop moxie-uwsgi')
-        run('circusctl start moxie-uwsgi')
+
+@task
+def deploy_api(version):
+    deploy_moxie_py(version)
+    # uwsgi application server reloads when env.restart_app_server changes
+    run('touch {reload_path}'.format(reload_path=env.restart_app_server))
+
+
+@task
+def deploy_tasks(version):
+    deploy_moxie_py(version)
+    run('supervisorctl restart moxie-celerybeat')
+    run('supervisorctl restart moxie-celery')
 
 
 @task
@@ -111,8 +70,6 @@ def deploy_front(version):
     """
     Deploy the front-end in a versioned folder and does a symlink
     """
-
-    require('user', provided_by=ENVIRONMENTS)
 
     if not version:
         utils.abort('You must specify a version (whether branch or tag).')
@@ -140,10 +97,8 @@ def deploy_front(version):
             run('ln -s %s %s' % (file[0].format(path=versioned_path),
                                  file[1].format(path=versioned_path, version=git_hash)))
 
-        if env.environment in ['staging', 'production']:
-            run('ln -s %s %s' % ('index-prod.html', 'index.html'))
-        else:
-            run('ln -s %s %s' % ('index-dev.html', 'index.html'))
+        run('ln -s %s %s' % ('index-prod.html', 'index.html'))
+
     # Pre GZip static (html, css, js) files
     run('sh {0}/gzip_static_files.sh {1}'.format(
         env.remote_git_checkout_front, versioned_path))
@@ -153,7 +108,7 @@ def deploy_front(version):
 
 @task
 def delete_index(core):
-    """Delete all documents from a Solr index 
+    """Delete all documents from a Solr index
     """
     if not core:
         utils.abort('You must specify the core')
@@ -182,7 +137,6 @@ def createvirtualenv(path):
 
 
 def install_moxie():
-    require('remote_git_checkout_api', provided_by=ENVIRONMENTS)
     with cd(env.remote_git_checkout_api):
         run('pip install . %s' % PIP_OPTIONS)
     run('pip install -r %s %s' % (env.additional_requirements, PIP_OPTIONS))
