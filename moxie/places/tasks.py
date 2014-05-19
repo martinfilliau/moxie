@@ -79,6 +79,7 @@ def import_osm(previous_result=None, url=None, force_update=False):
             parser.close()
         else:
             logger.info("OSM hasn't been imported - resource not loaded")
+            return False
     return True
 
 
@@ -124,6 +125,7 @@ def import_oxpoints(previous_result=None, url=None, force_update=False):
             importer.import_data()
         else:
             logger.info("OxPoints hasn't been imported - resource not loaded")
+            return False
     return True
 
 
@@ -142,6 +144,7 @@ def import_naptan(previous_result=None, url=None, force_update=False):
             naptan.run()
         else:
             logger.info("Naptan hasn't been imported - resource not loaded")
+            return False
     return True
 
 
@@ -159,4 +162,5 @@ def import_ox_library_data(previous_result=None, url=None, force_update=False):
             importer.run()
         else:
             logger.info("OxLibraryData hasn't been imported - resource not loaded")
+            return False
     return True
