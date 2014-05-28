@@ -13,10 +13,14 @@ UNIVERSITY_OF_OXFORD = URIRef("http://oxpoints.oucs.ox.ac.uk/id/00000000")
 
 class OxpointsDescendantsImporter(object):
 
-    def __init__(self, kv, oxpoints_file):
+    def __init__(self, kv, oxpoints_file, rdf_media_type='text/turtle'):
+        """Load the OxPoints graph and iterate through all organisations,
+        adding each organisation and all descendant organisations into the
+        key-value store.
+        """
         self.kv = kv
         graph = Graph()
-        graph.parse(oxpoints_file)
+        graph.parse(oxpoints_file, format=rdf_media_type)
         self.graph = graph
 
     def import_data(self):
@@ -30,6 +34,11 @@ class OxpointsDescendantsImporter(object):
         return desc
 
     def import_subject(self, subject):
+        """For each sub-organisation of the ``subject`` we recursively add all
+        suborganisations to a list of descendants.
+
+        These are placed into JSON and written to the KV Store.
+        """
         descendants = []
         suborgs = self.get_suborgs(subject)
         descendants.extend(map(self.format_descendant, suborgs))
