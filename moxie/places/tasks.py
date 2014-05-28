@@ -10,8 +10,10 @@ from moxie import create_app
 from moxie.worker import celery
 from moxie.core.tasks import get_resource
 from moxie.core.search import searcher
+from moxie.core.kv import kv_store
 from moxie.places.importers.osm import OSMHandler
 from moxie.places.importers.oxpoints import OxpointsImporter
+from moxie.places.importers.oxpoints_descendants import OxpointsDescendantsImporter
 from moxie.places.importers.naptan import NaPTANImporter
 from moxie.places.importers.ox_library_data import OxLibraryDataImporter
 
@@ -38,6 +40,7 @@ def import_all(force_update_all=False):
             logger.info("Deleted all documents from staging, launching importers")
             # Using a chain (seq) so tasks execute in order
             res = chain(import_osm.s(force_update=force_update_all),
+                         import_oxpoints_organisation_descendants.s(force_update=force_update_all),
                          import_oxpoints.s(force_update=force_update_all),
                          import_naptan.s(force_update=force_update_all),
                          import_ox_library_data.s(force_update=force_update_all))()
@@ -79,6 +82,26 @@ def import_osm(previous_result=None, url=None, force_update=False):
             parser.close()
         else:
             logger.info("OSM hasn't been imported - resource not loaded")
+            return False
+    return True
+
+
+@celery.task
+def import_oxpoints_organisation_descendants(previous_result=None, url=None, force_update=False):
+    if previous_result not in [None, True]:
+        return False
+    app = create_app()
+    RDF_MEDIA_TYPE = 'text/turtle'  # default RDF serialization
+    with app.blueprint_context(BLUEPRINT_NAME):
+        url = url or app.config['OXPOINTS_IMPORT_URL']
+        oxpoints = get_resource(url, force_update, media_type=RDF_MEDIA_TYPE)
+        if oxpoints:
+            logger.info("OxPoints Downloaded - Stored here: %s" % oxpoints)
+            oxpoints = open(oxpoints)
+            importer = OxpointsDescendantsImporter(kv_store, oxpoints)
+            importer.import_data()
+        else:
+            logger.info("OxPoints descendants hasn't been imported - resource not loaded")
             return False
     return True
 
