@@ -1,10 +1,12 @@
 import logging
 import urllib
+import json
 
 from itertools import izip
 from functools import partial
 
 from moxie.core.service import Service
+from moxie.core.kv import kv_store
 from moxie.core.search import searcher
 from moxie.places.importers.helpers import get_types_dict
 from moxie.places.solr import doc_to_poi
@@ -177,3 +179,10 @@ class POIService(Service):
         :return dict of types
         """
         return get_types_dict()
+
+    def get_descendants(self, ident):
+        desc = kv_store.get(ident)
+        if desc:
+            return json.loads(desc)
+        else:
+            return None

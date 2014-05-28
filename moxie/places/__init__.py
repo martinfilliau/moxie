@@ -7,7 +7,7 @@ PLACES_CURIE = 'http://moxie.readthedocs.org/en/latest/http_api/places.html#{rel
 
 
 def create_blueprint(blueprint_name, conf):
-    from moxie.places.views import Search, PoiDetail, Types, GeoJsonSearch
+    from moxie.places.views import Search, PoiDetail, Types, GeoJsonSearch, PoiDescendants
     from moxie.transport.views import RTI
 
     places_blueprint = Blueprint(blueprint_name, __name__, **conf)
@@ -25,6 +25,9 @@ def create_blueprint(blueprint_name, conf):
 
     places_blueprint.add_url_rule('/<path:ident>',
             view_func=PoiDetail.as_view('poidetail'))
+
+    places_blueprint.add_url_rule('/<path:ident>/descendants',
+            view_func=PoiDescendants.as_view('poidescendants'))
 
     places_blueprint.add_url_rule('/<path:ident>/rti/<path:rtitype>',
             view_func=RTI.as_view('rti'))
