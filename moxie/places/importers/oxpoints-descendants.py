@@ -2,6 +2,7 @@ import logging
 import json
 
 from rdflib import Graph, URIRef
+from rdflib.namespace import DC
 from moxie.places.importers.rdf_namespaces import Org
 
 logger = logging.getLogger(__name__)
@@ -21,15 +22,22 @@ class OxpointsDescendantsImporter(object):
     def import_data(self):
         self.import_subject(UNIVERSITY_OF_OXFORD)
 
+    def format_descendant(self, subject):
+        desc = {'id': self._get_formatted_oxpoints_id(subject)}
+        title = self.graph.value(subject, DC.title)
+        if title:
+            desc['title'] = title.toPython()
+        return desc
+
     def import_subject(self, subject):
-        uris = set()
+        descendants = []
         suborgs = self.get_suborgs(subject)
-        uris.update(map(self._get_formatted_oxpoints_id, suborgs))
+        descendants.extend(map(self.format_descendant, suborgs))
         for suborg in suborgs:
-            suborg_uris = self.import_subject(suborg)
-            uris.update(suborg_uris)
-        print ("%s: %s" % (subject, uris))
-        return uris
+            suborg_descendants = self.import_subject(suborg)
+            descendants.extend(suborg_descendants)
+        self.kv.set(self._get_formatted_oxpoints_id(subject), json.dumps({'descendants': descendants}))
+        return descendants
 
     def get_suborgs(self, subject):
         return [triple[0] for triple in self.graph.triples((None, Org.subOrganizationOf, subject))]
@@ -48,7 +56,7 @@ def main():
     parser.add_argument('oxpointsfile', type=argparse.FileType('r'))
     ns = parser.parse_args()
     from moxie.core.kv import KVService
-    kv = KVService('redis://localhost:6379/5')
+    kv = KVService('redis://localhost:6379/12')
     importer = OxpointsDescendantsImporter(kv, ns.oxpointsfile)
     importer.import_data()
 
