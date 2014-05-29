@@ -1,5 +1,5 @@
 from datetime import timedelta
-from flask import request, url_for, redirect
+from flask import request, url_for, redirect, json
 from werkzeug.wrappers import BaseResponse
 
 from moxie.core.views import ServiceView, accepts
@@ -138,3 +138,16 @@ class Types(ServiceView):
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, types):
         return HALTypesRepresentation(types, request.url_rule.endpoint).as_json()
+
+
+class PoiOrgDescendants(ServiceView):
+
+    def handle_request(self, ident):
+        poi_service = POIService.from_context()
+        return poi_service.get_organisational_descendants(ident)
+
+    @accepts(HAL_JSON, JSON)
+    def as_hal_json(self, descendants):
+        if not descendants:
+            raise NotFound()
+        return json.jsonify(descendants)
