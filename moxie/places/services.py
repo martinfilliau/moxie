@@ -180,7 +180,7 @@ class POIService(Service):
         """
         return get_types_dict()
 
-    def get_descendants(self, ident):
+    def get_organisational_descendants(self, ident):
         desc = kv_store.get(ident)
         if desc:
             return json.loads(desc)

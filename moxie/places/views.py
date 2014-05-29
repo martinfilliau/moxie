@@ -140,15 +140,14 @@ class Types(ServiceView):
         return HALTypesRepresentation(types, request.url_rule.endpoint).as_json()
 
 
-class PoiDescendants(ServiceView):
+class PoiOrgDescendants(ServiceView):
 
     def handle_request(self, ident):
         poi_service = POIService.from_context()
-        return poi_service.get_descendants(ident)
+        return poi_service.get_organisational_descendants(ident)
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, descendants):
         if not descendants:
             raise NotFound()
         return json.jsonify(descendants)
-
