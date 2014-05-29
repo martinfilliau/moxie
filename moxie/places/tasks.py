@@ -99,7 +99,7 @@ def import_oxpoints_organisation_descendants(previous_result=None, url=None, for
         if oxpoints:
             logger.info("OxPoints Downloaded - Stored here: %s" % oxpoints)
             oxpoints = open(oxpoints)
-            importer = OxpointsDescendantsImporter(kv_store, oxpoints, org.subOrganizationOf,
+            importer = OxpointsDescendantsImporter(kv_store, oxpoints, Org.subOrganizationOf,
                                                    rdf_media_type=RDF_MEDIA_TYPE)
             importer.import_data()
         else:
