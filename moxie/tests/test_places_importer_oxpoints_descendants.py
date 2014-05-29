@@ -3,6 +3,7 @@ import mock
 
 from rdflib import URIRef
 from moxie.places.importers.oxpoints_descendants import OxpointsDescendantsImporter
+from moxie.places.importers.rdf_namespaces import Org
 
 
 class OxpointsDescendantsImporterTestCase(unittest.TestCase):
@@ -11,6 +12,7 @@ class OxpointsDescendantsImporterTestCase(unittest.TestCase):
         self.sample_oxpoints = 'moxie/tests/data/sample-oxpoints.rdf'
         self.mock_kv = mock.Mock()
         self.importer = OxpointsDescendantsImporter(self.mock_kv, self.sample_oxpoints,
+                                                    Org.subOrganizationOf,
                                                     rdf_media_type='xml')
 
     def test_importer_runs(self):

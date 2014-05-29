@@ -16,6 +16,7 @@ from moxie.places.importers.oxpoints import OxpointsImporter
 from moxie.places.importers.oxpoints_descendants import OxpointsDescendantsImporter
 from moxie.places.importers.naptan import NaPTANImporter
 from moxie.places.importers.ox_library_data import OxLibraryDataImporter
+from moxie.places.importers.rdf_namespaces import Org
 
 logger = logging.getLogger(__name__)
 BLUEPRINT_NAME = 'places'
@@ -98,7 +99,8 @@ def import_oxpoints_organisation_descendants(previous_result=None, url=None, for
         if oxpoints:
             logger.info("OxPoints Downloaded - Stored here: %s" % oxpoints)
             oxpoints = open(oxpoints)
-            importer = OxpointsDescendantsImporter(kv_store, oxpoints)
+            importer = OxpointsDescendantsImporter(kv_store, oxpoints, org.subOrganizationOf,
+                                                   rdf_media_type=RDF_MEDIA_TYPE)
             importer.import_data()
         else:
             logger.info("OxPoints descendants hasn't been imported - resource not loaded")
