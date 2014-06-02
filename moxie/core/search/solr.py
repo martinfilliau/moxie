@@ -69,7 +69,7 @@ class SolrSearch(object):
             params=params)
         return SolrSearchResponse(results.json())
 
-    def index(self, document, params=None, count_per_page=200):
+    def index(self, document, params=None, count_per_page=100):
         """Index a list of objects, do paging
         :param document: must be a list of objects to index
         :param params: additional parameters to add
@@ -81,7 +81,7 @@ class SolrSearch(object):
             for i in range(0, len(document), count_per_page):
                 try:
                     self.index_all(document[i:i+count_per_page], params)
-                except SearchServerException:
+                except SearchServerException as e:
                     logger.error("Error in batch indexing", exc_info=True)
                 time.sleep(0.5)
 
@@ -155,7 +155,7 @@ class SolrSearch(object):
                     json = response.json()
                 except:
                     json = None
-                message = "Search server (Solr) exception"
+                message = "Search server (Solr) exception - Status code: %s" % (response.status_code)
                 if json and 'error' in json and 'msg' in json['error']:
                     solr_message = json['error']['msg']
                 else:
