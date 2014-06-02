@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 #TODO managed keys should come from the configuration files
 MANAGED_KEYS = ['name', 'location']
-MERGABLE_KEYS = ['identifiers', 'tags']
+MERGABLE_KEYS = ['identifiers', 'tags', 'type', 'type_name']
 PRECEDENCE_KEY = 'meta_precedence'
 
 
@@ -51,7 +51,7 @@ def prepare_document(doc, results, precedence):
         doc[PRECEDENCE_KEY] = precedence
         return doc
     elif len(results.results) == 1:
-        return merge_docs(doc, results.results[0], precedence)
+        return merge_docs(results.results[0], doc, precedence)
     else:
         raise ACIDException()
 
@@ -96,21 +96,28 @@ def merge_docs(current_doc, new_doc, new_precedence):
 
     @param new_precedence Integer proportional to the reliability of new data
     """
+    logger.warning("Merging documents: %s with %s - New Precedence: %s" % (current_doc['name'], new_doc['name'], new_precedence))
     new_doc = merge_keys(current_doc, new_doc, MERGABLE_KEYS)
-    current_precedence = current_doc.get('meta_precedence', -1)
+    current_precedence = current_doc.get(PRECEDENCE_KEY, -1)
+    logger.warning("Current Precedence: %s, new precedence: %s - %s" % (current_precedence, new_precedence, new_precedence>current_precedence))
     if new_precedence > current_precedence:
-        current_doc['meta_precedence'] = new_precedence
+        current_doc[PRECEDENCE_KEY] = new_precedence
         for key in MANAGED_KEYS:
             if key in new_doc:
                 current_doc[key] = new_doc[key]
+    logger.warning(new_doc.pop('id'))
     current_doc.update(new_doc)
+    logger.warning(current_doc)
     return current_doc
 
 
 def merge_keys(current_doc, new_doc, keys):
     for key in keys:
+        new_val = new_doc.get(key, [])
+        if not isinstance(new_val, list):
+            new_val = [new_val]
         new_doc[key] = merge_values(
-                current_doc.get(key, []), new_doc.get(key, []))
+                current_doc.get(key, []), new_val)
     return new_doc
 
 
