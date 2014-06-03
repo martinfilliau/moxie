@@ -9,16 +9,27 @@ app = flask.Flask(__name__)
 
 class HelpersTestCase(unittest.TestCase):
 
-    current_doc = {
+
+    def setUp(self):
+        self.current_doc = {
             'meta_precedence': 10,
             'name': 'moxie',
             'foo_url': 'https://github.com/ox-it/moxie',
             'identifiers': ['foo:123'],
-            }
-
-    def setUp(self):
+        }
         self.ctx = app.test_request_context()
         self.ctx.push()
+
+    def test_merge_direction(self):
+        """Tests the new document values are copied over to the current doc"""
+        key = 'mykey'
+        original_value = 'some value'
+        current_doc = {key: original_value}
+        new_doc = {key: 'some other value'}
+        merged_doc = merge_docs(current_doc, new_doc, 9)
+        self.assertEqual(merged_doc[key], new_doc[key])
+        # original value changed
+        self.assertNotEqual(merged_doc[key], original_value)
 
     def test_lower_precedence(self):
         new_doc = {'name': 'molly', 'identifiers': ['bar:xyz'],
