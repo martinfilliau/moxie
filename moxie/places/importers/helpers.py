@@ -10,10 +10,18 @@ from moxie.places.importers.loaders import OrderedDictYAMLLoader
 
 logger = logging.getLogger(__name__)
 
-#TODO managed keys should come from the configuration files
+# ID's are used to identify the doc, doens't make sense to merge
+# Solr will complain if this is done as we also return the _version_ of the
+# doc, this must align with the correct "ID" else a 409 (conflict) error is
+# raised by Solr.
+SPECIAL_KEYS = ['id', '_version_']
+
 MANAGED_KEYS = ['name', 'location']
 MERGABLE_KEYS = ['identifiers', 'tags', 'type', 'type_name']
 PRECEDENCE_KEY = 'meta_precedence'
+
+# Keys we don't want to copy over to the merged doc
+PROTECTED_KEYS = MANAGED_KEYS + MERGABLE_KEYS + SPECIAL_KEYS
 
 
 class ACIDException(Exception):
@@ -96,18 +104,18 @@ def merge_docs(current_doc, new_doc, new_precedence):
 
     @param new_precedence Integer proportional to the reliability of new data
     """
-    logger.warning("Merging documents: %s with %s - New Precedence: %s" % (current_doc['name'], new_doc['name'], new_precedence))
     new_doc = merge_keys(current_doc, new_doc, MERGABLE_KEYS)
     current_precedence = current_doc.get(PRECEDENCE_KEY, -1)
-    logger.warning("Current Precedence: %s, new precedence: %s - %s" % (current_precedence, new_precedence, new_precedence>current_precedence))
     if new_precedence > current_precedence:
         current_doc[PRECEDENCE_KEY] = new_precedence
         for key in MANAGED_KEYS:
             if key in new_doc:
                 current_doc[key] = new_doc[key]
-    logger.warning(new_doc.pop('id'))
-    current_doc.update(new_doc)
-    logger.warning(current_doc)
+    # Remove any protected keys, this includes all MERGABLE_KEYS, MANAGED_KEYS
+    # and SPECIAL_KEYS.
+    safe_dict = {key: new_doc[key] for key in set(new_doc.keys()).difference(PROTECTED_KEYS)}
+    # Copy all safe items over to the new (merged) doc
+    current_doc.update(safe_dict)
     return current_doc
 
 
