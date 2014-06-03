@@ -1,8 +1,8 @@
 import unittest
-
+import mock
 import flask
 
-from moxie.places.importers.helpers import merge_docs, merge_keys, merge_values, find_type_name
+from moxie.places.importers.helpers import merge_docs, merge_keys, merge_values, find_type_name, prepare_document
 
 
 app = flask.Flask(__name__)
@@ -19,6 +19,16 @@ class HelpersTestCase(unittest.TestCase):
         }
         self.ctx = app.test_request_context()
         self.ctx.push()
+
+
+    def test_prepare_doc(self):
+        """Relates to issue#62"""
+        mock_results = mock.MagicMock()
+        mock_results.results = [{}]
+        doc = {'type': 'test/foo'}
+        with mock.patch('moxie.places.importers.helpers.merge_docs') as mock_merge_docs:
+            prepare_document(doc, mock_results, 1)
+            mock_merge_docs.assert_called_with(mock_results.results[0], doc, 1)
 
     def test_merge_direction(self):
         """Tests the new document values are copied over to the current doc"""
