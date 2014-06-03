@@ -69,7 +69,7 @@ class SolrSearch(object):
             params=params)
         return SolrSearchResponse(results.json())
 
-    def index(self, document, params=None, count_per_page=100):
+    def index(self, document, params=None, count_per_page=200):
         """Index a list of objects, do paging
         :param document: must be a list of objects to index
         :param params: additional parameters to add
@@ -155,7 +155,7 @@ class SolrSearch(object):
                     json = response.json()
                 except:
                     json = None
-                message = "Search server (Solr) exception - Status code: %s" % (response.status_code)
+                message = "Search server (Solr) exception"
                 if json and 'error' in json and 'msg' in json['error']:
                     solr_message = json['error']['msg']
                 else:
@@ -164,6 +164,7 @@ class SolrSearch(object):
                     'data': {
                         'url': url,
                         'solr_message': solr_message,
+                        'solr_status_code': response.status_code,
                         'params': params,
                         'headers': headers}})
                 raise SearchServerException(solr_message, status_code=response.status_code)
