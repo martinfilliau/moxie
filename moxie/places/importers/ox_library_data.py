@@ -138,7 +138,6 @@ class OxLibraryDataImporter(object):
                 doc[self.prefix_index_key+'policy_postgraduate'] = lib['policies']['postgraduate']
             if 'undergraduate' in lib['policies']:
                 doc[self.prefix_index_key+'policy_undergraduate'] = lib['policies']['undergraduate']
-            doc['type'] = doc['type'][0]    # cannot be a list atm
             return prepare_document(doc, search_results, self.precedence)
         else:
             logger.info('No results for {ident}'.format(ident=ident))

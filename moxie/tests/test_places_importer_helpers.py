@@ -93,11 +93,18 @@ class HelpersTestCase(unittest.TestCase):
         self.assertEqual(set([1, 2, 3, 'a', 'b', 'c']), set(merged))
 
     def test_find_type_name(self):
-        #with app.test_client() as c:
-        self.assertEqual("University car park", find_type_name("/transport/car-park/university"))
-        self.assertEqual("Transport", find_type_name("/transport"))
-        self.assertEqual("Car park", find_type_name("/transport/car-park"))
-        self.assertEqual("Book shops", find_type_name("/amenities/shop/book", singular=False))
+        self.assertEqual(["University car park"], find_type_name(["/transport/car-park/university"]))
+
+    def test_find_type_name_old_api(self):
+        # Old API allows type to be passed as a single element not a list
+        # NOTE: always returns a list
+        self.assertEqual(["University car park"], find_type_name("/transport/car-park/university"))
+
+    def test_find_type_name_plural(self):
+        self.assertEqual(["Book shops"], find_type_name("/amenities/shop/book", singular=False))
+
+    def test_find_multiple_type_names(self):
+        self.assertEqual(["University car park", "Transport"], find_type_name(["/transport/car-park/university", "/transport"]))
 
     def tearDown(self):
         self.ctx.pop()
