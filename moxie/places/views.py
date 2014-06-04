@@ -88,6 +88,8 @@ class PoiDetail(ServiceView):
     """Details of one or multiple POIs separated by a comma
     """
 
+    expires = timedelta(hours=1)
+
     def handle_request(self, ident):
         if ident.endswith('/'):
             ident = ident.split('/')[0]
