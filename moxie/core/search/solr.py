@@ -164,6 +164,7 @@ class SolrSearch(object):
                     'data': {
                         'url': url,
                         'solr_message': solr_message,
+                        'solr_status_code': response.status_code,
                         'params': params,
                         'headers': headers}})
                 raise SearchServerException(solr_message, status_code=response.status_code)
