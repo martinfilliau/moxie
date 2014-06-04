@@ -49,7 +49,7 @@ class TestInheritedServiceView(TestServiceView):
 
 
 class TestExpiringView(TestServiceView):
-    expires = timedelta(seconds=10)
+    expires = timedelta(days=1, minutes=23)
 
 
 class TestFixedExpiringView(TestServiceView):
@@ -114,7 +114,7 @@ class ServiceViewTestCase(unittest.TestCase):
                 expected = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
                 self.assertEqual(rv.headers.get('Expires'), expected)
                 self.assertEqual(rv.headers.get('Cache-Control'), 'max-age={seconds}'
-                                    .format(seconds=TestExpiringView.expires.seconds))
+                                    .format(seconds=int(TestExpiringView.expires.total_seconds())))
 
     def test_expires_datetime(self):
         with self.app.test_client() as c:
