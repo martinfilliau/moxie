@@ -64,19 +64,27 @@ def prepare_document(doc, results, precedence):
         raise ACIDException()
 
 
-def find_type_name(type_path, singular=True):
+def find_type_name(type_paths, singular=True):
     """
     Find the name of the type from its path
-    @param type_path: a path e.g. /transport/bus-stop
+    @param type_paths: a list of types a single POI might be e.g.
+                       ["/amenity/hospital", "/university/site"] (e.g. JR)
+                       also supports being passed a single type_path e.g.
+                       "/transport/bus-stop"
     @param singular: optional parameter whether it should be a singular or plural name
-    @return: name (singular or plural) (e.g. "Bus stop")
+    @return: list of names (singular or plural) e.g. ["Hospital", "Site"]
     """
-    to_find = type_path.split("/")[-1]
-    node = find_type(types, type_path, to_find, 1)
-    if singular:
-        return node["name_singular"]
-    else:
-        return node["name_plural"]
+    if not isinstance(type_paths, list):
+        type_paths = [type_paths]
+    type_names = []
+    for type_path in type_paths:
+        to_find = type_path.split("/")[-1]
+        node = find_type(types, type_path, to_find, 1)
+        if singular:
+            type_names.append(node["name_singular"])
+        else:
+            type_names.append(node["name_plural"])
+    return type_names
 
 
 def find_type(data, path, to_find, count):
