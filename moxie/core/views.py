@@ -98,7 +98,7 @@ class ServiceView(View):
                 now = datetime.utcnow()
                 now += self.expires
                 h['Expires'] = http_date(now)
-                h['Cache-Control'] = 'max-age={seconds}'.format(seconds=self.expires.seconds)
+                h['Cache-Control'] = 'max-age={seconds}'.format(seconds=int(self.expires.total_seconds()))
             elif isinstance(self.expires, dt.datetime):
                 difference = self.expires - datetime.utcnow()
                 h['Expires'] = http_date(self.expires)
