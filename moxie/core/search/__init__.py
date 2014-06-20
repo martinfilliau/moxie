@@ -59,6 +59,9 @@ class SearchService(Service):
         """
         return self._backend.search(query, fq=fq, start=start, count=count)
 
+    def suggest(self, query, fq=None):
+        return self._backend.suggest(query, fq=fq)
+
     def get_by_ids(self, ids):
         return self._backend.get_by_ids(ids)
 
