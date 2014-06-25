@@ -179,6 +179,10 @@ Endpoint to search and retrieve information about places.
     :type q: string
     :query type_exact: filter by exact types (as opposite to the type parameter), you can have this parameter multiple times.
     :type type_exact: string
+    :query start: first result to retrieve
+    :type start: int
+    :query count: number of results to retrieve
+    :type count: int
 
     :statuscode 200: query found
     :statuscode 400: Bad request (e.g. missing parameters)

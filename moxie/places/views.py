@@ -162,10 +162,12 @@ class Suggest(ServiceView):
     def handle_request(self):
         self.query = request.args.get('q').encode('utf8')
         self.types_exact = request.args.getlist('type_exact')
+        self.start = request.args.get('start', 0)
+        self.count = request.args.get('count', 20)
 
         poi_service = POIService.from_context()
         
-        return poi_service.suggest_pois(self.query, self.types_exact)
+        return poi_service.suggest_pois(self.query, self.types_exact, self.start, self.count)
         
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, suggestions):

@@ -50,7 +50,9 @@ class SolrSearch(object):
                 data=data, headers=headers)
         return SolrSearchResponse(results.json())
 
-    def suggest(self, query, fq=None):
+    def suggest(self, query, fq=None, start=0, count=10):
+        query['start'] = str(start)
+        query['rows'] = str(count)
         if fq:
             query['fq'] = fq
         results = self.connection(self.methods['suggest'],
