@@ -171,4 +171,6 @@ class Suggest(ServiceView):
         
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, suggestions):
-        return POIsRepresentation(self.query, suggestions, len(suggestions)).as_json()
+        return HALPOISearchRepresentation(
+            self.query, suggestions, self.start, self.count, len(suggestions),
+            request.url_rule.endpoint, type_exact=self.types_exact).as_json()
