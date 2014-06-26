@@ -7,7 +7,7 @@ from moxie.core.representations import JSON, HAL_JSON
 from moxie.core.exceptions import BadRequest, NotFound
 from moxie.places.representations import (HALPOISearchRepresentation, HALPOIsRepresentation,
                                           HALPOIRepresentation, HALTypesRepresentation,
-                                          GeoJsonPointsRepresentation)
+                                          GeoJsonPointsRepresentation, POIsRepresentation)
 from .services import POIService
 
 
@@ -153,3 +153,24 @@ class PoiOrgDescendants(ServiceView):
         if not descendants:
             raise NotFound()
         return json.jsonify(descendants)
+        
+        
+class Suggest(ServiceView):
+    """Suggest POIs from name and alternative names
+    """
+
+    def handle_request(self):
+        self.query = request.args.get('q').encode('utf8')
+        self.types_exact = request.args.getlist('type_exact')
+        self.start = request.args.get('start', 0)
+        self.count = request.args.get('count', 20)
+
+        poi_service = POIService.from_context()
+        
+        return poi_service.suggest_pois(self.query, self.types_exact, self.start, self.count)
+        
+    @accepts(HAL_JSON, JSON)
+    def as_hal_json(self, suggestions):
+        return HALPOISearchRepresentation(
+            self.query, suggestions, self.start, self.count, len(suggestions),
+            request.url_rule.endpoint, type_exact=self.types_exact).as_json()

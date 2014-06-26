@@ -124,3 +124,66 @@ Endpoint to search and retrieve information about places.
     Display a list of types.
 
     :statuscode 200: display a list of types
+
+.. http:get:: /places/suggest
+
+    Suggest places based on name and alternative names.
+    Results can be filtered by specific types.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+		GET /places/suggest?q=sec&type=/university/department HTTP/1.1
+		Host: api.m.ox.ac.uk
+		Accept: application/json
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+        {
+          "query": "sec", 
+          "results": [
+            {
+              "address": "Wellington Square OX1 2JD", 
+              "distance": 0, 
+              "id": "oxpoints:23233517", 
+              "name": "Council Secretariat", 
+              "type": [
+                "/university/department"
+              ], 
+              "type_name": [
+                "Department"
+              ]
+            }, 
+            {
+              "address": "South Parks Road OX1 3RQ", 
+              "distance": 0, 
+              "id": "oxpoints:58455192", 
+              "name": "Oxford University Security Services", 
+              "type": [
+                "/university/department"
+              ], 
+              "type_name": [
+                "Department"
+              ]
+            }
+          ], 
+          "size": 2
+        }
+
+    :query q: what to search for
+    :type q: string
+    :query type_exact: filter by exact types (as opposite to the type parameter), you can have this parameter multiple times.
+    :type type_exact: string
+    :query start: first result to retrieve
+    :type start: int
+    :query count: number of results to retrieve
+    :type count: int
+
+    :statuscode 200: query found
+    :statuscode 400: Bad request (e.g. missing parameters)
+    :statuscode 503: Service not available
