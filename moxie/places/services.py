@@ -186,3 +186,19 @@ class POIService(Service):
             return json.loads(desc)
         else:
             return None
+
+    def suggest_pois(self, query, types_exact, start, count):
+        """Suggest POIs based on name
+        :param query: full-text query
+        :param types_exact: list of type to filter
+        :return list of documents
+        """
+        filter_queries = []
+        q = {'q': query,
+             'fl': 'id,name,type,type_name,address'}
+        # TODO no need to return the full response?
+        if types_exact:
+            filter_queries.append('type_exact:({types})'.format(types=" OR ".join('"{t}"'.format(t=t)
+                                                                              for t in types_exact)))
+        response = searcher.suggest(q, fq=filter_queries, start=start, count=count)
+        return [doc_to_poi(r) for r in response.results]

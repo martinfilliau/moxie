@@ -50,11 +50,14 @@ class SolrSearch(object):
                 data=data, headers=headers)
         return SolrSearchResponse(results.json())
 
-    def suggest(self, query):
-        params = {'q': query}
+    def suggest(self, query, fq=None, start=0, count=10):
+        query['start'] = str(start)
+        query['rows'] = str(count)
+        if fq:
+            query['fq'] = fq
         results = self.connection(self.methods['suggest'],
-            params=params)
-        return results
+                params=query)
+        return SolrSearchResponse(results.json())
 
     def get_by_ids(self, document_ids):
         """Get documents by their ID (using the real-time GET feature of Solr 4).
