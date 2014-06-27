@@ -100,7 +100,8 @@ class SolrSearch(object):
 
     def commit(self):
         return self.connection(self.methods['update'],
-                params={'commit': 'true'})
+                               timeout=60,
+                               params={'commit': 'true'})
 
     def clear_index(self):
         """WARNING: This action will delete *all* documents in your index.
