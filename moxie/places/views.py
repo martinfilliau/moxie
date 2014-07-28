@@ -36,6 +36,7 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
         self.facet_fields = arguments.poplist('facet')
+        self.in_oxford = arguments.pop('inoxford', False)   # filter only results "in oxford"
         self.other_args = arguments
 
         additional_filters = ["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems()]
@@ -60,6 +61,10 @@ class Search(ServiceView):
             'types_exact': self.types_exact,
             'filter_queries': additional_filters
         }
+
+        if self.in_oxford:
+            kwargs['geofilter_centre'] = [51.7531, -1.2584]
+            kwargs['geofilter_distance'] = 5
 
         # Only pass `facets` if we have user-speciified facets
         if self.facet_fields:

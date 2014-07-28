@@ -54,7 +54,7 @@ class POIService(Service):
 
     def get_results(self, original_query, location, start, count,
                     pois_type=None, types_exact=None, filter_queries=None,
-                    facets=(TYPE_FACET,)):
+                    facets=(TYPE_FACET,), geofilter_centre=None, geofilter_distance=None):
         """Search POIs
         :param original_query: fts query
         :param location: latitude,longitude
@@ -63,6 +63,8 @@ class POIService(Service):
         :param pois_type: (optional) type from the hierarchy of types to look for
         :param types_exact: (optional) exact types to search for (cannot be used in combination of type atm)
         :param facets: (optional) list of fields to be returned as facets defaults to the `type` facet.
+        :param geofilter_centre: (optional) lat/lon of the centre to start geofiltering
+        :param geofilter_distance: (optional) distance in km to geofilter
         :return list of domain objects (POIs), total size of results and facets on type
         """
         filter_queries = filter_queries or []
@@ -93,6 +95,11 @@ class POIService(Service):
         else:
             # no full-text query provided, sorting by name
             q['sort'] = 'name_sort asc'
+
+        if geofilter_centre and geofilter_distance:
+            filter_queries.append("{{!geofilt sfield=location pt={lat},{lon} d={distance}}}".format(lat=geofilter_centre[0],
+                                                                                                  lon=geofilter_centre[1],
+                                                                                                  distance=geofilter_distance))
 
         # TODO make a better filter query to handle having type and types_exact at the same time
         if pois_type:
