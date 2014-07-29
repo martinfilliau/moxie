@@ -1,5 +1,5 @@
 from datetime import timedelta
-from flask import request, url_for, redirect, json
+from flask import request, url_for, redirect, json, current_app
 from werkzeug.wrappers import BaseResponse
 
 from moxie.core.views import ServiceView, accepts
@@ -36,6 +36,7 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
         self.facet_fields = arguments.poplist('facet')
+        self.in_oxford = arguments.pop('inoxford', False)   # filter only results "in oxford"
         self.other_args = arguments
 
         additional_filters = ["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems()]
@@ -60,6 +61,10 @@ class Search(ServiceView):
             'types_exact': self.types_exact,
             'filter_queries': additional_filters
         }
+
+        if self.in_oxford:
+            kwargs['geofilter_centre'] = current_app.config.get('PLACES_GEOFILTER_CENTRE', [51.7531, -1.2584])
+            kwargs['geofilter_distance'] = current_app.config.get('PLACES_GEOFILTER_DISTANCE', 10)
 
         # Only pass `facets` if we have user-speciified facets
         if self.facet_fields:

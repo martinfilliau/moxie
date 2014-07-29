@@ -111,6 +111,8 @@ Endpoint to search and retrieve information about places.
     :type lat: string
     :query lon: longitude (as an alternative to the Geo-Position header if spatial search required)
     :type lon: string
+    :query inoxford: only get results within Oxford (value will be ignored)
+    :type inoxford: string
 
     If no geolocation is passed (either by header or query parameters), and if there is no full-text search (``q`` parameter),
     the result will be sorted by name (A-Z).
