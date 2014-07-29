@@ -36,7 +36,6 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
         self.facet_fields = arguments.poplist('facet')
-        # TODO False ==> "false" string query param to boolean
         self.in_oxford = arguments.pop('inoxford', False)   # filter only results "in oxford"
         self.other_args = arguments
 
