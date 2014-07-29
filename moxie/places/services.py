@@ -98,8 +98,8 @@ class POIService(Service):
 
         if geofilter_centre and geofilter_distance:
             filter_queries.append("{{!geofilt sfield=location pt={lat},{lon} d={distance}}}".format(lat=geofilter_centre[0],
-                                                                                                  lon=geofilter_centre[1],
-                                                                                                  distance=geofilter_distance))
+                                                                                                    lon=geofilter_centre[1],
+                                                                                                    distance=geofilter_distance))
 
         # TODO make a better filter query to handle having type and types_exact at the same time
         if pois_type:
