@@ -45,7 +45,7 @@ def import_all(force_update_all=False):
                          import_oxpoints.s(force_update=force_update_all),
                          import_naptan.s(force_update=force_update_all),
                          import_ox_library_data.s(force_update=force_update_all))()
-            res.get() # Get will block until all tasks complete
+            res.get()   # Get will block until all tasks complete
             if all([r[1] for r in res.collect()]):    # if all results are True
                 swap_response = requests.get("{server}/admin/cores?action=SWAP&core={new}&other={old}".format(server=solr_server,
                                                                                                               new=production_core,
