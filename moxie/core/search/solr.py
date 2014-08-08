@@ -82,10 +82,7 @@ class SolrSearch(object):
             self.index_all(document, params)
         else:
             for i in range(0, len(document), count_per_page):
-                try:
-                    self.index_all(document[i:i+count_per_page], params)
-                except SearchServerException:
-                    logger.error("Error in batch indexing", exc_info=True)
+                self.index_all(document[i:i+count_per_page], params)
                 time.sleep(0.5)
 
     def index_all(self, document, params=None):
