@@ -72,7 +72,7 @@ class SolrSearch(object):
             params=params)
         return SolrSearchResponse(results.json())
 
-    def index(self, document, params=None, count_per_page=200):
+    def index(self, document, params=None, count_per_page=100):
         """Index a list of objects, do paging
         :param document: must be a list of objects to index
         :param params: additional parameters to add
@@ -83,7 +83,7 @@ class SolrSearch(object):
         else:
             for i in range(0, len(document), count_per_page):
                 self.index_all(document[i:i+count_per_page], params)
-                time.sleep(0.5)
+                time.sleep(1)
 
     def index_all(self, document, params=None):
         """Index a list of objects
@@ -93,11 +93,11 @@ class SolrSearch(object):
         data = json.dumps(document)
         headers = {'Content-Type': self.content_types[self.return_type]}
         self.connection(self.methods['update'], params=params,
-                        data=data, headers=headers, timeout=60)
+                        data=data, headers=headers, timeout=120)
 
     def commit(self):
         return self.connection(self.methods['update'],
-                               timeout=60,
+                               timeout=120,
                                params={'commit': 'true'})
 
     def clear_index(self):
