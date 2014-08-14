@@ -317,9 +317,10 @@ class OxpointsImporter(object):
     def _handle_shape(self, subject):
         shape = self.graph.value(subject, Geometry.extent)
         if shape:
-            return {'shape': self.graph.value(shape, Geometry.asWKT).toPython()}
-        else:
-            return {}
+            wkt_shape = self.graph.value(shape, Geometry.asWKT)
+            if wkt_shape:
+                return {'shape': wkt_shape.toPython()}
+        return {}
 
     def _handle_alternative_names(self, subject):
         alternative_names = set()
