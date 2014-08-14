@@ -52,12 +52,14 @@ def import_all(force_update_all=False):
                                                                                                               old=staging_core))
                 if swap_response.ok:
                     logger.info("Cores swapped")
+                    return True
                 else:
                     logger.warning("Error when swapping core {response}".format(response=swap_response.status_code))
             else:
                 logger.warning("Didn't swap cores because some errors happened")
         else:
             logger.warning("Staging core not deleted correctly, aborting")
+        return False
 
 
 @celery.task
