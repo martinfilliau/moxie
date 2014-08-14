@@ -4,6 +4,7 @@ import rdflib
 import json
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS, RDFS
+from shapely.wkt import loads as wkt_loads
 
 from moxie.core.tasks import download_file
 from moxie.places.domain import File
@@ -323,7 +324,15 @@ class OxpointsImporter(object):
         if shape:
             wkt_shape = self.graph.value(shape, Geometry.asWKT)
             if wkt_shape:
-                return {'shape': wkt_shape.toPython()}
+                wkt = wkt_shape.toPython()
+                try:
+                    # make sure that it is a correct WKT shape
+                    result = wkt_loads(wkt)
+                    if not result:
+                        raise ValueError("No WKT shape")
+                    return {'shape': wkt}
+                except:
+                    logger.warning("Unable to detect a valid WKT shape", exc_info=True)
         return {}
 
     def _handle_alternative_names(self, subject):
