@@ -247,7 +247,11 @@ class OxpointsImporter(object):
             for obj in self.graph.objects(subject, oxp_property):
                 val = obj
                 if identifier == 'osm':
-                    val = val.split('/')[1]
+                    try:
+                        val = val.split('/')[1]
+                    except IndexError:
+                        logger.error('OSM identifier {value} malformed'.format(value=val))
+                        continue
                 ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
         return ids
 
