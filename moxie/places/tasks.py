@@ -41,10 +41,10 @@ def import_all(force_update_all=False):
             logger.info("Deleted all documents from staging, launching importers")
             # Using a chain (seq) so tasks execute in order
             res = chain(import_osm.s(force_update=force_update_all),
-                         import_oxpoints_organisation_descendants.s(force_update=force_update_all),
-                         import_oxpoints.s(force_update=force_update_all),
-                         import_naptan.s(force_update=force_update_all),
-                         import_ox_library_data.s(force_update=force_update_all))()
+                        import_oxpoints_organisation_descendants.s(force_update=force_update_all),
+                        import_oxpoints.s(force_update=force_update_all),
+                        import_naptan.s(force_update=force_update_all),
+                        import_ox_library_data.s(force_update=force_update_all))()
             res.get()   # Get will block until all tasks complete
             if all([r[1] for r in res.collect()]):    # if all results are True
                 swap_response = requests.get("{server}/admin/cores?action=SWAP&core={new}&other={old}".format(server=solr_server,
