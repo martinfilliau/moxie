@@ -214,6 +214,8 @@ class OxpointsImporter(object):
 
         doc.update(self._handle_mapped_properties(subject))
 
+        doc.update(self._handle_courses(subject))
+
         if '_accessibility_has_access_guide_information' not in doc:
             # no access info from main site, attempt to get from the thing directly
             doc.update(self._handle_accessibility_data(subject))
@@ -427,6 +429,13 @@ class OxpointsImporter(object):
                     doc['_social_facebook'] = account
                 elif 'twitter.com' in account:
                     doc['_social_twitter'] = account
+        return doc
+
+    def _handle_courses(self, subject):
+        doc = {}
+        courses = self._get_values_for_property(subject, AdHocDataOx.firstYearTeachingForCourseWithTitle)
+        if courses:
+            doc['_courses_name'] = courses
         return doc
 
     def _handle_address_data(self, subject):
