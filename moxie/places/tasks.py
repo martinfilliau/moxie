@@ -40,8 +40,7 @@ def import_all(force_update_all=False):
         if delete_response.ok and commit_response.ok:
             logger.info("Deleted all documents from staging, launching importers")
             # Using a chain (seq) so tasks execute in order
-            chain(import_oxpoints_organisation_descendants.s(force_update=force_update_all),
-                  import_oxpoints.s(force_update=force_update_all),
+            chain(import_oxpoints.s(force_update=force_update_all),
                   import_osm.s(force_update=force_update_all),
                   import_naptan.s(force_update=force_update_all),
                   import_ox_library_data.s(force_update=force_update_all),
