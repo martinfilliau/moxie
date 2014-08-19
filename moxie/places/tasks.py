@@ -136,6 +136,14 @@ def import_oxpoints(previous_result=None, url=None, force_update=False):
         else:
             oxpoints_accessibility = None
 
+        if 'OXPOINTS_COURSES_LOCATIONS_URL' in app.config:
+            url_courses = app.config['OXPOINTS_COURSES_LOCATIONS_URL']
+            oxpoints_courses = get_resource(url_courses,
+                                            force_update=force_update,
+                                            media_type=RDF_MEDIA_TYPE)
+        else:
+            oxpoints_courses = None
+
         if oxpoints:
             logger.info("OxPoints Downloaded - Stored here: %s" % oxpoints)
             oxpoints = open(oxpoints)
@@ -148,7 +156,14 @@ def import_oxpoints(previous_result=None, url=None, force_update=False):
                 accessibility = open(oxpoints_accessibility)
             else:
                 accessibility = None
-            importer = OxpointsImporter(searcher, 10, oxpoints, shapes, accessibility, static_files_dir)
+
+            if oxpoints_courses:
+                courses = open(oxpoints_courses)
+            else:
+                courses = None
+
+            importer = OxpointsImporter(searcher, 10, oxpoints, shapes, accessibility, courses, static_files_dir,
+                                        rdf_media_type=RDF_MEDIA_TYPE)
             importer.import_data()
         else:
             logger.info("OxPoints hasn't been imported - resource not loaded")

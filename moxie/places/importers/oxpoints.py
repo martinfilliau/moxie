@@ -84,16 +84,19 @@ OXPOINTS_IDENTIFIERS = {
 
 class OxpointsImporter(object):
 
-
-    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, accessibility_file, static_files_dir, identifier_key='identifiers'):
+    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, accessibility_file, courses_file,
+                 static_files_dir, identifier_key='identifiers', rdf_media_type='text/turtle'):
+        """Import OxPoints and extensions graph
+        """
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
         graph = rdflib.Graph()
-        RDF_MEDIA_TYPE = 'text/turtle'  # default RDF serialization
-        graph.parse(oxpoints_file, format=RDF_MEDIA_TYPE)
-        graph.parse(shapes_file, format=RDF_MEDIA_TYPE)
-        graph.parse(accessibility_file, format=RDF_MEDIA_TYPE)
+        graph.parse(oxpoints_file, format=rdf_media_type)
+        graph.parse(shapes_file, format=rdf_media_type)
+        graph.parse(accessibility_file, format=rdf_media_type)
+        if courses_file:
+            graph.parse(courses_file, format=rdf_media_type)
         self.graph = graph
         self.merged_things = []     # list of building/sites merged into departments
         if not static_files_dir:
