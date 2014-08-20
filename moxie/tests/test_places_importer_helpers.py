@@ -4,11 +4,10 @@ import flask
 
 from moxie.places.importers.helpers import merge_docs, merge_keys, merge_values, find_type_name, prepare_document
 
-
 app = flask.Flask(__name__)
 
-class HelpersTestCase(unittest.TestCase):
 
+class HelpersTestCase(unittest.TestCase):
 
     def setUp(self):
         self.current_doc = {
@@ -19,7 +18,6 @@ class HelpersTestCase(unittest.TestCase):
         }
         self.ctx = app.test_request_context()
         self.ctx.push()
-
 
     def test_prepare_doc(self):
         """Relates to issue#62"""
