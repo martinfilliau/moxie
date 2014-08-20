@@ -72,7 +72,7 @@ class SolrSearch(object):
             params=params)
         return SolrSearchResponse(results.json())
 
-    def index(self, document, params=None, count_per_page=100):
+    def index(self, document, params=None, count_per_page=200):
         """Index a list of objects, do paging
         :param document: must be a list of objects to index
         :param params: additional parameters to add
@@ -83,7 +83,6 @@ class SolrSearch(object):
         else:
             for i in range(0, len(document), count_per_page):
                 self.index_all(document[i:i+count_per_page], params)
-                time.sleep(1)
 
     def index_all(self, document, params=None):
         """Index a list of objects
