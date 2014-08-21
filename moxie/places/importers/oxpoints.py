@@ -84,16 +84,19 @@ OXPOINTS_IDENTIFIERS = {
 
 class OxpointsImporter(object):
 
-
-    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, accessibility_file, static_files_dir, identifier_key='identifiers'):
+    def __init__(self, indexer, precedence, oxpoints_file, shapes_file, accessibility_file, courses_file,
+                 static_files_dir, identifier_key='identifiers', rdf_media_type='text/turtle'):
+        """Import OxPoints and extensions graph
+        """
         self.indexer = indexer
         self.precedence = precedence
         self.identifier_key = identifier_key
         graph = rdflib.Graph()
-        RDF_MEDIA_TYPE = 'text/turtle'  # default RDF serialization
-        graph.parse(oxpoints_file, format=RDF_MEDIA_TYPE)
-        graph.parse(shapes_file, format=RDF_MEDIA_TYPE)
-        graph.parse(accessibility_file, format=RDF_MEDIA_TYPE)
+        graph.parse(oxpoints_file, format=rdf_media_type)
+        graph.parse(shapes_file, format=rdf_media_type)
+        graph.parse(accessibility_file, format=rdf_media_type)
+        if courses_file:
+            graph.parse(courses_file, format=rdf_media_type)
         self.graph = graph
         self.merged_things = []     # list of building/sites merged into departments
         if not static_files_dir:
@@ -210,6 +213,8 @@ class OxpointsImporter(object):
         doc.update(self._handle_social_accounts(subject))
 
         doc.update(self._handle_mapped_properties(subject))
+
+        doc.update(self._handle_courses(subject))
 
         if '_accessibility_has_access_guide_information' not in doc:
             # no access info from main site, attempt to get from the thing directly
@@ -424,6 +429,13 @@ class OxpointsImporter(object):
                     doc['_social_facebook'] = account
                 elif 'twitter.com' in account:
                     doc['_social_twitter'] = account
+        return doc
+
+    def _handle_courses(self, subject):
+        doc = {}
+        courses = self._get_values_for_property(subject, AdHocDataOx.firstYearTeachingForCourseWithTitle)
+        if courses:
+            doc['_courses_name'] = courses
         return doc
 
     def _handle_address_data(self, subject):

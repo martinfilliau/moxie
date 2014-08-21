@@ -8,6 +8,7 @@ flask:
     OXPOINTS_IMPORT_URL: 'https://data.ox.ac.uk/graph/oxpoints/data'
     OXPOINTS_SHAPES_URL: 'https://data.ox.ac.uk/graph/oxpoints-extents/data'
     OXPOINTS_ACCESSIBILITY_URL: 'https://data.ox.ac.uk/graph/access-guide/at-a-glance'
+    OXPOINTS_COURSES_LOCATIONS_URL: 'https://data.ox.ac.uk/graph/access-guide/course-locations'
     NAPTAN_IMPORT_URL: 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
     PLACES_GEOFILTER_CENTRE: [51.7531, -1.2584]
     PLACES_GEOFILTER_DISTANCE: 12
