@@ -49,14 +49,14 @@ def cache_etag_location(url, etag, location):
     return success
 
 
-def get_resource(url, force_update=False, media_type=None):
+def get_resource(url, force_update=False, media_type=None, timeout=60):
     etag, location = get_cached_etag_location(url)
     headers = {}
     if etag and not force_update:
         headers['if-none-match'] = etag
     if media_type:
         headers['Accept'] = media_type
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=timeout)
     etag = response.headers.get('etag', None)
     if response.status_code == 304:
         # Unchanged
