@@ -208,6 +208,8 @@ class OxpointsImporter(object):
 
         doc.update(self._handle_alternative_names(subject))
 
+        doc.update(self._handle_hidden_names(subject))
+
         doc.update(self._handle_address_data(subject))
 
         doc.update(self._handle_social_accounts(subject))
@@ -343,12 +345,21 @@ class OxpointsImporter(object):
     def _handle_alternative_names(self, subject):
         alternative_names = set()
         alternative_names.update(self._get_values_for_property(subject, SKOS.altLabel))
-        alternative_names.update(self._get_values_for_property(subject, SKOS.hiddenLabel))
-        alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingName))
-        alternative_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingContents))
+        alternative_names.update(self._get_values_for_property(subject, OpenVocab.prefAcronym))
         alt_names = list(alternative_names)
         if alt_names:
             return {'alternative_names': alt_names}
+        else:
+            return {}
+
+    def _handle_hidden_names(self, subject):
+        hidden_names = set()
+        hidden_names.update(self._get_values_for_property(subject, SKOS.hiddenLabel))
+        hidden_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingName))
+        hidden_names.update(self._get_values_for_property(subject, AdHocDataOx.accessGuideBuildingContents))
+        hidden_names = list(hidden_names)
+        if hidden_names:
+            return {'hidden_names': hidden_names}
         else:
             return {}
 
