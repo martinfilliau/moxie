@@ -29,11 +29,12 @@ class POIService(Service):
     INBOUND = 1
     OUTBOUND = 2
 
-    def __init__(self, prefix_keys="_"):
+    def __init__(self, prefix_keys="_", identifiers_field='identifiers'):
         """POI service
         :param prefix_keys: prefix used for keys not being in the schema of the search engine
         """
         self.prefix_keys = prefix_keys
+        self.identifiers_field = identifiers_field
 
     def _transform_arg(self, arg, direction=1):
         for transform in self.key_transforms:
@@ -83,9 +84,9 @@ class POIService(Service):
         if ' ' not in query:
             # only search in identifiers if it's a single
             # word query
-            SEARCH_FIELDS['identifiers'] = 0.8
+            SEARCH_FIELDS[self.identifiers_field] = 0.8
             query = "{original} OR {field}:*\:{value}".format(original=query,
-                                                              field='identifiers',
+                                                              field=self.identifiers_field,
                                                               value=query)
 
         qfs = []
@@ -205,7 +206,7 @@ class POIService(Service):
         :param ident: identifier to lookup
         :return POI or None if no result
         """
-        response = searcher.search_for_ids("identifiers", idents)
+        response = searcher.search_for_ids(self.identifiers_field, idents)
         if response.results:
             return [doc_to_poi(result, self.prefix_keys) for result in response.results]
         else:
