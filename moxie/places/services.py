@@ -78,8 +78,15 @@ class POIService(Service):
             'tags': 0.5,
             '_courses_name': 0.7,
             'hidden_names': 0.7,
-            'identifiers': 0.8,
         }
+
+        if ' ' not in query:
+            # only search in identifiers if it's a single
+            # word query
+            SEARCH_FIELDS['identifiers'] = 0.8
+            query = "{original} OR {field}:*\:{value}".format(original=query,
+                                                              field='identifiers',
+                                                              value=query)
 
         qfs = []
         for field_name, boost in SEARCH_FIELDS.iteritems():
@@ -88,8 +95,6 @@ class POIService(Service):
                                                    boost=boost))
             else:
                 qfs.append(field_name)
-
-        #TODO if single word also search in identifiers... should have high boost score
 
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
