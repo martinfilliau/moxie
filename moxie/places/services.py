@@ -81,6 +81,14 @@ class POIService(Service):
             'hidden_names': 0.7,
         }
 
+        # boost the score of documents in cases where all of the terms
+        # in the "q" param appear in close proximity
+        PHRASE_FIELDS = {
+            'name': 1.0,
+            'alternative_names': 0.9,
+            'hidden_names': 0.9,
+        }
+
         if ' ' not in query and query:
             # only search in identifiers if it's a single
             # word query
@@ -89,21 +97,14 @@ class POIService(Service):
                                                               field=self.identifiers_field,
                                                               value=query)
 
-        qfs = []
-        for field_name, boost in SEARCH_FIELDS.iteritems():
-            if boost:
-                qfs.append("{name}^{boost}".format(name=field_name,
-                                                   boost=boost))
-            else:
-                qfs.append(field_name)
-
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
-             'pf': query,
              'q': query,
              'q.alt': self.default_search,
-             'qf': ' '.join(qfs)
+             'qf': self._build_parameter_value(SEARCH_FIELDS),
+             'pf': self._build_parameter_value(PHRASE_FIELDS)
              }
+
         internal_facets = []
         if facets:
             internal_facets = self._args_to_internal(facets)
@@ -240,3 +241,17 @@ class POIService(Service):
                                                                               for t in types_exact)))
         response = searcher.suggest(q, fq=filter_queries, start=start, count=count)
         return [doc_to_poi(r) for r in response.results]
+
+    def _build_parameter_value(self, d):
+        """Build a solr string for fields/boost
+        :param d: dict
+        :return string
+        """
+        qfs = []
+        for field_name, boost in d.iteritems():
+            if boost:
+                qfs.append("{name}^{boost}".format(name=field_name,
+                                                   boost=boost))
+            else:
+                qfs.append(field_name)
+        return ' '.join(qfs)
