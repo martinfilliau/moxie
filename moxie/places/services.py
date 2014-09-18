@@ -76,7 +76,7 @@ class POIService(Service):
             'alternative_names': 0.8,
             'type_name': 0.3,
             'tags': 0.5,
-            '_courses_*': 0.7,
+            '_courses_name': 0.7,
             'hidden_names': 0.7,
             'identifiers': 0.8,
         }
