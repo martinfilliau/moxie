@@ -69,11 +69,34 @@ class POIService(Service):
         """
         filter_queries = filter_queries or []
         filter_queries = self._args_to_internal(filter_queries)
-        query = original_query or self.default_search
+        query = original_query or ''
+
+        SEARCH_FIELDS = {
+            'name': None,
+            'alternative_names': 0.8,
+            'type_name': 0.3,
+            'tags': 0.5,
+            '_courses_*': 0.7,
+            'hidden_names': 0.7,
+            'identifiers': 0.8,
+        }
+
+        qfs = []
+        for field_name, boost in SEARCH_FIELDS.iteritems():
+            if boost:
+                qfs.append("{name}^{boost}".format(name=field_name,
+                                                   boost=boost))
+            else:
+                qfs.append(field_name)
+
+        #TODO if single word also search in identifiers... should have high boost score
+
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
              'pf': query,
              'q': query,
+             'q.alt': self.default_search,
+             'qf': ' '.join(qfs)
              }
         internal_facets = []
         if facets:
