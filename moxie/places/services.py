@@ -81,7 +81,7 @@ class POIService(Service):
             'hidden_names': 0.7,
         }
 
-        if ' ' not in query:
+        if ' ' not in query and query:
             # only search in identifiers if it's a single
             # word query
             SEARCH_FIELDS[self.identifiers_field] = 0.8
