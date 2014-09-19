@@ -10,7 +10,7 @@ from moxie.core.tasks import download_file
 from moxie.places.domain import File
 from moxie.places.importers.rdf_namespaces import (
     Geo, Geometry, OxPoints, VCard, Org, OpenVocab, LinkingYou, Accessibility,
-    AdHocDataOx, EntranceOpeningType, ParkingType, Rooms, Levelness)
+    AdHocDataOx, EntranceOpeningType, ParkingType, Rooms, Levelness, ContactMethod)
 from moxie.places.importers.helpers import prepare_document
 
 logger = logging.getLogger(__name__)
@@ -48,6 +48,7 @@ MAPPED_PROPERTIES = [
     ('_accessibility_has_lifts_to_all_floors', Accessibility.liftsToAllFloors),
     ('_accessibility_number_of_accessible_toilets', Accessibility.numberOfAccessibleToilets),
     ('_accessibility_number_of_floors', Accessibility.numberOfFloors),
+    ('_accessibility_number_of_disabled_parking_spaces', Accessibility.numberOfDisabledParkingSpaces),
     ('_accessibility_opening_hours_closed', AdHocDataOx.openingHoursClosed),
     ('_accessibility_opening_hours_term_time', AdHocDataOx.openingHoursTermTime),
     ('_accessibility_opening_hours_vacation', AdHocDataOx.openingHoursVacation),
@@ -69,6 +70,12 @@ ENTRANCE_LEVEL_TYPES = {
 PARKING_TYPES = {
     ParkingType.BlueBadge: 'Blue Badge',
     ParkingType.PayAndDisplay: 'Pay and Display'
+}
+
+CONTACT_METHOD = {
+    ContactMethod.None: 'None',
+    ContactMethod.Doorbell: 'Doorbell',
+    ContactMethod.Intercom: 'Intercom'
 }
 
 OXPOINTS_IDENTIFIERS = {
@@ -420,6 +427,14 @@ class OxpointsImporter(object):
                     logger.warning('No entrance level type value found for {entrance_type}'.format(entrance_type=levelness.toPython()))
                 else:
                     values['_accessibility_primary_entrance_levelness'] = levelness_value
+
+        contact_method = self.graph.value(subject, Accessibility.contactMethodFromEntranceToReception)
+        if contact_method:
+            contact_method_value = CONTACT_METHOD.get(contact_method)
+            if not contact_method_value:
+                logger.warning('No contact method from entrance to reception found for {cm}'.format(cm=contact_method.toPython()))
+            else:
+                values['_accessibility_contact_method_from_entrance_to_reception'] = contact_method_value
 
         accessible_entrance = self.graph.value(subject, Rooms.entrance)
         if accessible_entrance:
