@@ -107,37 +107,30 @@ def get_nav_links(endpoint, start, count, size, **kwargs):
     :return dict of navigation links
     """
     start, count, size = int(start), int(count), int(size)
-    nav = {'curies': [{
-        'name': 'hl',
-        'href': RELATIONS_CURIE,
-        'templated': True,
-        }],
-    }
+    nav = {'curies': [{'name': 'hl',
+                       'href': RELATIONS_CURIE,
+                       'templated': True}]}
 
     if 'facet' in kwargs:
-        nav['curies'].append({
-            'name': 'facet',
-            'href': FACET_CURIE,
-        })
+        nav['curies'].append({'name': 'facet',
+                              'href': FACET_CURIE})
 
     if size-count > 0:
         nav['hl:last'] = {
-                   'href': url_for(endpoint, start=size-count, count=count, **kwargs)
-        }
+            'href': url_for(endpoint, start=size-count, count=count, **kwargs)}
     else:
         nav['hl:last'] = {
-            'href': url_for(endpoint, count=count, **kwargs)
-        }
+            'href': url_for(endpoint, count=count, **kwargs)}
+
     nav['hl:first'] = {
-               'href': url_for(endpoint, count=count, **kwargs)
-           }
+        'href': url_for(endpoint, count=count, **kwargs)}
 
     if size > start+count:
         nav['hl:next'] = {
-            'href': url_for(endpoint, start=start+count, count=count, **kwargs)
-        }
+            'href': url_for(endpoint, start=start+count, count=count, **kwargs)}
+
     if start > 0 and size >= start+count:
         nav['hl:prev'] = {
-            'href': url_for(endpoint, start=start-count, count=count, **kwargs)
-        }
+            'href': url_for(endpoint, start=start-count, count=count, **kwargs)}
+
     return nav
