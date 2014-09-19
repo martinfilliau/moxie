@@ -84,6 +84,14 @@ class RepresentationsTestCase(unittest.TestCase):
             self.assertEqual(len(links['curies']), 1)
             self.assertEqual(links3['curies'][0]['name'], 'hl')
 
+            links4 = get_nav_links('a', 20, 20, 30)
+            self.assertEqual(links4['hl:first']['href'], '/?count=20')
+            self.assertEqual(links4['hl:last']['href'], '/?count=20&start=10')
+            self.assertFalse('hl:next' in links4)
+            self.assertEqual(links4['hl:prev']['href'], '/?count=20&start=0')
+            self.assertEqual(len(links4['curies']), 1)
+            self.assertEqual(links4['curies'][0]['name'], 'hl')
+
     def test_nav_links_with_facet(self):
         app.add_url_rule('/', endpoint='a')
         with app.test_request_context():
