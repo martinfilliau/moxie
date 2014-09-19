@@ -38,6 +38,7 @@ class POIRepresentation(Representation):
             'distance': self.poi.distance,
             'type': self.poi.type,
             'type_name': self.poi.type_name,
+            'identifiers': self.poi.identifiers
         }
         if self.poi.short_name:
             values['short_name'] = self.poi.short_name
