@@ -46,16 +46,6 @@ class Search(ServiceView):
 
         poi_service = POIService.from_context()
 
-        # Try to match the query to identifiers if it's a one word query,
-        # useful when querying for bus stop naptan number
-        # TODO pass the location to have the distance from the point
-        if ' ' not in self.query:
-            unique_doc = poi_service.search_places_by_identifiers(['*:{id}'.format(id=self.query)])
-            if unique_doc:
-                self.size = 1
-                self.facets = None
-                return unique_doc
-
         kwargs = {
             'pois_type': self.type,
             'types_exact': self.types_exact,

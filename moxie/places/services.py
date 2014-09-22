@@ -29,11 +29,12 @@ class POIService(Service):
     INBOUND = 1
     OUTBOUND = 2
 
-    def __init__(self, prefix_keys="_"):
+    def __init__(self, prefix_keys="_", identifiers_field='identifiers'):
         """POI service
         :param prefix_keys: prefix used for keys not being in the schema of the search engine
         """
         self.prefix_keys = prefix_keys
+        self.identifiers_field = identifiers_field
 
     def _transform_arg(self, arg, direction=1):
         for transform in self.key_transforms:
@@ -69,12 +70,41 @@ class POIService(Service):
         """
         filter_queries = filter_queries or []
         filter_queries = self._args_to_internal(filter_queries)
-        query = original_query or self.default_search
+        query = original_query or ''
+
+        SEARCH_FIELDS = {
+            'name': None,
+            'alternative_names': 0.8,
+            'type_name': 0.3,
+            'tags': 0.5,
+            '_courses_name': 0.7,
+            'hidden_names': 0.7,
+        }
+
+        # boost the score of documents in cases where all of the terms
+        # in the "q" param appear in close proximity
+        PHRASE_FIELDS = {
+            'name': 1.0,
+            'alternative_names': 0.9,
+            'hidden_names': 0.9,
+        }
+
+        if ' ' not in query and query:
+            # only search in identifiers if it's a single
+            # word query
+            SEARCH_FIELDS[self.identifiers_field] = 0.8
+            query = "{original} OR {field}:*\:{value}".format(original=query,
+                                                              field=self.identifiers_field,
+                                                              value=query)
+
         q = {'defType': 'edismax',
              'spellcheck.collate': 'true',
-             'pf': query,
              'q': query,
+             'q.alt': self.default_search,
+             'qf': self._build_parameter_value(SEARCH_FIELDS),
+             'pf': self._build_parameter_value(PHRASE_FIELDS)
              }
+
         internal_facets = []
         if facets:
             internal_facets = self._args_to_internal(facets)
@@ -177,7 +207,7 @@ class POIService(Service):
         :param ident: identifier to lookup
         :return POI or None if no result
         """
-        response = searcher.search_for_ids("identifiers", idents)
+        response = searcher.search_for_ids(self.identifiers_field, idents)
         if response.results:
             return [doc_to_poi(result, self.prefix_keys) for result in response.results]
         else:
@@ -211,3 +241,17 @@ class POIService(Service):
                                                                               for t in types_exact)))
         response = searcher.suggest(q, fq=filter_queries, start=start, count=count)
         return [doc_to_poi(r) for r in response.results]
+
+    def _build_parameter_value(self, d):
+        """Build a solr string for fields/boost
+        :param d: dict
+        :return string
+        """
+        qfs = []
+        for field_name, boost in d.iteritems():
+            if boost:
+                qfs.append("{name}^{boost}".format(name=field_name,
+                                                   boost=boost))
+            else:
+                qfs.append(field_name)
+        return ' '.join(qfs)
