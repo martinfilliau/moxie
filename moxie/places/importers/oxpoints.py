@@ -26,7 +26,7 @@ MAPPED_TYPES = [
     (OxPoints.Library, '/university/library'),
     (OxPoints.SubLibrary, '/university/sub-library'),
     (OxPoints.Division, '/university/division'),
-    (OxPoints.Museum, '/leisure/museum'),
+    (OxPoints.Museum, ['/leisure/museum', '/university/museum']),
     (OxPoints.CarPark, '/transport/car-park/university'),
     (OxPoints.Room, '/university/room'),
     (OxPoints.Hall, '/university/hall'),
