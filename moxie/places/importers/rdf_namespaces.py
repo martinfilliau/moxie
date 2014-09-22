@@ -28,3 +28,7 @@ EntranceOpeningType = Namespace(PURL_ACCESSIBILITY+'entranceOpeningType/')
 ParkingType = Namespace(PURL_ACCESSIBILITY+'parkingType/')
 
 Levelness = Namespace(PURL_ACCESSIBILITY+'levelness/')
+
+ContactMethodFromEntranceToReception = Namespace(PURL_ACCESSIBILITY+'contactMethodFromEntranceToReception/')
+
+ContactMethod = Namespace(PURL_ACCESSIBILITY+'contactMethod/')
