@@ -113,6 +113,10 @@ Endpoint to search and retrieve information about places.
     :type lon: string
     :query inoxford: only get results within Oxford (value will be ignored)
     :type inoxford: string
+    :query university_only: only get results from the University (value will be ignored)
+    :type university_only: string
+    :query exclude_university: exclude results from the University (value will be ignored) i.e. only amenities, transport...
+    :type exclude_university: string
 
     If no geolocation is passed (either by header or query parameters), and if there is no full-text search (``q`` parameter),
     the result will be sorted by name (A-Z).

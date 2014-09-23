@@ -36,13 +36,26 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
         self.facet_fields = arguments.poplist('facet')
+        self.other_args = arguments.copy()
         self.in_oxford = arguments.pop('inoxford', False)   # filter only results "in oxford"
-        self.other_args = arguments
-
-        additional_filters = ["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems()]
 
         if self.type and self.types_exact:
             raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
+
+        additional_filters = []
+
+        university_only = arguments.pop('university_only', False)
+        exclude_university = arguments.pop('exclude_university', False)
+
+        if university_only and exclude_university:
+            raise BadRequest("Parameters 'university_only' and 'exclude_university' are mutually exclusive.")
+
+        if university_only:
+            additional_filters.append("type_exact:\/university*")
+        if exclude_university:
+            additional_filters.append("-type_exact:\/university*")
+
+        additional_filters.extend(["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems()])
 
         poi_service = POIService.from_context()
 
