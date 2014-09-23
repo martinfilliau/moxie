@@ -36,8 +36,8 @@ class Search(ServiceView):
         self.start = arguments.pop('start', 0)
         self.count = arguments.pop('count', 35)
         self.facet_fields = arguments.poplist('facet')
+        self.other_args = arguments.copy()
         self.in_oxford = arguments.pop('inoxford', False)   # filter only results "in oxford"
-        self.other_args = arguments
 
         if self.type and self.types_exact:
             raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
