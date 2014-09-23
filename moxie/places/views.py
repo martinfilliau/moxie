@@ -47,6 +47,9 @@ class Search(ServiceView):
         university_only = arguments.pop('university_only', False)
         exclude_university = arguments.pop('exclude_university', False)
 
+        if university_only and exclude_university:
+            raise BadRequest("Parameters 'university_only' and 'exclude_university' are mutually exclusive.")
+
         if university_only:
             additional_filters.append("type_exact:\/university*")
         if exclude_university:
