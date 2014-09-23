@@ -59,7 +59,7 @@ class Search(ServiceView):
         kwargs = {
             'pois_type': self.type,
             'types_exact': self.types_exact,
-            'filter_queries': additional_filters,
+            'filter_queries': additional_filters
         }
 
         if self.in_oxford:
