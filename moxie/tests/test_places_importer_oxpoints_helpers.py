@@ -15,9 +15,11 @@ class OxpointsDescendantsImporterTestCase(unittest.TestCase):
         building = URIRef('http://oxpoints/building1')
         building2 = URIRef('http://oxpoints/building2')
         room = URIRef('http://oxpoints/room1')
+        university = URIRef('http://oxpoints/university')
 
         self.graph.add([sublibrary, Org.subOrganizationOf, library])
         self.graph.add([library, OxPoints.primaryPlace, building])
+        self.graph.add([library, Org.subOrganizationOf, university])
         self.graph.add([building, Geo.lat, Literal(51)])
         self.graph.add([building, Geo.long, Literal(12)])
         self.graph.add([building2, Geo.lat, Literal(52)])

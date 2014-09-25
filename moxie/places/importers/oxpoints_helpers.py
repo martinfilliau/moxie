@@ -16,10 +16,6 @@ def find_location(graph, subject, depth=1, max_depth=10):
             lat = graph.value(subject, Geo.lat).toPython()
             lon = graph.value(subject, Geo.long).toPython()
             return lat, lon
-        elif (subject, Org.subOrganizationOf, None) in graph:
-            org = graph.value(subject, Org.subOrganizationOf)
-            depth += 1
-            return find_location(graph, org, depth=depth)
         elif (subject, OxPoints.primaryPlace, None) in graph:
             place = graph.value(subject, OxPoints.primaryPlace)
             depth += 1
@@ -28,4 +24,8 @@ def find_location(graph, subject, depth=1, max_depth=10):
             within = graph.value(subject, SpatialRelations.within)
             depth += 1
             return find_location(graph, within, depth=depth)
+        elif (subject, Org.subOrganizationOf, None) in graph:
+            org = graph.value(subject, Org.subOrganizationOf)
+            depth += 1
+            return find_location(graph, org, depth=depth)
     return None
