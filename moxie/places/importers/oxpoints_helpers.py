@@ -1,4 +1,4 @@
-from moxie.places.importers.rdf_namespaces import Geo, OxPoints, Org
+from moxie.places.importers.rdf_namespaces import Geo, OxPoints, Org, SpatialRelations
 
 
 def find_location(graph, subject):
@@ -19,5 +19,8 @@ def find_location(graph, subject):
     elif (subject, OxPoints.primaryPlace, None) in graph:
         place = graph.value(subject, OxPoints.primaryPlace)
         return find_location(graph, place)
+    elif (subject, SpatialRelations.within, None) in graph:
+        within = graph.value(subject, SpatialRelations.within)
+        return find_location(graph, within)
     else:
         return None
