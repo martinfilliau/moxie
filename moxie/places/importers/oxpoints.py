@@ -483,11 +483,19 @@ class OxpointsImporter(object):
 
     def _handle_files(self, subject):
         files = []
+        access_guide_image = self._get_files(subject, AdHocDataOx.accessGuideImage,
+                                             File.DEPICTION, primary=True)
+
+        if access_guide_image:
+            files.extend(access_guide_image)
+            files.extend(self._get_files(subject, FOAF.img, File.DEPICTION))
+        else:
+            # the access guide image is the primary one, but if there is no
+            # access guide image, use the OxPoints img
+            files.extend(self._get_files(subject, FOAF.img, File.DEPICTION, primary=True))
+
         files.extend(self._get_files(subject, FOAF.depiction, File.DEPICTION))
         files.extend(self._get_files(subject, FOAF.logo, File.LOGO))
-        # Accessibility files
-        files.extend(self._get_files(subject, AdHocDataOx.accessGuideImage,
-                                     File.DEPICTION, primary=True))
         files.extend(self._get_files(subject, Accessibility.floorplan,
                                      File.FLOORPLAN))
         return files
