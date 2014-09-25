@@ -55,7 +55,7 @@ class Search(ServiceView):
         if exclude_university:
             additional_filters.append("-type_exact:\/university*")
 
-        additional_filters.extend(["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems()])
+        additional_filters.extend(["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems(multi=True)])
 
         poi_service = POIService.from_context()
 
