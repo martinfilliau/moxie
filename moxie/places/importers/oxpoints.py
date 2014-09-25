@@ -12,6 +12,7 @@ from moxie.places.importers.rdf_namespaces import (
     Geo, Geometry, OxPoints, VCard, Org, OpenVocab, LinkingYou, Accessibility,
     AdHocDataOx, EntranceOpeningType, ParkingType, Rooms, Levelness, ContactMethod)
 from moxie.places.importers.helpers import prepare_document
+from moxie.places.importers.oxpoints_helpers import find_location
 
 logger = logging.getLogger(__name__)
 
@@ -198,18 +199,15 @@ class OxpointsImporter(object):
                 # adding a relation between the site and the thing
                 parent_of.add(self._get_formatted_oxpoints_id(main_site))
 
-            doc.update(self._handle_location(main_site))
             doc.update(self._handle_shape(main_site))
         else:
             # else attempt to get a location from the actual thing
             doc.update(self._handle_shape(subject))
-            doc.update(self._handle_location(subject))
 
-            if 'location' not in doc:
-                # try to find location from the parent element
-                parent = self.graph.value(subject, DCTERMS.isPartOf)
-                if parent:
-                    doc.update(self._handle_location(parent))
+        location = find_location(self.graph, subject)
+        if location:
+            lat, lon = location
+            doc['location'] = "{lat},{lon}".format(lat=lat, lon=lon)
 
         doc[self.identifier_key] = list(ids)
 
@@ -328,14 +326,6 @@ class OxpointsImporter(object):
         """
         return 'oxpoints{separator}{ident}'.format(separator=separator,
                                                    ident=uri_ref.toPython().rsplit('/')[-1])
-
-    def _handle_location(self, subject):
-        if (subject, Geo.lat, None) in self.graph and (subject, Geo.long, None) in self.graph:
-            lat = self.graph.value(subject, Geo.lat).toPython()
-            lon = self.graph.value(subject, Geo.long).toPython()
-            return {'location': "{lat},{lon}".format(lat=lat, lon=lon)}
-        else:
-            return {}
 
     def _handle_shape(self, subject):
         shape = self.graph.value(subject, Geometry.extent)
