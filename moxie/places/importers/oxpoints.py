@@ -265,7 +265,11 @@ class OxpointsImporter(object):
                     try:
                         val = val.split('/')[1]
                     except IndexError:
-                        logger.error('OSM identifier {value} malformed'.format(value=val))
+                        logger.error('OSM identifier {value} malformed'.format(value=val), extra={
+                            'data': {
+                                'oxpoints_subject': subject.toPython()
+                            }
+                        })
                         continue
                 ids.append('{0}:{1}'.format(identifier, val.replace(' ', '-').replace('/', '-')))
         return ids
@@ -346,7 +350,11 @@ class OxpointsImporter(object):
                         raise ValueError("No WKT shape")
                     return {'shape': wkt}
                 except:
-                    logger.warning("Unable to detect a valid WKT shape", exc_info=True)
+                    logger.warning("Unable to detect a valid WKT shape", exc_info=True, extra={
+                        'data': {
+                            'oxpoints_subject': subject.toPython()
+                        }
+                    })
         return {}
 
     def _handle_alternative_names(self, subject):
@@ -417,14 +425,24 @@ class OxpointsImporter(object):
             if entrance_opening_type:
                 entrance_value = ENTRANCE_OPENING_TYPES.get(entrance_opening_type)
                 if not entrance_value:
-                    logger.warning('No entrance opening type value found for {entrance_type}'.format(entrance_type=entrance_opening_type.toPython()))
+                    logger.warning('No entrance opening type value found for {entrance_type}'.format(entrance_type=entrance_opening_type.toPython()),
+                                   extra={
+                                       'data': {
+                                           'oxpoints_subject': subject.toPython()
+                                       }
+                                   })
                 else:
                     values['_accessibility_primary_entrance_opening_type'] = entrance_value
             levelness = self.graph.value(primary_entrance, Accessibility.levelness)
             if levelness:
                 levelness_value = ENTRANCE_LEVEL_TYPES.get(levelness)
                 if not levelness_value:
-                    logger.warning('No entrance level type value found for {entrance_type}'.format(entrance_type=levelness.toPython()))
+                    logger.warning('No entrance level type value found for {entrance_type}'.format(entrance_type=levelness.toPython()),
+                                   extra={
+                                       'data': {
+                                           'oxpoints_subject': subject.toPython()
+                                       }
+                                   })
                 else:
                     values['_accessibility_primary_entrance_levelness'] = levelness_value
 
@@ -432,7 +450,12 @@ class OxpointsImporter(object):
         if contact_method:
             contact_method_value = CONTACT_METHOD.get(contact_method)
             if not contact_method_value:
-                logger.warning('No contact method from entrance to reception found for {cm}'.format(cm=contact_method.toPython()))
+                logger.warning('No contact method from entrance to reception found for {cm}'.format(cm=contact_method.toPython()),
+                               extra={
+                                   'data': {
+                                       'oxpoints_subject': subject.toPython()
+                                       }
+                               })
             else:
                 values['_accessibility_contact_method_from_entrance_to_reception'] = contact_method_value
 
