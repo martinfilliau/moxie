@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # raised by Solr.
 SPECIAL_KEYS = ['id', '_version_']
 
-MANAGED_KEYS = ['name', 'location']
+MANAGED_KEYS = ['name', 'name_sort', 'location']
 MERGABLE_KEYS = ['identifiers', 'tags', 'type', 'type_name']
 PRECEDENCE_KEY = 'meta_precedence'
 
