@@ -2,8 +2,9 @@ import unittest
 
 import rdflib
 from rdflib import URIRef, Literal
-from moxie.places.importers.oxpoints_helpers import find_location
-from moxie.places.importers.rdf_namespaces import Org, OxPoints, Geo, SpatialRelations
+from moxie.places.importers.oxpoints_helpers import find_location, find_shape
+from moxie.places.importers.rdf_namespaces import (Org, OxPoints, Geo,
+                                                   SpatialRelations, Geometry)
 
 
 class OxpointsHelpersImporterTestCase(unittest.TestCase):
@@ -16,12 +17,16 @@ class OxpointsHelpersImporterTestCase(unittest.TestCase):
         building2 = URIRef('http://oxpoints/building2')
         room = URIRef('http://oxpoints/room1')
         university = URIRef('http://oxpoints/university')
+        building_shape = URIRef('http://oxpoints/buildings1/shape')
+        self.building_shape_value = "POLYGON ((-1.2674743 51.753493400000004 0,-1.2663551 51.753694199999998 0,-1.2662089 51.7533819 0,-1.2672244 51.753199600000002 0,-1.2672569 51.753269199999998 0,-1.2673606 51.7532506 0,-1.2674743 51.753493400000004 0))"
 
         self.graph.add([sublibrary, Org.subOrganizationOf, library])
         self.graph.add([library, OxPoints.primaryPlace, building])
         self.graph.add([library, Org.subOrganizationOf, university])
         self.graph.add([building, Geo.lat, Literal(51)])
         self.graph.add([building, Geo.long, Literal(12)])
+        self.graph.add([building2, Geometry.extent, building_shape])
+        self.graph.add([building_shape, Geometry.asWKT, Literal(self.building_shape_value)])
         self.graph.add([building2, Geo.lat, Literal(52)])
         self.graph.add([building2, Geo.long, Literal(13)])
         self.graph.add([room, SpatialRelations.within, building2])
@@ -39,3 +44,12 @@ class OxpointsHelpersImporterTestCase(unittest.TestCase):
         lat, lon = result
         self.assertEqual(lat, 52)
         self.assertEqual(lon, 13)
+
+    def test_shape(self):
+        result = find_shape(self.graph, URIRef('http://oxpoints/room1'))
+        self.assertIsNotNone(result)
+        self.assertEqual(self.building_shape_value, result)
+
+    def test_no_shape(self):
+        result = find_shape(self.graph, URIRef('http://oxpoints/sublibrary1'))
+        self.assertIsNone(result)

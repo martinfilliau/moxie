@@ -4,18 +4,16 @@ import rdflib
 import json
 from rdflib import RDF
 from rdflib.namespace import DC, SKOS, FOAF, DCTERMS, RDFS
-from shapely.wkt import loads as wkt_loads
 
 from moxie.core.tasks import download_file
 from moxie.places.domain import File
 from moxie.places.importers.rdf_namespaces import (
-    Geo, Geometry, OxPoints, VCard, Org, OpenVocab, LinkingYou, Accessibility,
+    OxPoints, VCard, Org, OpenVocab, LinkingYou, Accessibility,
     AdHocDataOx, EntranceOpeningType, ParkingType, Rooms, Levelness, ContactMethod)
 from moxie.places.importers.helpers import prepare_document
-from moxie.places.importers.oxpoints_helpers import find_location
+from moxie.places.importers.oxpoints_helpers import find_location, find_shape
 
 logger = logging.getLogger(__name__)
-
 
 
 MAPPED_TYPES = [
@@ -199,15 +197,14 @@ class OxpointsImporter(object):
                 # adding a relation between the site and the thing
                 parent_of.add(self._get_formatted_oxpoints_id(main_site))
 
-            doc.update(self._handle_shape(main_site))
-        else:
-            # else attempt to get a location from the actual thing
-            doc.update(self._handle_shape(subject))
-
         location = find_location(self.graph, subject)
         if location:
             lat, lon = location
             doc['location'] = "{lat},{lon}".format(lat=lat, lon=lon)
+
+        shape = find_shape(self.graph, subject)
+        if shape:
+            doc['shape'] = shape
 
         doc[self.identifier_key] = list(ids)
 
@@ -326,26 +323,6 @@ class OxpointsImporter(object):
         """
         return 'oxpoints{separator}{ident}'.format(separator=separator,
                                                    ident=uri_ref.toPython().rsplit('/')[-1])
-
-    def _handle_shape(self, subject):
-        shape = self.graph.value(subject, Geometry.extent)
-        if shape:
-            wkt_shape = self.graph.value(shape, Geometry.asWKT)
-            if wkt_shape:
-                wkt = wkt_shape.toPython()
-                try:
-                    # make sure that it is a correct WKT shape
-                    result = wkt_loads(wkt)
-                    if not result:
-                        raise ValueError("No WKT shape")
-                    return {'shape': wkt}
-                except:
-                    logger.warning("Unable to detect a valid WKT shape", exc_info=True, extra={
-                        'data': {
-                            'oxpoints_subject': subject.toPython()
-                        }
-                    })
-        return {}
 
     def _handle_alternative_names(self, subject):
         alternative_names = set()
