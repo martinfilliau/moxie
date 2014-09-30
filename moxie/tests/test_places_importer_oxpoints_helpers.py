@@ -6,7 +6,7 @@ from moxie.places.importers.oxpoints_helpers import find_location
 from moxie.places.importers.rdf_namespaces import Org, OxPoints, Geo, SpatialRelations
 
 
-class OxpointsDescendantsImporterTestCase(unittest.TestCase):
+class OxpointsHelpersImporterTestCase(unittest.TestCase):
 
     def setUp(self):
         self.graph = rdflib.Graph()
