@@ -36,6 +36,13 @@ def find_location(graph, subject, depth=1, max_depth=10):
 
 
 def find_shape(graph, subject, depth=1, max_depth=10):
+    """Find shape for a given subject
+    :param graph: graph to browse
+    :param subject: subject to be used
+    :param depth: actual depth
+    :param max_depth: maximum depth
+    :return string or None
+    """
     if depth <= max_depth:
         depth += 1
         shape = graph.value(subject, Geometry.extent)
@@ -57,6 +64,7 @@ def find_shape(graph, subject, depth=1, max_depth=10):
                     })
                     return None
 
+        # find shape from parent container
         if (subject, OxPoints.primaryPlace, None) in graph:
             place = graph.value(subject, OxPoints.primaryPlace)
             return find_shape(graph, place, depth=depth)
@@ -66,5 +74,4 @@ def find_shape(graph, subject, depth=1, max_depth=10):
         elif (subject, Org.subOrganizationOf, None) in graph:
             org = graph.value(subject, Org.subOrganizationOf)
             return find_shape(graph, org, depth=depth)
-
     return None
