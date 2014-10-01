@@ -193,12 +193,14 @@ class OxpointsImporter(object):
                     if self.static_files_dir:
                         doc['files'] = self._handle_files(main_site)
 
+                    # primary place is itself
+                    doc['primary_place'] = doc['id']
+
             if not main_site_id:
                 # Thing and its main site haven't been merged
                 # adding a relation between the site and the thing
                 parent_of.add(self._get_formatted_oxpoints_id(main_site))
-
-            doc['primary_place'] = self._get_formatted_oxpoints_id(main_site)
+                doc['primary_place'] = self._get_formatted_oxpoints_id(main_site)
 
             doc.update(self._handle_location(main_site))
             doc.update(self._handle_shape(main_site))
