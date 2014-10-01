@@ -131,6 +131,8 @@ class HALPOIRepresentation(POIRepresentation):
             pois_ids = set(self.poi.children)
             if self.poi.parent:
                 pois_ids.add(self.poi.parent)
+            if self.poi.primary_place:
+                pois_ids.add(self.poi.primary_place)
             if pois_ids:
                 pois_objects = poi_service.get_places_by_identifiers(pois_ids)
                 # ease lookup by having a dict with ID as key
@@ -154,6 +156,9 @@ class HALPOIRepresentation(POIRepresentation):
 
                 if self.poi.parent:
                     add_link('parent', representation.add_link, self.poi.parent)
+
+                if self.poi.primary_place:
+                    add_link('primary_place', representation.add_link, self.poi.primary_place)
 
                 if self.poi.children:
                     for child in self.poi.children:

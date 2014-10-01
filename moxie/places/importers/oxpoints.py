@@ -198,6 +198,8 @@ class OxpointsImporter(object):
                 # adding a relation between the site and the thing
                 parent_of.add(self._get_formatted_oxpoints_id(main_site))
 
+            doc['primary_place'] = self._get_formatted_oxpoints_id(main_site)
+
             doc.update(self._handle_location(main_site))
             doc.update(self._handle_shape(main_site))
         else:
