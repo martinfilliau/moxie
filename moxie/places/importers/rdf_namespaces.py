@@ -32,3 +32,5 @@ Levelness = Namespace(PURL_ACCESSIBILITY+'levelness/')
 ContactMethodFromEntranceToReception = Namespace(PURL_ACCESSIBILITY+'contactMethodFromEntranceToReception/')
 
 ContactMethod = Namespace(PURL_ACCESSIBILITY+'contactMethod/')
+
+SpatialRelations = Namespace('http://data.ordnancesurvey.co.uk/ontology/spatialrelations/')
