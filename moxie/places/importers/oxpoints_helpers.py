@@ -1,4 +1,5 @@
 import logging
+from rdflib.namespace import RDF
 
 from moxie.places.importers.rdf_namespaces import (Geo, OxPoints, Org, SpatialRelations,
                                                    Geometry)
@@ -57,12 +58,18 @@ def find_shape(graph, subject, depth=1, max_depth=10):
                         raise ValueError("No WKT shape")
                     return wkt
                 except:
+                    print "zut"
                     logger.warning("Unable to detect a valid WKT shape", exc_info=True, extra={
                         'data': {
                             'oxpoints_subject': subject.toPython()
                         }
                     })
                     return None
+
+        # if we're at a Building level, do not try to go further
+        current_type = graph.value(subject, RDF.type)
+        if current_type and current_type == OxPoints.Building:
+            return None
 
         # find shape from parent container
         if (subject, OxPoints.primaryPlace, None) in graph:
