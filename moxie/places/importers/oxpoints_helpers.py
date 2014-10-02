@@ -58,7 +58,6 @@ def find_shape(graph, subject, depth=1, max_depth=10):
                         raise ValueError("No WKT shape")
                     return wkt
                 except:
-                    print "zut"
                     logger.warning("Unable to detect a valid WKT shape", exc_info=True, extra={
                         'data': {
                             'oxpoints_subject': subject.toPython()
