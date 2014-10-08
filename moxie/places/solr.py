@@ -39,6 +39,8 @@ def doc_to_poi(doc, fields_key="_"):
         for fileJSON in doc['files']:
             fileData = json.loads(fileJSON)
             poi.files.append(File(**fileData))
+    if 'primary_place' in doc:
+        poi.primary_place = doc['primary_place']
     for key, val in doc.items():
         if key.startswith(fields_key) and key not in SOLR_IGNORE_FIELDS:
             if not getattr(poi, 'fields', False):

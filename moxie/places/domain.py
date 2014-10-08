@@ -2,7 +2,8 @@ class POI(object):
 
     def __init__(self, id, name, type, lat=None, lon=None, type_name=None, identifiers=None, short_name=None,
                  distance=0, address="", phone="", website="", opening_hours="", collection_times="",
-                 parent=None, children=None, alternative_names=None, shape="", name_sort="", files=None):
+                 parent=None, children=None, alternative_names=None, shape="", name_sort="", files=None,
+                 primary_place=None):
         self.id = id
         self.name = name
         self.type = type
@@ -23,6 +24,7 @@ class POI(object):
         self.shape = shape
         self.name_sort = name_sort
         self.files = files or []
+        self.primary_place = primary_place
 
 
 class File(object):
