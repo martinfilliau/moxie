@@ -168,10 +168,13 @@ class Suggest(ServiceView):
     """
 
     def handle_request(self):
-        self.query = request.args.get('q').encode('utf8')
+        self.query = request.args.get('q', '').encode('utf8')
         self.types_exact = request.args.getlist('type_exact')
         self.start = request.args.get('start', 0)
         self.count = request.args.get('count', 20)
+
+        if not self.query:
+            raise BadRequest("Parameter 'q' is mandatory")
 
         poi_service = POIService.from_context()
         
