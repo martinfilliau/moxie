@@ -3,7 +3,8 @@ import json
 from moxie.places.domain import POI, File
 
 # fields specific to Solr that should be ignored
-SOLR_IGNORE_FIELDS = ['_version_', '_dist_', '_accessibility_has_access_guide_information']
+SOLR_IGNORE_FIELDS = ['_version_', '_dist_', '_accessibility_has_access_guide_information',
+                      '_is_display_in_maps_department_list']
 
 
 def doc_to_poi(doc, fields_key="_"):

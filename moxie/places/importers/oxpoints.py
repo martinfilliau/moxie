@@ -52,6 +52,7 @@ MAPPED_PROPERTIES = [
     ('_accessibility_opening_hours_term_time', AdHocDataOx.openingHoursTermTime),
     ('_accessibility_opening_hours_vacation', AdHocDataOx.openingHoursVacation),
     ('_managed_building', OxPoints.managedBuilding),
+    ('_is_display_in_maps_department_list', OxPoints.displayInMapsDepartmentList)
 ]
 
 ENTRANCE_OPENING_TYPES = {

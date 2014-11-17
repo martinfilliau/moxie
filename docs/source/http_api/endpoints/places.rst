@@ -137,6 +137,14 @@ Endpoint to search and retrieve information about places.
     :query accessibility_has_accessible_toilets: only get POIs known to have "accessible toilets"
     :type accessibility_has_accessible_toilets: boolean
 
+    **Application specific filtering**
+
+    Below are filters made specifically for an application. It is not recommended to use these parameters, as it
+    is mainly experimental and might change to be generic in the future.
+
+    :query is_display_in_maps_department_list: only get POIs manually selected / curated as "featured" university departments
+    :type is_display_in_maps_department_list: boolean
+
     If no geolocation is passed (either by header or query parameters), and if there is no full-text search (``q`` parameter),
     the result will be sorted by name (A-Z).
 

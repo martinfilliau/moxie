@@ -25,6 +25,7 @@ class POIService(Service):
     key_transforms = [
         ('accessibility', '_accessibility'),
         ('library', '_library'),
+        ('is', '_is')
     ]
     INBOUND = 1
     OUTBOUND = 2
