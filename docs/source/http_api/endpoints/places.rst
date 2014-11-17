@@ -118,6 +118,25 @@ Endpoint to search and retrieve information about places.
     :query exclude_university: exclude results from the University (value will be ignored) i.e. only amenities, transport...
     :type exclude_university: string
 
+    **Accessibility filtering**
+
+    Below are filters specific to accessibility features, coming from the university' access guide.
+
+    :query accessibility_has_adapted_furniture: only get POIs known to have "adapted furniture"
+    :type accessibility_has_adapted_furniture: boolean
+    :query accessibility_has_cafe_refreshments: only get POIs known to have "accessible cafe / refreshments"
+    :type accessibility_has_cafe_refreshments: boolean
+    :query accessibility_has_computer_access: only get POIs known to have "accessible computer access"
+    :type accessibility_has_computer_access: boolean
+    :query accessibility_has_hearing_system: only get POIs known to have a "hearing system"
+    :type accessibility_has_hearing_system: boolean
+    :query accessibility_has_lifts_to_all_floors: only get POIs known to have "lift access to all floors"
+    :type accessibility_has_lifts_to_all_floors: boolean
+    :query accessibility_has_quiet_space: only get POIs known to have "accessible quiet space"
+    :type accessibility_has_quiet_space: boolean
+    :query accessibility_has_accessible_toilets: only get POIs known to have "accessible toilets"
+    :type accessibility_has_accessible_toilets: boolean
+
     If no geolocation is passed (either by header or query parameters), and if there is no full-text search (``q`` parameter),
     the result will be sorted by name (A-Z).
 
