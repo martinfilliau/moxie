@@ -51,7 +51,8 @@ MAPPED_PROPERTIES = [
     ('_accessibility_opening_hours_closed', AdHocDataOx.openingHoursClosed),
     ('_accessibility_opening_hours_term_time', AdHocDataOx.openingHoursTermTime),
     ('_accessibility_opening_hours_vacation', AdHocDataOx.openingHoursVacation),
-    ('_managed_building', OxPoints.managedBuilding),
+    ('_managed_building', OxPoints.managedBuilding),        # TODO should be deprecated to use a correct representation
+    ('_is_managed_building', OxPoints.managedBuilding),     # with is_managed_building
     ('_is_display_in_maps_department_list', OxPoints.displayInMapsDepartmentList)
 ]
 
