@@ -34,6 +34,8 @@ MAPPED_TYPES = [
     (OxPoints.Site, '/university/site')
 ]
 
+INDEXED_TYPES = dict(MAPPED_TYPES)
+
 # properties which maps "easily" to our structure
 MAPPED_PROPERTIES = [
     ('website', FOAF.homepage),
@@ -156,7 +158,11 @@ class OxpointsImporter(object):
         doc = {}
         doc['name'] = title
         doc['id'] = self._get_formatted_oxpoints_id(subject)
-        doc['type'] = mapped_type
+
+        if not isinstance(mapped_type, list):
+            types = [mapped_type]
+        else:
+            types = mapped_type
 
         sort_label = self.graph.value(subject, OpenVocab.SORT_LABEL)
         if sort_label:
@@ -186,6 +192,11 @@ class OxpointsImporter(object):
                     main_site_id = self._get_formatted_oxpoints_id(main_site)
                     ids.add(main_site_id)
                     ids.update(self._get_identifiers_for_subject(main_site))
+                    # try to add the type of the site to the Thing
+                    # e.g. Sheldonian is both a Department and a Building after merge
+                    main_site_type = self.graph.value(main_site, RDF.type)
+                    if main_site_type in INDEXED_TYPES:
+                        types.append(INDEXED_TYPES[main_site_type])
                     self.merged_things.append(main_site)
                     # adding accessibility data of the site to the doc
                     # this happens when a building == an organisation
@@ -250,6 +261,8 @@ class OxpointsImporter(object):
         child_of.update(self._find_relations(subject, DCTERMS.isPartOf))
         if child_of:
             doc['child_of'] = list(child_of)
+
+        doc['type'] = types
 
         return doc
 
