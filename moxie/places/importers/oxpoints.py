@@ -376,6 +376,14 @@ class OxpointsImporter(object):
             else:
                 values['_accessibility_has_accessible_toilets'] = False
 
+        accessibility_number_of_disabled_parking_spaces = self.graph.value(subject, Accessibility.numberOfDisabledParkingSpaces)
+        if accessibility_number_of_disabled_parking_spaces:
+            number = accessibility_number_of_disabled_parking_spaces.toPython()
+            if number > 0:
+                values['_accessibility_has_accessible_parking_spaces'] = True
+            else:
+                values['_accessibility_has_accessible_parking_spaces'] = False
+
         accessibility_guide_url = self.graph.value(subject, LinkingYou['space-accessibility'])
         if accessibility_guide_url:
             values['_accessibility_has_access_guide_information'] = True

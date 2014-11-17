@@ -314,6 +314,8 @@ All the responses are conform to the `HAL specification <http://stateless.co/hal
     :type accessibility_has_quiet_space: boolean
     :query accessibility_has_accessible_toilets: only get POIs known to have "accessible toilets"
     :type accessibility_has_accessible_toilets: boolean
+    :query accessibility_has_accessible_parking_spaces: only get POIs known to have "accessible parking spaces"
+    :type accessibility_has_accessible_parking_spaces: boolean
 
     **Application specific filtering**
 
