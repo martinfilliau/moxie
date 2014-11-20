@@ -16,7 +16,7 @@ from moxie.places.importers.oxpoints_helpers import find_location, find_shape
 logger = logging.getLogger(__name__)
 
 
-MAPPED_TYPES = [
+MAPPED_TYPES = (
     (OxPoints.University, '/university'),
     (OxPoints.College, '/university/college'),
     (OxPoints.Department, '/university/department'),
@@ -32,7 +32,7 @@ MAPPED_TYPES = [
     (OxPoints.Building, '/university/building'),
     (OxPoints.Space, '/university/space'),
     (OxPoints.Site, '/university/site')
-]
+)
 
 INDEXED_TYPES = dict(MAPPED_TYPES)
 
@@ -159,10 +159,12 @@ class OxpointsImporter(object):
         doc['name'] = title
         doc['id'] = self._get_formatted_oxpoints_id(subject)
 
+        # storing all the types of the Thing
+        types = []
         if not isinstance(mapped_type, list):
-            types = [mapped_type]
+            types.append(mapped_type)
         else:
-            types = mapped_type
+            types.extend(mapped_type)
 
         sort_label = self.graph.value(subject, OpenVocab.SORT_LABEL)
         if sort_label:
@@ -192,11 +194,17 @@ class OxpointsImporter(object):
                     main_site_id = self._get_formatted_oxpoints_id(main_site)
                     ids.add(main_site_id)
                     ids.update(self._get_identifiers_for_subject(main_site))
+
                     # try to add the type of the site to the Thing
                     # e.g. Sheldonian is both a Department and a Building after merge
                     main_site_type = self.graph.value(main_site, RDF.type)
                     if main_site_type in INDEXED_TYPES:
-                        types.append(INDEXED_TYPES[main_site_type])
+                        main_site_mapped_types = INDEXED_TYPES.get(main_site_type)
+                        if type(main_site_mapped_types) is list:
+                            types.extend(main_site_mapped_types)
+                        else:
+                            types.append(main_site_mapped_types)
+
                     self.merged_things.append(main_site)
                     # adding accessibility data of the site to the doc
                     # this happens when a building == an organisation
