@@ -10,10 +10,18 @@ from moxie.places.importers.loaders import OrderedDictYAMLLoader
 
 logger = logging.getLogger(__name__)
 
-#TODO managed keys should come from the configuration files
-MANAGED_KEYS = ['name', 'location']
-MERGABLE_KEYS = ['identifiers', 'tags']
+# ID's are used to identify the doc, doens't make sense to merge
+# Solr will complain if this is done as we also return the _version_ of the
+# doc, this must align with the correct "ID" else a 409 (conflict) error is
+# raised by Solr.
+SPECIAL_KEYS = ['id', '_version_']
+
+MANAGED_KEYS = ['name', 'name_sort', 'location']
+MERGABLE_KEYS = ['identifiers', 'tags', 'type', 'type_name']
 PRECEDENCE_KEY = 'meta_precedence'
+
+# Keys we don't want to copy over to the merged doc
+PROTECTED_KEYS = MANAGED_KEYS + MERGABLE_KEYS + SPECIAL_KEYS
 
 
 class ACIDException(Exception):
@@ -51,24 +59,32 @@ def prepare_document(doc, results, precedence):
         doc[PRECEDENCE_KEY] = precedence
         return doc
     elif len(results.results) == 1:
-        return merge_docs(doc, results.results[0], precedence)
+        return merge_docs(results.results[0], doc, precedence)
     else:
         raise ACIDException()
 
 
-def find_type_name(type_path, singular=True):
+def find_type_name(type_paths, singular=True):
     """
     Find the name of the type from its path
-    @param type_path: a path e.g. /transport/bus-stop
+    @param type_paths: a list of types a single POI might be e.g.
+                       ["/amenity/hospital", "/university/site"] (e.g. JR)
+                       also supports being passed a single type_path e.g.
+                       "/transport/bus-stop"
     @param singular: optional parameter whether it should be a singular or plural name
-    @return: name (singular or plural) (e.g. "Bus stop")
+    @return: list of names (singular or plural) e.g. ["Hospital", "Site"]
     """
-    to_find = type_path.split("/")[-1]
-    node = find_type(types, type_path, to_find, 1)
-    if singular:
-        return node["name_singular"]
-    else:
-        return node["name_plural"]
+    if not isinstance(type_paths, list):
+        type_paths = [type_paths]
+    type_names = []
+    for type_path in type_paths:
+        to_find = type_path.split("/")[-1]
+        node = find_type(types, type_path, to_find, 1)
+        if singular:
+            type_names.append(node["name_singular"])
+        else:
+            type_names.append(node["name_plural"])
+    return type_names
 
 
 def find_type(data, path, to_find, count):
@@ -97,20 +113,27 @@ def merge_docs(current_doc, new_doc, new_precedence):
     @param new_precedence Integer proportional to the reliability of new data
     """
     new_doc = merge_keys(current_doc, new_doc, MERGABLE_KEYS)
-    current_precedence = current_doc.get('meta_precedence', -1)
+    current_precedence = current_doc.get(PRECEDENCE_KEY, -1)
     if new_precedence > current_precedence:
-        current_doc['meta_precedence'] = new_precedence
+        current_doc[PRECEDENCE_KEY] = new_precedence
         for key in MANAGED_KEYS:
             if key in new_doc:
                 current_doc[key] = new_doc[key]
-    current_doc.update(new_doc)
+    # Remove any protected keys, this includes all MERGABLE_KEYS, MANAGED_KEYS
+    # and SPECIAL_KEYS.
+    safe_dict = {key: new_doc[key] for key in set(new_doc.keys()).difference(PROTECTED_KEYS)}
+    # Copy all safe items over to the new (merged) doc
+    current_doc.update(safe_dict)
     return current_doc
 
 
 def merge_keys(current_doc, new_doc, keys):
     for key in keys:
+        new_val = new_doc.get(key, [])
+        if not isinstance(new_val, list):
+            new_val = [new_val]
         new_doc[key] = merge_values(
-                current_doc.get(key, []), new_doc.get(key, []))
+                current_doc.get(key, []), new_val)
     return new_doc
 
 

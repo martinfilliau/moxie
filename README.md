@@ -23,6 +23,7 @@ Requirements
 
 * Solr 4.4
 * Redis
+* libgeos2
 * pip (`easy_install pip`)
 
 How to run

@@ -1,11 +1,13 @@
 from datetime import timedelta
-from flask import request, current_app, url_for, redirect
+from flask import request, url_for, redirect, json, current_app
 from werkzeug.wrappers import BaseResponse
 
 from moxie.core.views import ServiceView, accepts
 from moxie.core.representations import JSON, HAL_JSON
 from moxie.core.exceptions import BadRequest, NotFound
-from moxie.places.representations import (HALPOIsRepresentation, HALPOIRepresentation, HALTypesRepresentation)
+from moxie.places.representations import (HALPOISearchRepresentation, HALPOIsRepresentation,
+                                          HALPOIRepresentation, HALTypesRepresentation,
+                                          GeoJsonPointsRepresentation, POIsRepresentation)
 from .services import POIService
 
 
@@ -16,69 +18,119 @@ class Search(ServiceView):
     cors_allow_headers = 'geo-position'
 
     def handle_request(self):
+        arguments = request.args.copy()
+
+        # Always remove lat lon from arguments so they are not accidentally
+        # passed to POIService.get_results in other_args
+        lat, lon = arguments.pop('lat', None), arguments.pop('lon', None)
         if 'Geo-Position' in request.headers:
             location = request.headers['Geo-Position'].split(';')
+        elif lat and lon:
+            location = (lat, lon)
         else:
-            default_lat, default_lon = current_app.config['DEFAULT_LOCATION']
-            location = (request.args.get('lat', default_lat),
-                        request.args.get('lon', default_lon))
+            location = None
 
-        self.query = request.args.get('q', '')
-        self.type = request.args.get('type', None)
-        self.types_exact = request.args.getlist('type_exact')
-        self.start = request.args.get('start', 0)
-        self.count = request.args.get('count', 35)
-        all_types = False
-        if self.query:
-            all_types = True
-            self.query = self.query.encode('utf8')
+        self.query = arguments.pop('q', '').encode('utf8')
+        self.type = arguments.pop('type', None)
+        self.types_exact = arguments.poplist('type_exact')
+        self.start = arguments.pop('start', 0)
+        self.count = arguments.pop('count', 35)
+        self.facet_fields = arguments.poplist('facet')
+        self.other_args = arguments.copy()
+        self.in_oxford = arguments.pop('inoxford', False)   # filter only results "in oxford"
+
         if self.type and self.types_exact:
             raise BadRequest("You cannot have both 'type' and 'type_exact' parameters at the moment.")
 
-        poi_service = POIService.from_context()
-        # Try to match the query to identifiers if it's a one word query,
-        # useful when querying for bus stop naptan number
-        # TODO pass the location to have the distance from the point
+        additional_filters = []
 
-        if ' ' not in self.query:
-            unique_doc = poi_service.search_places_by_identifiers(['*:{id}'.format(id=self.query)])
-            if unique_doc:
-                self.size = 1
-                self.facets = None
-                return unique_doc
-        results, self.size, self.facets = poi_service.get_results(self.query, location,
-            self.start, self.count, type=self.type, types_exact=self.types_exact, all_types=all_types)
+        university_only = arguments.pop('university_only', False)
+        exclude_university = arguments.pop('exclude_university', False)
+
+        if university_only and exclude_university:
+            raise BadRequest("Parameters 'university_only' and 'exclude_university' are mutually exclusive.")
+
+        if university_only:
+            additional_filters.append("type_exact:\/university*")
+        if exclude_university:
+            additional_filters.append("-type_exact:\/university*")
+
+        additional_filters.extend(["%s:%s" % (key, val or True) for (key, val) in arguments.iteritems(multi=True)])
+
+        poi_service = POIService.from_context()
+
+        kwargs = {
+            'pois_type': self.type,
+            'types_exact': self.types_exact,
+            'filter_queries': additional_filters
+        }
+
+        if self.in_oxford:
+            kwargs['geofilter_centre'] = current_app.config.get('PLACES_GEOFILTER_CENTRE', [51.7531, -1.2584])
+            kwargs['geofilter_distance'] = current_app.config.get('PLACES_GEOFILTER_DISTANCE', 10)
+
+        # Only pass `facets` if we have user-speciified facets
+        if self.facet_fields:
+            kwargs['facets'] = self.facet_fields
+        results, self.size, self.facets = poi_service.get_results(
+            self.query, location, self.start, self.count, **kwargs)
         return results
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
-        return HALPOIsRepresentation(self.query, response, self.start, self.count, self.size,
-            request.url_rule.endpoint, types=self.facets, type=self.type, type_exact=self.types_exact).as_json()
+        return HALPOISearchRepresentation(
+            self.query, response, self.start, self.count, self.size,
+            request.url_rule.endpoint, facets=self.facets, type=self.type,
+            type_exact=self.types_exact,
+            other_args=self.other_args).as_json()
+
+
+class GeoJsonSearch(Search):
+
+    @accepts(HAL_JSON, JSON)
+    def as_json(self, response):
+        return GeoJsonPointsRepresentation(response).as_json()
 
 
 class PoiDetail(ServiceView):
-    """Details of one POI
+    """Details of one or multiple POIs separated by a comma
     """
+
+    expires = timedelta(hours=1)
 
     def handle_request(self, ident):
         if ident.endswith('/'):
             ident = ident.split('/')[0]
         poi_service = POIService.from_context()
-        doc = poi_service.get_place_by_identifier(ident)
-        if not doc:
-            raise NotFound()
-        if doc.id != ident:
-            # redirection to the same URL but with the main ID of the doc
-            path = url_for(request.url_rule.endpoint, ident=doc.id)
-            return redirect(path, code=301)
+        # split identifiers on comma if there is more than
+        # one identifier requested
+        self.idents = ident.split(',')
+        if len(self.idents) == 1:
+            doc = poi_service.get_place_by_identifier(ident)
+            if not doc:
+                raise NotFound()
+            if doc.id != ident:
+                # redirection to the same URL but with the main ID of the doc
+                path = url_for(request.url_rule.endpoint, ident=doc.id)
+                return redirect(path, code=301)
+            else:
+                return doc
         else:
-            return doc
+            documents = poi_service.get_places_by_identifiers(self.idents)
+            if not documents:
+                raise NotFound()
+            else:
+                return documents
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, response):
         if issubclass(type(response), BaseResponse):
             # to handle 301 redirections and 404
             return response
+        elif type(response) == list:
+            # if more than one POI has been requested
+            size = len(response)
+            return HALPOIsRepresentation(response, size, request.url_rule.endpoint, self.idents).as_json()
         else:
             return HALPOIRepresentation(response, request.url_rule.endpoint).as_json()
 
@@ -96,3 +148,40 @@ class Types(ServiceView):
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, types):
         return HALTypesRepresentation(types, request.url_rule.endpoint).as_json()
+
+
+class PoiOrgDescendants(ServiceView):
+
+    def handle_request(self, ident):
+        poi_service = POIService.from_context()
+        return poi_service.get_organisational_descendants(ident)
+
+    @accepts(HAL_JSON, JSON)
+    def as_hal_json(self, descendants):
+        if not descendants:
+            raise NotFound()
+        return json.jsonify(descendants)
+        
+        
+class Suggest(ServiceView):
+    """Suggest POIs from name and alternative names
+    """
+
+    def handle_request(self):
+        self.query = request.args.get('q', '').encode('utf8')
+        self.types_exact = request.args.getlist('type_exact')
+        self.start = request.args.get('start', 0)
+        self.count = request.args.get('count', 20)
+
+        if not self.query:
+            raise BadRequest("Parameter 'q' is mandatory")
+
+        poi_service = POIService.from_context()
+        
+        return poi_service.suggest_pois(self.query, self.types_exact, self.start, self.count)
+        
+    @accepts(HAL_JSON, JSON)
+    def as_hal_json(self, suggestions):
+        return HALPOISearchRepresentation(
+            self.query, suggestions, self.start, self.count, len(suggestions),
+            request.url_rule.endpoint, type_exact=self.types_exact).as_json()

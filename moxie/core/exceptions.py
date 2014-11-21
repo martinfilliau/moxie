@@ -15,7 +15,7 @@ def exception_handler(ex):
 class ApplicationException(Exception):
 
     status_code = 500
-    message = "An error has occured"
+    message = "An error has occurred"
 
     def __init__(self, message=None, status_code=None, payload=None,
                  headers=None):

@@ -11,11 +11,10 @@ university:
           name_plural: Departments
         library:
           name_singular: Library
-          name_plural: Librairies
-          types:
-            sub-library:
-              name_singular: Sub-library
-              name_plural: Sub-librairies
+          name_plural: Libraries
+        sub-library:
+          name_singular: Sub-library
+          name_plural: Sub-libraries
         division:
           name_singular: Division
           name_plural: Divisions
@@ -34,6 +33,9 @@ university:
         hall:
           name_singular: Hall
           name_plural: Halls
+        museum:
+          name_singular: University museum
+          name_plural: University museums
 amenities:
     name_singular: Amenity
     name_plural: Amenities

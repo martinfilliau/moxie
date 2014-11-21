@@ -89,10 +89,10 @@ class NaptanXMLHandler(ContentHandler):
             data = dict([('raw_naptan_%s' % k, v) for k, v in sa.items()])
             data['id'] = "stoparea:%s" % sa['StopAreaCode']
             data[self.identifier_key] = [data['id']]
-            lon, lat = (sa.pop('Location_Translation_Longitude'),
-                    sa.pop('Location_Translation_Latitude'))
-            data['location'] = "%s,%s" % (lon, lat)
+            data['location'] = "%s,%s" % (sa.pop('Location_Translation_Latitude'),
+                                          sa.pop('Location_Translation_Longitude'))
             data['name'] = sa['Name']
+            data['name_sort'] = data['name']
             data['type'] = "/transport/stop-area"
             self.stop_areas[sa['StopAreaCode']] = data
 
@@ -130,15 +130,15 @@ class NaptanXMLHandler(ContentHandler):
             else:
                 return
 
-            lon, lat = (sp.pop('Place_Location_Translation_Longitude'),
-                    sp.pop('Place_Location_Translation_Latitude'))
-            data['location'] = "%s,%s" % (lon, lat)
+            data['location'] = "%s,%s" % (sp.pop('Place_Location_Translation_Latitude'),
+                                          sp.pop('Place_Location_Translation_Longitude'))
 
             if 'Descriptor_Indicator' in sp:
                 indicator = self.get_indicator_name(str(sp['Descriptor_Indicator']))
                 data['name'] = "%s %s" % (indicator, sp['Descriptor_CommonName'])
             else:
                 data['name'] = sp['Descriptor_CommonName']
+            data['name_sort'] = data['name']
             self.stop_points[sp['AtcoCode']] = data
 
     def annotate_stop_area_ancestry(self, stop_areas):

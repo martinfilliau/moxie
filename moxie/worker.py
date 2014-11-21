@@ -4,6 +4,11 @@ import os
 from moxie import default_celeryconfig
 from celery import Celery
 
+# Set the log level of requests
+import logging
+requests_log = logging.getLogger("requests")
+requests_log.setLevel(logging.WARNING)
+
 
 class MoxieCelery(Celery):
 

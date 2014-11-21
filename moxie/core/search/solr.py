@@ -1,8 +1,10 @@
 import logging
 import requests
-from requests.exceptions import RequestException
 import json
 import time
+
+from urllib import urlencode
+from requests.exceptions import RequestException
 
 from moxie.core.search import SearchResponse, SearchServerException
 from moxie.core.metrics import statsd
@@ -36,38 +38,26 @@ class SolrSearch(object):
         return '<{name} {url}{core}>'.format(name=__name__,
             url=self.server_url, core=self.core)
 
-    def search_nearby(self, query, location, fq=None, start=0, count=10, location_field='location'):
-        # TODO this method is not called anymore. But it should be refactored to handle more
-        # logic from Solr, but being more flexible at the same time
-        lat, lon = location
-        q = {'defType': 'edismax',
-                'spellcheck.collate': 'true',
-                'pf': query,
-                'q': query,
-                'sfield': location_field,
-                'pt': '%s,%s' % (lon, lat),
-                'sort': 'geodist() asc',
-                'fl': '*,_dist_:geodist()',
-                }
-        return self.search(q, fq, start, count)
-
     def search(self, query, fq=None, start=0, count=10):
         query['start'] = str(start)
         query['rows'] = str(count)
         if fq:
             query['fq'] = fq
-        parameters = ["{key}={value}".format(key=k, value=v) for k, v in query.items()]
-        data = "&".join(parameters)
+        # doseq=True will add multiple time the same parameter if there's an array
+        data = urlencode(query, doseq=True)
         headers = {'Content-Type': self.content_types['form']}
         results = self.connection(self.methods['select'],
                 data=data, headers=headers)
         return SolrSearchResponse(results.json())
 
-    def suggest(self, query):
-        params = {'q': query}
+    def suggest(self, query, fq=None, start=0, count=10):
+        query['start'] = str(start)
+        query['rows'] = str(count)
+        if fq:
+            query['fq'] = fq
         results = self.connection(self.methods['suggest'],
-            params=params)
-        return results
+                params=query)
+        return SolrSearchResponse(results.json())
 
     def get_by_ids(self, document_ids):
         """Get documents by their ID (using the real-time GET feature of Solr 4).
@@ -82,7 +72,7 @@ class SolrSearch(object):
             params=params)
         return SolrSearchResponse(results.json())
 
-    def index(self, document, params=None, count_per_page=50):
+    def index(self, document, params=None, count_per_page=200):
         """Index a list of objects, do paging
         :param document: must be a list of objects to index
         :param params: additional parameters to add
@@ -92,11 +82,7 @@ class SolrSearch(object):
             self.index_all(document, params)
         else:
             for i in range(0, len(document), count_per_page):
-                try:
-                    self.index_all(document[i:i+count_per_page], params)
-                except SearchServerException:
-                    logger.error("Error in batch indexing", exc_info=True)
-                time.sleep(0.5)
+                self.index_all(document[i:i+count_per_page], params)
 
     def index_all(self, document, params=None):
         """Index a list of objects
@@ -106,11 +92,12 @@ class SolrSearch(object):
         data = json.dumps(document)
         headers = {'Content-Type': self.content_types[self.return_type]}
         self.connection(self.methods['update'], params=params,
-                        data=data, headers=headers)
+                        data=data, headers=headers, timeout=120)
 
     def commit(self):
         return self.connection(self.methods['update'],
-                params={'commit': 'true'})
+                               timeout=120,
+                               params={'commit': 'true'})
 
     def clear_index(self):
         """WARNING: This action will delete *all* documents in your index.
@@ -131,12 +118,15 @@ class SolrSearch(object):
         query_string = {'q': " OR ".join(query)}
         return self.search(query_string, start=0, count=100)
 
-    def connection(self, method, params=None, data=None, headers=None):
+    def connection(self, method, params=None, data=None, headers=None, timeout=None):
         """Does a GET request if there is no data otherwise a POST
         :param params: URL parameters as a dict
         :param data: POST form
+        :param headers: custom headers to pass to Solr as a dict
+        :param timeout: custom timeout
         """
         headers = headers or dict()
+        timeout = timeout or self.DEFAULT_TIMEOUT
         params = params or dict()
         params['wt'] = self.return_type
         url = '{0}{1}/{2}'.format(self.server_url, self.core, method)
@@ -145,10 +135,10 @@ class SolrSearch(object):
             with statsd.timer('core.search.solr.request'):
                 if data:
                     response = requests.post(url, data, headers=headers,
-                                             params=params, timeout=self.DEFAULT_TIMEOUT)
+                                             params=params, timeout=timeout)
                 else:
                     response = requests.get(url, headers=headers,
-                                            params=params, timeout=self.DEFAULT_TIMEOUT)
+                                            params=params, timeout=timeout)
         except RequestException as re:
             logger.error('Error in request to Solr', exc_info=True,
                          extra={
@@ -174,6 +164,7 @@ class SolrSearch(object):
                     'data': {
                         'url': url,
                         'solr_message': solr_message,
+                        'solr_status_code': response.status_code,
                         'params': params,
                         'headers': headers}})
                 raise SearchServerException(solr_message, status_code=response.status_code)
