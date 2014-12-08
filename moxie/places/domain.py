@@ -18,7 +18,7 @@ class POI(object):
         self.website = website
         self.opening_hours = opening_hours
         self.collection_times = collection_times
-        self.parent = parent
+        self.parent = parent or []
         self.children = children or []
         self.alternative_names = alternative_names
         self.shape = shape

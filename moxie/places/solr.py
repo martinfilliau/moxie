@@ -31,7 +31,7 @@ def doc_to_poi(doc, fields_key="_"):
     if 'parent_of' in doc:
         poi.children = doc['parent_of']
     if 'child_of' in doc:
-        poi.parent = doc['child_of'][0]
+        poi.parent = doc['child_of']
     if 'alternative_names' in doc:
         poi.alternative_names = doc['alternative_names']
     if 'shape' in doc:
