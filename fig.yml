@@ -1,0 +1,19 @@
+solr:
+    build: solr
+    ports:
+        - "8983:8983"
+redis:
+    image: redis
+    ports:
+        - "6379:6379"
+web:
+    build: .
+    command: python runserver.py --host 0.0.0.0 
+    volumes:
+        - .:/code
+    ports:
+        - "5000:5000"
+    links:
+        - redis
+        - solr
+
