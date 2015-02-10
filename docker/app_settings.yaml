@@ -1,0 +1,60 @@
+flask:
+    DEBUG: True
+    SECRET_KEY: 'put-your-secret-key-here'
+    DEFAULT_ALLOW_ORIGINS:
+        - 'http://localhost'
+        - 'http://localhost:8080'
+    # Places
+    DEFAULT_LOCATION: [51.7531, -1.2584]
+    OSM_IMPORT_URL: 'http://download.geofabrik.de/europe/great-britain/england/oxfordshire-latest.osm.bz2'
+    OXPOINTS_IMPORT_URL: 'https://data.ox.ac.uk/graph/oxpoints/data'
+    OXPOINTS_SHAPES_URL: 'https://data.ox.ac.uk/graph/oxpoints-extents/data'
+    NAPTAN_IMPORT_URL: 'http://www.dft.gov.uk/NaPTAN/snapshot/NaPTANxml.zip'
+    XCRI_IMPORT_URL: 'https://course.data.ox.ac.uk/catalogues/?uri=https%3A//data.ox.ac.uk/id/courses/cobomo-catalogue&format=xcricap-full'
+    TALKS_CAM_URLS: ['http://talks.ox.ac.uk/show/xml/upcoming_talks']
+    #STATSD_HOST: 'statsd.vm'
+    #STATSD_PREFIX: 'dev'
+    LIBRARY_DATA_IMPORT_URL: 'http://librarydata.bodleian.ox.ac.uk/libraries.xml'
+    SQLALCHEMY_DATABASE_URI: 'sqlite:////tmp/test.db'
+    #STATIC_FILES_IMPORT_DIRECTORY: '/Users/martinfilliau/Desktop/moxie/'
+    STATIC_FILES_URL: 'http://files-api.ox.ac.uk/images/'
+    PLACES_SOLR_SERVER: 'http://mox-solr.vm:8080/solr'
+    PLACES_SOLR_CORE_STAGING: 'places_staging'
+    PLACES_SOLR_CORE_PRODUCTION: 'places_production'
+
+blueprints:
+    transport:
+        url_prefix: /transport
+        factory: moxie.transport.create_blueprint
+
+services:
+    places:
+        POIService: {}
+        TransportService:
+            providers:
+                moxie.transport.providers.cloudamber.CloudAmberBusRtiProvider:
+                    url: 'http://www.oxontime.com'
+                moxie.transport.providers.ldb.LiveDepartureBoardPlacesProvider:
+                    token: 'E0F65B9D-1A41-4864-8326-722F5F2D646A'
+                moxie.transport.providers.park_and_rides.OxfordParkAndRideProvider: {}
+        SearchService:
+            backend_uri: 'solr+http://solr:8983/solr/collection1'
+        KVService:
+            backend_uri: 'redis://redis:6379/0'
+    transport:
+        POIService: {}
+        TransportService:
+            providers:
+                moxie.transport.providers.park_and_rides.OxfordParkAndRideProvider: {}
+        SearchService:
+            backend_uri: 'solr+http://solr:8983/solr/collection1'
+        KVService:
+            backend_uri: 'redis://redis:6379/0'
+
+healthchecks:
+    Places search:
+        moxie.core.search.SearchService:
+            backend_uri: 'solr+http://solr:8983/solr/collection1'
+    KV service:
+        moxie.core.kv.KVService:
+            backend_uri: 'redis://redis:6379/0'

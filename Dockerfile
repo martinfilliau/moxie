@@ -1,5 +1,8 @@
 FROM python:2.7
+
 ENV PYTHONUNBUFFERED 1
+ENV MOXIE_SETTINGS /code/docker/app_settings.py
+
 RUN mkdir /code
 WORKDIR /code
 ADD requirements.txt /code/
@@ -8,4 +11,3 @@ RUN apt-get update && apt-get install -y git python-dev libgeos-dev
 RUN pip install -r requirements.txt
 RUN pip install -r requirements_dev.txt
 ADD . /code/
-

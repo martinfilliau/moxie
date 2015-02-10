@@ -8,7 +8,9 @@ redis:
         - "6379:6379"
 web:
     build: .
-    command: python runserver.py --host 0.0.0.0 
+    command: python runserver.py --host 0.0.0.0
+    environment:
+        - MOXIE_SETTINGS=/code/docker/app_settings.yaml
     volumes:
         - .:/code
     ports:
