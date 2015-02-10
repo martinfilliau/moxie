@@ -1,0 +1,7 @@
+<elevate>
+ <query text="it services">
+  <doc id="oxpoints:31337175" /> <!-- department IT Services -->
+  <doc id="oxpoints:40002001" /> <!-- 7-19 Banbury Road -->
+  <doc id="oxpoints:23233672" /> <!-- HBS -->
+ </query>
+</elevate>
