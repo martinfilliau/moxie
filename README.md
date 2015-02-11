@@ -49,4 +49,22 @@ You can do this via a Python shell:
     >>> from moxie.places.tasks import import_all
     >>> import_all.delay()
 
+Deploying with Fabric
+---------------------
 
+Steps:
+
+* Add your public SSH key to /srv/moxie/.ssh/authorized_keys
+* Execute the fabric script on your local machine, which will then connect to the designated server and run the pre-programmed tasks:
+
+ `fab deploy_api:GIT_BRANCH -g USER@GATEWAY -H moxie@PRIVATE_IP`
+
+ For example: 
+
+ `fab deploy_api:master -g martinfilliau@mox-api-front.oucs.ox.ac.uk -H moxie@192.168.2.102`
+
+* Optional: Use an ssh_config file to define the the gateway to and provide aliases for machines behind the front-end server. Then the -g flag is not necessary and memorable hostnames can be used instead of IP addresses:
+
+ `fab deploy_api:master -H moxie@mox-api-1.oucs.ox.ac.uk`
+
+ See [puppet/fabric/ubuntu-ssh/ssh_config](https://github.com/ox-it/puppet/blob/master/fabric/ubuntu-ssh/ssh_config) for examples.
