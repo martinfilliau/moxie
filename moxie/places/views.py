@@ -155,7 +155,8 @@ class PoiOrgDescendants(ServiceView):
     def handle_request(self, ident):
         poi_service = POIService.from_context()
         descendants = poi_service.get_organisational_descendants(ident)
-        return {'id': ident, 'descendants': descendants}
+        descendants['id'] = ident
+        return descendants
 
     @accepts(HAL_JSON, JSON)
     def as_hal_json(self, descendants):
