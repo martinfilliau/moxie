@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<schema name="moxie-places" version="1.5">
+
+    <fields>
+        <!-- Fields below are mandatory for every document -->
+
+        <!-- e.g. ID: osm:1938450 -->
+        <field name="identifiers" type="string" indexed="true" stored="true" required="true" multiValued="true" />
+
+        <!-- Tags eg. ['pizza', 'italian'] -->
+        <field name="tags" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+
+        <!-- Type of POI e.g. "/amenity/places-to-eat/restaurant" as a hierarchy of types -->
+        <field name="type" type="text_path" indexed="true" stored="true" required="true" multiValued="true" />
+
+		<!-- Type of POI stored as a flat string for exact search -->
+		<field name="type_exact" type="string" indexed="true" stored="true" multiValued="true" />
+
+        <!-- Name of the type e.g. "Bus stop" -->
+        <field name="type_name" type="string" indexed="true" stored="true" multiValued="true" />
+
+        <!-- Unique ID - this is the preferred ID for a POI. e.g osm:139894 -->
+        <field name="id" type="string" indexed="true" stored="true"/>
+
+        <!-- Basic field to store opening hours -->
+        <field name="opening_hours" type="string" indexed="false" stored="true" required="false" />
+
+        <!-- Basic field to store collection times -->
+        <field name="collection_times" type="string" indexed="false" stored="true" required="false" />
+
+        <!-- Precedence - int proportional to the reliability of the importer which set the value -->
+        <field name="meta_precedence" type="int" indexed="false" stored="true" required="true" multiValued="false" />
+
+        <!-- e.g. "Oxford University Computing Services" -->
+        <field name="name" type="text_en_splitting" indexed="true" stored="true" required="true" />
+
+        <!-- e.g. "Computing Services, Department of" -->
+        <field name="name_sort" type="alpha_only_sort" indexed="true" stored="true" required="false" multiValued="false" />
+
+        <!-- e.g. "Computing Services" -->
+        <field name="short_name" type="text_en_splitting" indexed="true" stored="true" required="false" />
+
+        <!-- e.g. "OUCS", alternatives to the main name -->
+        <field name="alternative_names" type="text_en_splitting" indexed="true" stored="true" required="false" multiValued="true" />
+
+        <!-- e.g. "OUCS", alternatives to the main name -->
+        <field name="hidden_names" type="text_en_splitting" indexed="true" stored="true" required="false" multiValued="true" />
+
+        <!-- Address / phone / website (vCard like) properties for POIs -->
+        <field name="address" type="string" stored="true" indexed="false" required="false" multiValued="false" />
+        <field name="phone" type="string" stored="true" indexed="false" required="false" multiValued="false" />
+        <field name="website" type="string" stored="true" indexed="false" required="false" multiValued="false" />
+
+        <!-- Unique ID of parent(s) of the present document -->
+        <field name="child_of" type="string" indexed="true" stored="true" multiValued="true" />
+
+        <!-- Unique ID of children of the present document -->
+        <field name="parent_of" type="string" indexed="true" stored="true" multiValued="true" />
+
+        <!-- ID of the primary place of the POI -->
+        <field name="primary_place" type="string" indexed="true" stored="true" multiValued="false" />
+
+        <!-- Full Text Search for tags and name of document -->
+        <field name="fts" type="text_en_splitting" indexed="true" stored="false" multiValued="true"/>
+
+        <!-- location - can't be multiValued atm, see fieldType -->
+        <field name="location" type="location" indexed="true" stored="true" required="false" multiValued="false" />
+        <dynamicField name="*_coordinate" type="tdouble" indexed="true" stored="false" />
+
+        <!-- shapes are NOT indexed atm as we're facing performance issues when indexing -->
+        <field name="shape" type="shape" indexed="false" stored="true" required="false" multiValued="false" />
+
+        <!-- Library opening hours -->
+        <dynamicField name="_library_opening_hours_*" type="string" indexed="false" stored="true" multiValued="false" />
+
+        <!-- Library policies -->
+        <dynamicField name="_library_policy_*" type="string" indexed="false" stored="true" multiValued="false" />
+
+        <!-- Library subjects -->
+        <field name="_library_subject" type="string" indexed="true" stored="true" multiValued="true" />
+
+        <!-- Accessibility features -->
+        <dynamicField name="_accessibility_has_*" type="boolean" indexed="true" stored="true" />
+        <dynamicField name="_accessibility_number_*" type="int" indexed="true" stored="true" />
+        <dynamicField name="_accessibility_*" type="string" indexed="true" stored="true" />
+
+        <!-- name of courses attached to the POI -->
+        <dynamicField name="_courses_*" type="text_en_splitting" indexed="true" stored="true" multiValued="true" />
+
+        <!-- Social accounts -->
+        <dynamicField name="_social_*" type="string" indexed="false" stored="true" multiValued="true" />
+
+        <field name="files" type="string" indexed="false" stored="true" multiValued="true" />
+
+        <!-- used for /suggest -->
+        <dynamicField name="*_suggest_edge" type="text_suggest_edge" indexed="true" stored="false" multiValued="true"/>
+        <dynamicField name="*_suggest_ngram" type="text_suggest_ngram" indexed="true" stored="false" multiValued="true"/>
+        <dynamicField name="*_suggest" type="text_suggest" indexed="true" stored="false" multiValued="true"/>
+
+        <!-- dynamic fields for some providers -->
+        <dynamicField name="_is_*" type="boolean" indexed="true" stored="true" multiValued="false" />
+        <dynamicField name="_*" type="string" indexed="true" stored="true" multiValued="true" />
+
+		<!-- Required version field -->
+	    <field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
+
+        <!-- all other fields are stored as string atm -->
+        <dynamicField name="raw_*" type="string" indexed="false" stored="false" multiValued="true" />
+    </fields>
+
+    <uniqueKey>id</uniqueKey>
+
+    <!-- Copying name and tags for full text search -->
+    <copyField source="name" dest="fts"/>
+    <copyField source="alternative_names" dest="fts"/>
+    <copyField source="type_name" dest="fts"/>
+    <copyField source="tags" dest="fts"/>
+    <copyField source="_courses_*" dest="fts" />   <!-- "fts" should be replaced by a  -->
+    <copyField source="hidden_names" dest="fts" />
+
+	<!-- Copy the type in a different field to do exact search on it (e.g. fq) -->
+	<copyField source="type" dest="type_exact"/>
+
+    <copyField source="name" dest="name_suggest" />
+    <copyField source="name" dest="name_suggest_edge" />
+    <copyField source="name" dest="name_suggest_ngram" />
+    <copyField source="alternative_names" dest="alternative_names_suggest" />
+    <copyField source="alternative_names" dest="alternative_names_suggest_edge" />
+    <copyField source="alternative_names" dest="alternative_names_suggest_ngram" />
+    <copyField source="hidden_names" dest="hidden_names_suggest" />
+    <copyField source="hidden_names" dest="hidden_names_suggest_edge" />
+    <copyField source="hidden_names" dest="hidden_names_suggest_ngram" />
+
+    <types>
+        <!-- Simple type that doesn't do any analyze, perfect for IDs... -->
+        <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+
+        <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
+
+	    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
+
+        <fieldType name="boolean" class="solr.BoolField" />
+
+        <fieldType name="location" class="solr.LatLonType" subFieldSuffix="_coordinate" />
+        <!-- used by dnyamic field "_coordinate" -->
+        <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" positionIncrementGap="0"/>
+
+        <fieldType name="shape" class="solr.SpatialRecursivePrefixTreeFieldType"
+            spatialContextFactory="com.spatial4j.core.context.jts.JtsSpatialContextFactory"
+            distErrPct="0.025"
+            maxDistErr="0.000009"
+            units="degrees" />
+
+        <!-- Simple string analysis. Used for Query elevation -->
+        <fieldType name="string_simple" class="solr.TextField">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
+        <!-- A text field with defaults appropriate for English: it
+            tokenizes with StandardTokenizer, removes English stop words
+            (lang/stopwords_en.txt), down cases, protects words from protwords.txt, and
+            finally applies Porter's stemming.  The query time analyzer
+            also applies synonyms from synonyms.txt. -->
+        <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <!-- in this example, we will only use synonyms at query time
+                <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+                -->
+                <!-- Case insensitive stop word removal.
+                add enablePositionIncrements=true in both the index and query
+                analyzers to leave a 'gap' for more accurate phrase queries.
+                -->
+                <filter class="solr.StopFilterFactory"
+                    ignoreCase="true"
+                    words="lang/stopwords_en.txt"
+                    enablePositionIncrements="true"
+                />
+                <filter class="solr.LowerCaseFilterFactory"/>
+	            <filter class="solr.EnglishPossessiveFilterFactory"/>
+                <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+	            <!-- Optionally you may want to use this less aggressive stemmer instead of PorterStemFilterFactory:
+                <filter class="solr.EnglishMinimalStemFilterFactory"/>
+	            -->
+                <filter class="solr.PorterStemFilterFactory"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+                <filter class="solr.StopFilterFactory"
+                     ignoreCase="true"
+                     words="lang/stopwords_en.txt"
+                     enablePositionIncrements="true"
+                     />
+                <filter class="solr.LowerCaseFilterFactory"/>
+	            <filter class="solr.EnglishPossessiveFilterFactory"/>
+                <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+	            <!-- Optionally you may want to use this less aggressive stemmer instead of PorterStemFilterFactory:
+                <filter class="solr.EnglishMinimalStemFilterFactory"/>
+	            -->
+                <filter class="solr.PorterStemFilterFactory"/>
+            </analyzer>
+        </fieldType>
+
+            <!-- A text field with defaults appropriate for English, plus
+        	 aggressive word-splitting and autophrase features enabled.
+        	 This field is just like text_en, except it adds
+        	 WordDelimiterFilter to enable splitting and matching of
+        	 words on case-change, alpha numeric boundaries, and
+        	 non-alphanumeric chars.  This means certain compound word
+        	 cases will work, for example query "wi fi" will match
+        	 document "WiFi" or "wi-fi".
+                -->
+            <fieldType name="text_en_splitting" class="solr.TextField" positionIncrementGap="100" autoGeneratePhraseQueries="true">
+              <analyzer type="index">
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <!-- in this example, we will only use synonyms at query time
+                <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+                -->
+                <!-- Case insensitive stop word removal.
+                  add enablePositionIncrements=true in both the index and query
+                  analyzers to leave a 'gap' for more accurate phrase queries.
+                -->
+                <filter class="solr.StopFilterFactory"
+                        ignoreCase="true"
+                        words="lang/stopwords_en.txt"
+                        enablePositionIncrements="true"
+                        />
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+                <filter class="solr.PorterStemFilterFactory"/>
+              </analyzer>
+              <analyzer type="query">
+                <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+                <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+                <filter class="solr.StopFilterFactory"
+                        ignoreCase="true"
+                        words="lang/stopwords_en.txt"
+                        enablePositionIncrements="true"
+                        />
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="1"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+                <filter class="solr.PorterStemFilterFactory"/>
+              </analyzer>
+            </fieldType>
+
+            <!-- Store a hierarchy e.g. /transport/bus-stop -->
+            <!-- TODO see http://stackoverflow.com/questions/6920506/solr-pathhierarchytokenizerfactory-facet-query -->
+            <fieldType name="text_path" class="solr.TextField" positionIncrementGap="100">
+                <analyzer>
+                    <tokenizer class="solr.PathHierarchyTokenizerFactory" delimiter="/" replace="/"/>
+                </analyzer>
+            </fieldType>
+
+            <fieldType name="alpha_only_sort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+              <analyzer>
+                <!-- KeywordTokenizer does no actual tokenizing, so the entire
+                     input string is preserved as a single token
+                  -->
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <!-- The LowerCase TokenFilter does what you expect, which can be
+                     when you want your sorting to be case insensitive
+                  -->
+                <filter class="solr.LowerCaseFilterFactory" />
+                <!-- The TrimFilter removes any leading or trailing whitespace -->
+                <filter class="solr.TrimFilterFactory" />
+              </analyzer>
+            </fieldType>
+
+            <!-- field types used for /suggest -->
+
+            <fieldType name="text_suggest_ngram" class="solr.TextField">
+              <analyzer type="index">
+                <charFilter class="solr.MappingCharFilterFactory" mapping="mapping-ISOLatin1Accent.txt"/>
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="1"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.EdgeNGramFilterFactory" maxGramSize="20" minGramSize="1"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="([^\w\d\*æøåÆØÅ ])" replacement="" replace="all"/>
+              </analyzer>
+              <analyzer type="query">
+                <charFilter class="solr.MappingCharFilterFactory" mapping="mapping-ISOLatin1Accent.txt"/>
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.WordDelimiterFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="([^\w\d\*æøåÆØÅ ])" replacement="" replace="all"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="^(.{20})(.*)?" replacement="$1" replace="all"/>
+              </analyzer>
+            </fieldType>
+
+            <fieldType name="text_suggest_edge" class="solr.TextField">
+              <analyzer type="index">
+                <charFilter class="solr.MappingCharFilterFactory" mapping="mapping-ISOLatin1Accent.txt"/>
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="([\.,;:-_])" replacement=" " replace="all"/>
+                <filter class="solr.EdgeNGramFilterFactory" maxGramSize="30" minGramSize="1"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="([^\w\d\*æøåÆØÅ ])" replacement="" replace="all"/>
+              </analyzer>
+              <analyzer type="query">
+                <charFilter class="solr.MappingCharFilterFactory" mapping="mapping-ISOLatin1Accent.txt"/>
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="([\.,;:-_])" replacement=" " replace="all"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="([^\w\d\*æøåÆØÅ ])" replacement="" replace="all"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="^(.{30})(.*)?" replacement="$1" replace="all"/>
+              </analyzer>
+            </fieldType>
+
+            <!-- text_suggest : Matches whole terms in the suggest text  -->
+            <fieldType name="text_suggest" class="solr.TextField" positionIncrementGap="100">
+              <analyzer type="index">
+                <charFilter class="solr.MappingCharFilterFactory" mapping="mapping-ISOLatin1Accent.txt"/>
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.WordDelimiterFilterFactory"
+                      generateWordParts="1"
+                      generateNumberParts="1"
+                      catenateWords="1"
+                      catenateNumbers="1"
+                      catenateAll="1"
+                      splitOnCaseChange="1"
+                      splitOnNumerics="1"
+                      preserveOriginal="1"
+                />
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="([^\w\d\*æøåÆØÅ ])" replacement=" " replace="all"/>
+              </analyzer>
+              <analyzer type="query">
+                <charFilter class="solr.MappingCharFilterFactory" mapping="mapping-ISOLatin1Accent.txt"/>
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.WordDelimiterFilterFactory"
+                      generateWordParts="0"
+                      generateNumberParts="0"
+                      catenateWords="0"
+                      catenateNumbers="0"
+                      catenateAll="0"
+                      splitOnCaseChange="0"
+                      splitOnNumerics="0"
+                />
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.PatternReplaceFilterFactory" pattern="([^\w\d\*æøåÆØÅ ])" replacement=" " replace="all"/>
+              </analyzer>
+            </fieldType>
+
+    </types>
+
+</schema>

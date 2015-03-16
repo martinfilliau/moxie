@@ -1,0 +1,9 @@
+stcatz => St Catherine's
+dept => department
+food, dinner, meal, meals, places to eat
+drink, pub, bar
+coffee, cafe
+cashpoint => ATM
+bank, atm
+welling => wellington
+worc => worcester
