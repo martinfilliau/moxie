@@ -1,0 +1,202 @@
+flask:
+    DEBUG: False
+    DEFAULT_ALLOW_ORIGINS:
+        - 'http://new.m.ox.ac.uk'
+    XCRI_IMPORT_URL: 'https://course.data.ox.ac.uk/catalogues/?uri=https%3A//data.ox.ac.uk/id/courses/cobomo-catalogue&format=xcricap-full'
+    SENTRY_DSN: 'http://33b0439f8b9844f29d2e0bbabb80832c:c4c39c42b1d8450fa26d2532154c1ccf@sentry.oucs.ox.ac.uk/15'
+    TALKS_CAM_URLS: ['http://talks.ox.ac.uk/show/xml/upcoming_talks',]
+    LIBRARY_DATA_IMPORT_URL: 'https://librarydata.bodleian.ox.ac.uk/libraries.xml'
+    SQLALCHEMY_DATABASE_URI: 'postgresql+psycopg2://moxie:moxie@192.168.2.106/moxie'
+    CACHE_REDIS_HOST: '192.168.2.106'
+    CACHE_REDIS_PORT: 6379
+    CACHE_REDIS_DB: 1
+    STATIC_FILES_URL: '//mox-static-files.oucs.ox.ac.uk/'
+
+blueprints:
+    transport:
+        url_prefix: /transport
+        factory: moxie.transport.create_blueprint
+    courses:
+        url_prefix: /courses
+        factory: moxie_courses.create_blueprint
+    library:
+        url_prefix: /library
+        factory: moxie_library.create_blueprint
+    oxford_dates:
+        url_prefix: /dates
+        factory: moxie_oxford_dates.create_blueprint
+    contacts:
+        url_prefix: /contact
+        factory: moxie_contacts.create_blueprint
+    river_status:
+        url_prefix: /rivers
+        factory: moxie_river_status.create_blueprint
+    weather:
+        url_prefix: /weather
+        factory: moxie_weather.create_blueprint
+    webcams:
+        url_prefix: /webcams
+        factory: moxie_webcams.create_blueprint
+    events:
+        url_prefix: /events
+        factory: moxie_events.create_blueprint
+    feedback:
+        url_prefix: /feedback
+        factory: moxie_feedback.create_blueprint
+    notifications:
+        url_prefix: /notifications
+        factory: moxie_notifications.create_blueprint
+
+services:
+    places:
+        POIService: {}
+        TransportService:
+            providers:
+                moxie.transport.providers.cloudamber.CloudAmberBusRtiProvider:
+                    url: 'http://www.oxontime.com'
+                    timeout: 4
+                moxie.transport.providers.ldb.LiveDepartureBoardPlacesProvider:
+                    token: 'E0F65B9D-1A41-4864-8326-722F5F2D646A'
+                moxie.transport.providers.park_and_rides.OxfordParkAndRideProvider: {}
+        SearchService:
+            backend_uri: 'solr+http://solr-lb:8983/solr/moxie_places'
+        KVService:
+            backend_uri: 'redis://192.168.2.106:6379/0'
+    transport:
+        POIService: {}
+        TransportService:
+            providers:
+                moxie.transport.providers.park_and_rides.OxfordParkAndRideProvider: {}
+        SearchService:
+            backend_uri: 'solr+http://solr-lb:8983/solr/moxie_places'
+        KVService:
+            backend_uri: 'redis://192.168.2.106:6379/0'
+    courses:
+        CourseService:
+            providers: {}
+                #moxie_courses.providers.weblearn.WebLearnProvider:
+                #    endpoint: 'http://jenkins.oucs.ox.ac.uk:40080/course-signup/rest/'
+        #OAuth1Service:
+        #    oauth_endpoint: 'http://jenkins.oucs.ox.ac.uk:40080/oauth-tool/'
+        #    client_identifier: 'mobileox-dev'
+        #    client_secret: 'ZSis0Ho8TzMMw'
+        SearchService:
+            backend_uri: 'solr+http://solr-lb:8983/solr/moxie_courses'
+        KVService:
+            backend_uri: 'redis://192.168.2.106:6379/0'
+    library:
+        LibrarySearchService:
+            search_provider_config:
+                moxie_library.providers.oxford_z3950.Z3950:
+                    host: 'library.ox.ac.uk'
+                    database: 'ALEPH'
+                    aleph_url: 'http://aleph.sers.ox.ac.uk:8991/X'
+                    results_encoding: 'unicode'
+        POIService: {}
+        SearchService:
+            backend_uri: 'solr+http://solr-lb:8983/solr/moxie_places'
+        KVService:
+            backend_uri: 'redis://192.168.2.106:6379/0'
+    oxford_dates:
+        DatesService: {}
+    contacts:
+        ContactSearchService:
+            search_provider_config:
+                moxie_contacts.providers.ox_search.ContactProvider:
+                    url: 'http://www2.ox.ac.uk/cgi-bin/contactx'
+    river_status:
+        RiverStatusService:
+            url: 'http://www.ourcs.org.uk/disclaimer'
+        KVService:
+            backend_uri: 'redis://192.168.2.106:6379/2'
+    weather:
+        WeatherService:
+            providers:
+              moxie_weather.providers.metoffice.MetOfficeProvider:
+                    url: 'http://datapoint.metoffice.gov.uk/public/data/val'
+                    api_key: '7fa6992d-ce94-4434-9ef7-dd21b02cc161'
+                    forecasts_location_id: '310118'
+                    observations_location_id: '3658'
+        KVService:
+            backend_uri: 'redis://192.168.2.106:6379/2'
+    webcams:
+        WebcamsService:
+            webcams_list:
+              oii-1:
+                title: OII Camera 1
+                description: Oxford Internet Institute Camera 1
+                credit: Oxford Internet Institute
+                url: http://webcam.oii.ox.ac.uk/snapshot/image1.jpg
+                poi: oxpoints:23232608
+              oii-2:
+                title: OII Camera 2
+                description: Oxford Internet Institute Camera 2
+                credit: Oxford Internet Institute
+                url: http://webcam.oii.ox.ac.uk/snapshot/image2.jpg
+                poi: oxpoints:23232608
+              oii-3:
+                title: OII Camera 3
+                description: Oxford Internet Institute Camera 3
+                credit: Oxford Internet Institute
+                url: http://webcam.oii.ox.ac.uk/snapshot/image3.jpg
+                poi: oxpoints:23232608
+              wolfson-academic-centre-construction:
+                title: Wolfson Academic Centre
+                description: Construction of the Leonard Wolfson lecture theatre
+                credit: Wolfson College
+                url: http://www.wolfson.ox.ac.uk/academic_building_cam.jpg
+              sant-gateway:
+                title: St Antony's Gateway Buildings
+                description: Construction of the new St. Antony's Gateway buildings
+                credit: St. Antony's Gateway Campaign
+                url: http://www.gatewaycampaign.com/webcam/live000.jpg
+    events:
+        EventsService: {}
+        SearchService:
+            backend_uri: 'solr+http://solr-lb:8983/solr/moxie_events'
+    feedback:
+        FeedbackService:
+            backends:
+              moxie_feedback.backends.mail.EmailBackend:
+                smtp_server: 'smtp.ox.ac.uk'
+                sender_email: 'moxie@torvalds.oucs.ox.ac.uk'
+                send_to: ['martin.filliau@it.ox.ac.uk', 'theodore.koterwas@it.ox.ac.uk']
+        KVService:
+            backend_uri: 'redis://192.168.2.106:6379/3'
+    notifications:
+        NotificationsService:
+            users:
+              richard: bakescakes
+            providers:
+              moxie_notifications.providers.DummyNotificationsProvider: {}
+              moxie_notifications.providers.gcm.GCMProvider:
+                   api_key: 'AIzaSyCuTptNbITM1QEZwjpIhoWVlK3tnqB_5Es'
+              moxie_notifications.providers.apns.APNSProvider:
+                   cert_file: '/srv/moxie/apns_prod_key.pem'
+                   push_address: 'push_production'
+                   feedback_address: 'feedback_production'
+              moxie_notifications.providers.mail.EmailNotificationsProvider:
+                   smtp_server: 'smtp.ox.ac.uk'
+                   sender_email: 'mobileoxford@it.ox.ac.uk'
+                   send_to: ['martin.filliau@it.ox.ac.uk', 'richard.buckner@it.ox.ac.uk', 'theodore.koterwas@it.ox.ac.uk']
+        KVService:
+            backend_uri: 'redis://192.168.2.106:6379/4'
+
+healthchecks:
+    Courses search:
+        moxie.core.search.SearchService:
+            backend_uri: 'solr+http://solr-lb:8983/solr/moxie_courses'
+    Events search:
+        moxie.core.search.SearchService:
+            backend_uri: 'solr+http://solr-lb:8983/solr/moxie_events'
+    Relational database:
+        moxie.core.db.DBHealthcheck: {}
+    Places search:
+        moxie.core.search.SearchService:
+            backend_uri: 'solr+http://solr-lb:8983/solr/moxie_places'
+    Places staging search:
+        moxie.core.search.SearchService:
+            backend_uri: 'solr+http://solr-lb:8983/solr/moxie_places_import'
+    KV service:
+        moxie.core.kv.KVService:
+            backend_uri: 'redis://192.168.2.106:6379/0'
