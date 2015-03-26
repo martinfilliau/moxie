@@ -1,0 +1,136 @@
+<elevate>
+ <query text="it services">
+  <doc id="oxpoints:31337175" /> <!-- department IT Services -->
+  <doc id="oxpoints:40002001" /> <!-- 7-19 Banbury Road -->
+  <doc id="oxpoints:23233672" /> <!-- HBS -->
+ </query>
+
+<query text="greek OR identifiers:*\:greek">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="greek">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="mandarin">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="mandarin OR identifiers:*\:mandarin">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="french">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="french OR identifiers:*\:french">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="georgian">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="georgian OR identifiers:*\:georgian">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="italian">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="italian OR identifiers:*\:italian">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="german">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="german OR identifiers:*\:german">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="russian">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="russian OR identifiers:*\:russian">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="portuguese">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="portuguese OR identifiers:*\:portuguese">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="spanish">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="spanish OR identifiers:*\:spanish">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="arabic">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="arabic OR identifiers:*\:arabic">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="welsh">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="welsh OR identifiers:*\:welsh">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="japanese">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="japanese OR identifiers:*\:japanese">
+    <doc id="oxpoints:23233557" />  <!-- Language centre -->
+</query>
+
+<query text="helpdesk">
+    <doc id="oxpoints:52042089" />  <!-- Help centre IT Services -->
+</query>
+
+<query text="helpdesk OR identifiers:*\:helpdesk">
+    <doc id="oxpoints:52042089" />  <!-- Help centre IT Services -->
+</query>
+
+<query text="train">
+    <doc id="crs:OXF" />
+</query>
+
+<query text="train OR identifiers:*\:train">
+    <doc id="crs:OXF" />
+</query>
+
+<query text="train station">
+    <doc id="crs:OXF" />
+</query>
+
+<query text="railway">
+    <doc id="crs:OXF" />
+</query>
+
+<query text="railway OR identifiers:*\:railway">
+    <doc id="crs:OXF" />
+</query>
+
+<query text="railway station">
+    <doc id="crs:OXF" />
+</query>
+
+</elevate>
