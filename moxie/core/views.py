@@ -72,18 +72,18 @@ class ServiceView(View):
         h = {}
         allow_origins = current_app.config.get('DEFAULT_ALLOW_ORIGINS', [])
         if not self.cors_allow_credentials:
-            h['Access-Control-Allow-Origin'] = '*'
+            h['access-control-allow-origin'] = '*'
         elif current_app.debug or origin in allow_origins:
-            h['Access-Control-Allow-Origin'] = origin
+            h['access-control-allow-origin'] = origin
         else:
             abort(400)
         if preflight:
-            h['Access-Control-Allow-Methods'] = response.headers['allow']
-            h['Access-Control-Max-Age'] = str(self.cors_max_age)
+            h['access-control-allow-methods'] = response.headers['allow']
+            h['access-control-max-age'] = str(self.cors_max_age)
             if self.cors_allow_headers:
-                h['Access-Control-Allow-Headers'] = self.cors_allow_headers
+                h['access-aontrol-allow-headers'] = self.cors_allow_headers
         if self.cors_allow_credentials:
-            h['Access-Control-Allow-Credentials'] = 'true'
+            h['access-control-allow-credentials'] = 'true'
         response.headers.extend(h)
         return response
 
